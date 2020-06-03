@@ -25,7 +25,7 @@
 #include "core/ignit.h"
 
 //TODO
-#include "InputOutput.h"
+//#include "InputOutput.h"
 #include "CyclesSync.h"
 #include "Parameters.h"
 
@@ -68,6 +68,52 @@ void command_cmd_DELTA_PS()
 	
 	return;
 }
+/******************************************************************************/
+void command_cmd_DELTA_PS_EXEC()
+{
+    static void * paramTable[11] = {
+        &(Output.Str.F_ras) 
+        , &(Output.Str.HF_reg)
+        , &(Output.Str.T_Vibro)
+        , &(Output.Str.L_Vibro)
+        , &(Output.Str.WP_reg)
+        , &(Output.Str.Tmp_Out[0])
+        , &(Output.Str.Tmp_Out[1])
+        , &(Output.Str.Tmp_Out[2])
+        , &(Output.Str.Tmp_Out[3])
+        , &(Output.Str.Tmp_Out[4])
+        , &(Output.Str.Tmp_Out[5])
+    };
+	static uint32_t val, paramTmpWord;
+	static uint32_t * ptr;
+	static uint32_t index = 0;
+		   
+    // high byte
+	if ((index & 1) == 0){
+		ptr = (uint32_t*)paramTable[index >> 1];
+		val = *ptr;
+        // move it to low byte of word
+		paramTmpWord = val >> 8; 
+	} else {
+		paramTmpWord = val;
+	}
+	paramTmpWord &= 0xFF;
+	paramTmpWord |= index << 8;
+	
+    // reset all bits of status word
+	//Valid_Data = 0;
+    //g_gld.valid.word = 0;
+    Valid_Data = 0;
+ 
+    index++;
+	if (index > 21) {
+		index = 0;
+	}
+    
+    command_ans_DELTA_PS_EXEC(paramTmpWord);
+    
+	return;
+}
 /******************************************************************************/	
 void command_cmd_DELTA_BINS()
 {
@@ -78,7 +124,8 @@ void command_cmd_DELTA_BINS()
 	UART_SwitchSpeed(trm_rate);
 	CMD_Mode = 4;
 	// reset all bits of status word
-	Valid_Data = 0;
+    //g_gld.valid.word = 0;
+    Valid_Data = 0;
 	
 	command_ans_DELTA_BINS();
 	return;
@@ -90,7 +137,8 @@ void command_cmd_DELTA_SF()
 	//dither counters  and the filter of moving average
 	RgConB = RATE_VIBRO_1;
 	// reset all bits of status word
-	Valid_Data = 0;		
+    //g_gld.valid.word = 0;	
+    Valid_Data = 0;	
 
 	command_ans_DELTA_SF();
 	return;
@@ -254,7 +302,7 @@ void command_subcmd_M_GPH_W()
 	Device_blk.Str.Gain_Ph_B = rcv_buf[5];
 
 	//e. display these values to digital potentiometers 
-	Out_G_photo(Device_blk.Str.Gain_Ph_A, Device_blk.Str.Gain_Ph_B);
+	hardware_photo_out(Device_blk.Str.Gain_Ph_A, Device_blk.Str.Gain_Ph_B);
 	
 	trm_cycl = 0;      //e. periodic data transmission is not needed
 	command_ans_common();
@@ -391,6 +439,7 @@ void command_subcmd_M_RATE1()
     SwitchRefMeandInt(RATE_REPER_OR_REFMEANDR);
     
     // reset all bits of status word
+    //g_gld.valid.word = 0;
     Valid_Data = 0;
     
     //e. load needed length of working period 1
@@ -463,7 +512,8 @@ void command_ans_common(void)
 /******************************************************************************/
 void command_ans_device_status(void)
 {
-	command_utility_SetSpeedPeriod();        //e. and set the answer transfer rate and its periodicity 
+    //e. and set the answer transfer rate and its periodicity
+	command_utility_SetSpeedPeriod();
 	num_of_par = 2;
 	//e. the register address of the self-testing result
 	COMMAND_UTILITY_ANSWER_FIELD(0,&blt_in_test,2);
@@ -476,6 +526,15 @@ void command_ans_device_status(void)
 }
 
 /******************************************************************************/
+void command_ans_DELTA_PS_EXEC(x_uint32_t paramTmpWord)
+{
+    num_of_par = 2;
+    COMMAND_UTILITY_ANSWER_FIELD(0,&Output.Str.PS_dif,2);
+    COMMAND_UTILITY_ANSWER_FIELD(1,&paramTmpWord,2);
+    trm_ena = 1; 
+}
+
+/******************************************************************************/
 void command_ans_DELTA_PS()
 {
 }
@@ -485,7 +544,8 @@ void command_ans_DELTA_BINS()
 {
 	num_of_par = 2;        			//e. 2 parameters output 
 	COMMAND_UTILITY_ANSWER_FIELD(0,&Output.Str.BINS_dif,4);
-	COMMAND_UTILITY_ANSWER_FIELD(1,&Valid_Data,1);
+	//COMMAND_UTILITY_ANSWER_FIELD(1,&(g_gld.valid.word),1);
+	COMMAND_UTILITY_ANSWER_FIELD(1,&(Valid_Data),1);
 	//e. allow operation of the transmitter
 	trm_ena = 1;        			 
 }
@@ -543,7 +603,7 @@ void command_ans_M_CTL_R()
 	
 	COMMAND_UTILITY_ANSWER_FIELD(0,&CMD_Code,2);
 	if ((rcv_buf[3] & (1 << 4)) == 0) {
-		COMMAND_UTILITY_ANSWER_FIELD(1,&RgConA,2);
+		COMMAND_UTILITY_ANSWER_FIELD(1,&g_gld.RgConA,2);
 	} else {
 		COMMAND_UTILITY_ANSWER_FIELD(1,&RgConB,2);
 	}
@@ -553,8 +613,8 @@ void command_ans_M_CTL_R()
 /******************************************************************************/
 void command_ans_M_CTL_M()
 {
-	uint32_t * ptr;
-	uint32_t bit_numb;
+	x_uint16_t * ptr;
+	x_uint32_t bit_numb;
 	
 	num_of_par = 2;        
 	COMMAND_UTILITY_ANSWER_FIELD(0,&CMD_Code,2);
@@ -562,10 +622,10 @@ void command_ans_M_CTL_M()
 	
 	//e. is main control register needed?
 	if ((CMD_Code & (1 << 4)) == 0) {
-		ptr = &RgConA;
+		ptr = &(g_gld.RgConA.word);
 	} else {
 		//e. otherwise - load the address of the addititonal register
-		ptr = &RgConB;
+		ptr = &(g_gld.RgConB.word);
 	}
 	
 	//e. extract the number of the changeable bit
@@ -698,7 +758,7 @@ void command_ans_M_RATE1()
     COMMAND_UTILITY_ANSWER_FIELD(0,&(Output.Str.Cnt_Pls),2);
     COMMAND_UTILITY_ANSWER_FIELD(1,&(Output.Str.Cnt_Mns),2);
     COMMAND_UTILITY_ANSWER_FIELD(2,&(Output.Str.Cnt_Dif),2);
-    COMMAND_UTILITY_ANSWER_FIELD(3,&(Output.Str.F_ras),2);
+    COMMAND_UTILITY_ANSWER_FIELD(3,&(Output.Str.F_ras),2);//частота расщипления
     COMMAND_UTILITY_ANSWER_FIELD(4,&(Output.Str.HF_reg),2);
     COMMAND_UTILITY_ANSWER_FIELD(5,&(Output.Str.HF_dif),2);
     COMMAND_UTILITY_ANSWER_FIELD(6,&(Output.Str.T_Vibro),2);

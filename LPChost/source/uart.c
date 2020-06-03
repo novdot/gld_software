@@ -6,7 +6,8 @@
 #define FOSC 12000000 
 #define FCCLK (FOSC  * 8) 
 #define FCCO (FCCLK * 3)
-#define FPCLK (FCCLK / 4)
+//#define FPCLK (FCCLK / 4)
+#define FPCLK (103200000) 
 
 extern unsigned int SystemCoreClock; 
 
@@ -21,6 +22,7 @@ uint32_t EnablDMA = 0;
 */
 //#define UART0REC
 #define UART1REC
+//#define UART2REC
 
 #if defined (UART1REC)
     #define CDESTADDR (UART1_DMA_TX_DST)
@@ -35,12 +37,23 @@ uint32_t EnablDMA = 0;
 #endif
 
 /******************************************************************************/
-void UART0_Init(void)
+void UART_Init(x_uint32_t baudrate)
+{
+#if defined (UART0REC)
+    UART0_Init(baudrate);
+#elif defined (UART1REC)
+    UART1_Init(baudrate);
+#elif defined (UART2REC)
+    UART2_Init(baudrate);
+#endif
+}
+/******************************************************************************/
+void UART0_Init(x_uint32_t baudrate)
 {
     uint32_t Fdiv = 0;
     uint32_t pclk = 0;
     
-    uint32_t baudrate = 38400;
+    //uint32_t baudrate = 38400;
     
     //switch on UART0
     LPC_SC->PCONP |= (1<<3);	
@@ -70,29 +83,37 @@ void UART0_Init(void)
 }
 
 /******************************************************************************/
-void UART1_Init(void)
+void UART1_Init(x_uint32_t baudrate)
 {
     uint32_t Fdiv = 0;
+    uint32_t usFdiv = 0;
     uint32_t pclk = 0;
 
     //uint32_t baudrate = 256000;
-    uint32_t baudrate = 38400;
-
+    
     //switch on UART1
     LPC_SC->PCONP |= (1<<4);
    
     //P2.0, P2.1, P2.5, P2.7 
-    LPC_PINCON->PINSEL4 |=  (2<<0)|(2<<2)|(2<<10)|(2<<14);          
-            
+    //LPC_PINCON->PINSEL4 |=  (2<<0)|(2<<2)|(2<<10)|(2<<14);          
+     
+    LPC_PINCON->PINSEL4 |= (2 << 0); /* Pin P2.0 used as TXD0 (Com0) */
+    LPC_PINCON->PINSEL4 |= (2 << 2); /* Pin P2.1 used as RXD0 (Com0) */
+    
     pclk = SystemCoreClock/4;
+    
+    usFdiv = ((FPCLK  / 16) / baudrate) +1; 
+    Fdiv = (pclk / 16) / baudrate; 
 
-    LPC_UART1->LCR  = word_length_8 |one_stop_bit |no_parity |back_trans_dis |DLAB_access;                     
-    Fdiv = (pclk / 16) / baudrate;           
-    LPC_UART1->DLM  = Fdiv / 256;
-    LPC_UART1->DLL  = Fdiv % 256; 
-    LPC_UART1->LCR  &= ~DLAB_access;	                      
+    LPC_UART1->LCR  = word_length_8 |one_stop_bit |no_parity |back_trans_dis |DLAB_access;                         
+    //LPC_UART1->LCR  = 0x83; 
+    LPC_UART1->DLM  = usFdiv / 256;
+    LPC_UART1->DLL  = usFdiv % 256; 
+    LPC_UART1->LCR  &= ~DLAB_access;
+    //LPC_UART1->LCR  = 0x03;    
     LPC_UART1->FCR  = TX_FIFO_Reset |RX_FIFO_Reset |FIFOs_En |RX_TrigLvl_14;
-	LPC_UART1->IER = 0;//RBR_IntEnabl;
+	//LPC_UART1->FCR  = 0x07; 
+    LPC_UART1->IER = 0;//RBR_IntEnabl;
 
 	//LPC_UART1->RS485CTRL = (1<<5);
 
@@ -102,7 +123,7 @@ void UART1_Init(void)
 }
 
 /******************************************************************************/
-void UART2_Init (void)
+void UART2_Init (x_uint32_t baudrate)
 {
 	uint16_t usFdiv;
     /* UART2 */
@@ -112,7 +133,7 @@ void UART2_Init (void)
    	LPC_SC->PCONP = LPC_SC->PCONP|(1<<24);	      
 
     LPC_UART2->LCR  = 0x83;                      
-    usFdiv = (FPCLK / 16) / 115200;            
+    usFdiv = (FPCLK / 16) / baudrate; //115200       
     LPC_UART2->DLM  = usFdiv / 256;
     LPC_UART2->DLL  = usFdiv % 256; 
     LPC_UART2->LCR  = 0x03;                      
@@ -279,15 +300,21 @@ void uart_transm(x_uint32_t trm_num_byt, int Device_Mode, x_uint8_t*a_pBufferTra
 /******************************************************************************/
 void UART_SwitchSpeed(unsigned Speed)
 {
-  uint32_t Fdiv;
-  uint32_t pclk;
+    uint32_t Fdiv;
+    uint32_t pclk;
+   
+    /*
+    Переключение скорости только при настройке
+    модуля по умолчанию
+    */
+#if defined (__CONFIG_COMMANDS_DEFAULT)
 
-  pclk = SystemCoreClock/4;
+    pclk = SystemCoreClock/4;
 #if defined  UART1REC
 	LPC_UART1->LCR |= DLAB_access;
 #else
 	LPC_UART0->LCR |= DLAB_access;
-#endif
+#endif //UART1REC
 	switch (Speed) {
 		case Sp38400:
             Fdiv = (pclk / 16) / 38400; 
@@ -317,5 +344,7 @@ void UART_SwitchSpeed(unsigned Speed)
 	LPC_UART0->DLM  = Fdiv / 256;
     LPC_UART0->DLL  = Fdiv % 256; 
     LPC_UART0->LCR  &= ~DLAB_access;
-#endif
+#endif //UART1REC
+    
+#endif //__CONFIG_COMMANDS_DEFAULT
 }

@@ -54,9 +54,6 @@ x_bool_t pwm_is_pulse_was_formed()
 /******************************************************************************/
 x_bool_t pwm_pulse_calc(int a_T_Vibro, int a_L_Vibro, int a_Vibro_2_CountIn, x_bool_t a_bIsSwitchInq)
 {
-    //LPC_MCPWM->LIM0 = (a_L_Vibro*MULT_7680_12500)>>SHIFT_7680_12500;
-    //LPC_MCPWM->MAT0 = (a_L_Vibro*MULT_7680_12500)>>SHIFT_7680_12500;
-    
     if (LPC_MCPWM->MAT2 > LPC_MCPWM->MAT1) {
         //inquiry cycle duration must be changed
         if (a_bIsSwitchInq) {

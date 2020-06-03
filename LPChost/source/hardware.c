@@ -41,51 +41,6 @@ void hardware_backlight_off()
     LPC_GPIO2->FIOSET  = (1<<12);
 }
 /******************************************************************************/
-void hardware_configure_vibro()
-{
-    //вибро реализован на ШИМ
-    return;
-    LPC_PINCON->PINSEL3  &= ~(0x00<<18);//e. P1.25 is GPIO pin
-    LPC_PINCON->PINSEL3  |= (0x00<<18);//e. P1.25 is GPIO pin
-    LPC_PINCON->PINMODE3 |= (3<<18);//e. P1.25  (включениe подтягивающего резистора")
-    LPC_GPIO1->FIODIR    |= (1<<25);//e. P0.5 is output   (запись ( 1 ) в  5  бит FIODIR    выбор P0.5 как выход)
-    LPC_GPIO1->FIOCLR    |= (1<<25);
-    
-    LPC_PINCON->PINSEL3  &= ~(0x00<<24);//e. P1.28 is GPIO pin
-    LPC_PINCON->PINSEL3  |= (0x00<<24);//e. P1.28 is GPIO pin
-    LPC_PINCON->PINMODE3 |= (3<<24);//e. P1.28 is GPIO pin (запись ( 11 ) в бит PINMODE0  "для включения подтягивающего резистора")
-    LPC_GPIO1->FIODIR    |= (1<<28);//e. P1.28 is output   (запись ( 1 ) в  5  бит FIODIR    выбор P0.5 как выход)
-    LPC_GPIO1->FIOCLR    |= (1<<28);
-}
-/******************************************************************************/
-void hardware_vibro1_on()
-{
-    //вибро реализован на ШИМ
-    return;
-    LPC_GPIO2->FIOCLR  = (1<<25);
-}
-/******************************************************************************/
-void hardware_vibro1_off()
-{
-    //вибро реализован на ШИМ
-    return;
-    LPC_GPIO2->FIOSET  = (1<<25);
-}
-/******************************************************************************/
-void hardware_vibro2_on()
-{
-    //вибро реализован на ШИМ
-    return;
-    LPC_GPIO2->FIOCLR  = (1<<28);
-}
-/******************************************************************************/
-void hardware_vibro2_off()
-{
-    //вибро реализован на ШИМ
-    return;
-    LPC_GPIO2->FIOSET  = (1<<28);
-}
-/******************************************************************************/
 void hardware_modulator(x_uint32_t a_data)
 {
     float v_ampl = 0;
@@ -117,6 +72,12 @@ void hardware_modulator(x_uint32_t a_data)
     //запишем значение в ЦАП
     hardware_dac_send(a_data);
 }
+
+/******************************************************************************/
+void hardware_regul_data_init()
+{
+    spi_init();
+}
 /******************************************************************************/
 //опорник операционного усилителя
 #define SPI_DAC_AMPL_VOLT_REF (2.23)
@@ -124,7 +85,7 @@ void hardware_modulator(x_uint32_t a_data)
 #define IN_VAL_MAX (0xd23)
 #define IN_VAL_REF (0x722)
 
-void hardware_write_regul_data(x_uint32_t flag, int*pExchangeErr, int a_HF_reg, int a_WP_reg)
+void hardware_regul_data_write(x_uint32_t flag, int*pExchangeErr, int a_HF_reg, int a_WP_reg)
 {
     int data[6] = {0,0,0,0,0,0};
     float v_ampl = 0.0;
@@ -185,25 +146,46 @@ void hardware_write_regul_data(x_uint32_t flag, int*pExchangeErr, int a_HF_reg, 
     spi_write(data,6,pExchangeErr);
 }
 /******************************************************************************/
-void SetDAC()
+void hardware_regul_data_read(int*a_pBuffer, int cnt, int*pExchangeErr)
+{
+    spi_read(a_pBuffer,cnt,pExchangeErr);
+}
+
+/******************************************************************************/
+void hardware_set_dac()
 {
     spi_set_cs(PIN_DAC_CS);
 }
 /******************************************************************************/
-void ResetDAC()
+void hardware_reset_dac()
 {
     spi_reset_cs(PIN_DAC_CS);
 }
 /******************************************************************************/
-void SetADC()
+void hardware_set_adc()
 {
     spi_set_cs(PIN_ADC_CS);
 }
 /******************************************************************************/
-void ResetADC()
+void hardware_reset_adc()
 {
     spi_reset_cs(PIN_ADC_CS);
 }
-/******************************************************************************/
 
 /******************************************************************************/
+void hardware_photo_init(void) 
+{
+    i2c_init();
+}
+/******************************************************************************/
+void hardware_photo_exchange(int*pCntDif) 
+{
+    i2c_read(pCntDif);
+}
+/******************************************************************************/
+void hardware_photo_out(x_uint32_t Ph_A, x_uint32_t Ph_B)
+{
+    i2c_write(Ph_A,Ph_B);
+}
+/******************************************************************************/
+

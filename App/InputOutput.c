@@ -35,7 +35,7 @@ void G_Photo_Exchange(void)
 ******************************************************************************/
 void DAC_ADC_Exchange()
 {
-    hardware_write_regul_data(
+    hardware_regul_data_write(
         Sys_Clock
         , &ExchangeErr
         , Output.Str.HF_reg

@@ -8,7 +8,6 @@ gld_error_t ignit_single(void);
 void ignit_set_started(x_bool_t flag);
 void ignit_set_busy(x_bool_t flag);
 
-x_bool_t g_bIsStartRequested = _x_false; //start
 x_bool_t g_bIsStarted = _x_false; //on start procedure
 x_bool_t g_bIsRequested = _x_false; //single ignit
 x_bool_t g_bIsBusy = _x_false; //on single ingnit procedure
@@ -38,16 +37,7 @@ void ignit_set_request(x_bool_t flag)
 {
     g_bIsRequested = flag;
 }
-/******************************************************************************/
-x_bool_t ignit_is_start_request(void)
-{
-    return g_bIsStartRequested;
-}
-/******************************************************************************/
-void ignit_set_start_request(x_bool_t flag)
-{
-    g_bIsStartRequested = flag;
-}
+
 /******************************************************************************/
 x_bool_t ignit_is_busy()
 {
@@ -122,11 +112,10 @@ gld_error_t ignit_start(void)
     gld_error_t nErrorIteration = _gld_error_no_ignit;
     
     //if no request to light-up go away
-    if(ignit_is_start_request()==_x_false) return _gld_wrg_wait;
+    if(ignit_is_request()==_x_false) return _gld_wrg_wait;
     
     if(ignit_is_started()==_x_false) {
         hardware_backlight_on();
-        //close_all_loops();
         ignit_set_started(_x_true);
         nIteration = 0;
         ignit_set_busy(_x_false);
@@ -154,12 +143,11 @@ gld_error_t ignit_start(void)
     }
 failing:   
 finishing:
-    ignit_set_start_request(_x_false);
+    ignit_set_request(_x_false);
     ignit_set_started(_x_false);
     ignit_set_busy(_x_false);
     nIteration = 0;
     hardware_backlight_off();
-    //open_all_loops();
 skip:
     return nErrorIteration;
 }
@@ -171,6 +159,7 @@ typedef enum ignit_statusDef{
     , _ignit_status_pause
     , _ignit_status_polling
 }ignit_status;
+
 gld_error_t ignit_single(void)
 {
     static ignit_status status = _ignit_status_free;
@@ -178,7 +167,7 @@ gld_error_t ignit_single(void)
     
     switch(status){
         case _ignit_status_free: 
-            status = _ignit_status_free;
+            status = _ignit_status_pulse;
         case _ignit_status_pulse:
             retval = handle_pulse();
             if(retval==_gld_wrg_wait) goto skip;
@@ -192,7 +181,7 @@ gld_error_t ignit_single(void)
             break;
         
         case _ignit_status_polling: 
-            retval = handle_pause();
+            retval = handle_polling();
             if(retval==_gld_wrg_wait) goto skip;
             else goto fail;
             break;
@@ -203,5 +192,13 @@ skip:
     return _gld_wrg_wait;
 fail:
     status = _ignit_status_free;
-    return _gld_error_no_ignit;
+    return retval;
+}
+
+/******************************************************************************/
+void ignit_init(void)
+{
+    ignit_set_request(_x_true);
+    ignit_set_started(_x_false);
+    ignit_set_busy(_x_false);
 }

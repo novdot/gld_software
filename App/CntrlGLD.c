@@ -267,6 +267,34 @@ void contrl_GLD(void)     //e.========== procedure of device control ===========
 	GLD_Stop();   //e. stop the device, if necessary //r. остановить прибор, если необходимо
 	//GLD_Pulse();  //e. generation of the light-up pulse if request is exists //r. генерация импульса поджига при наличии запроса
 	ignit_start();
-    GLD_Output(); //e. gyro output modes //r. режимы выдачи данных из гироскопа
+    gld_output(); //e. gyro output modes //r. режимы выдачи данных из гироскопа
 } // contrl_GLD
 
+/******************************************************************************/
+void gld_output(void)
+{
+    //latch appeared
+    if (Latch_Rdy) {
+        //enable packet generation
+        if (trm_cycl) trm_ena = 1;   
+
+        switch (CMD_Mode) {
+            case 1: //e. Delta _PS mode
+                command_cmd_DELTA_PS_EXEC();
+                break;
+
+            case 5:
+                //e. reset bits of current command code settings of periodicity and transfer rate
+                //r. СЃР±СЂРѕСЃРёС‚СЊ РІ С‚РµРєСѓС‰РµРј РєРѕРґРµ РєРѕРјР°РЅРґС‹ Р±РёС‚С‹ СѓСЃС‚Р°РЅРѕРІРєРё РїРµСЂРёРѕРґРёС‡РЅРѕСЃС‚Рё Рё СЃРєРѕСЂРѕСЃС‚Рё РїРµСЂРµРґР°С‡Рё
+                CMD_Code &= 0xff1f;
+                //e. is it the Rate2 mode?
+                //r. СЌС‚Рѕ СЂРµР¶РёРј Rate2?
+                if (CMD_Code == SUBCMD_M_RATE2)	 {
+                    if (data_Rdy & WHOLE_PERIOD)  {
+                        trm_ena = 1;
+                    } else trm_ena = 0;
+                }   	
+                break;	
+        }
+    }
+}

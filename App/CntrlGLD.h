@@ -14,7 +14,7 @@
 #if defined (PARAMS_TEST)
     #define	HF_REF_CONST	15000	
     #define	HF_SCL_CONST	0	    
-    #define	HF_MIN_CONST	-4896  
+    #define	HF_MIN_CONST	( (0x8365a0)>>4 )//-4896  
     #define	HF_MAX_CONST    -1327
     #define	HFO_SHIFT		16		
     
@@ -208,5 +208,6 @@
 #define close_all_loops()			RgConA   = 0xFFFF
 
 void contrl_GLD(void);
+void gld_output(void);
 #endif
 

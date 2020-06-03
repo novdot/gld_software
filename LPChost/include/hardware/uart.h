@@ -198,9 +198,10 @@
 ** Returned value:		None
 ** 
 ******************************************************************************/
-void UART0_Init(void);
-void UART1_Init(void);
-void UART2_Init(void);
+void UART_Init(x_uint32_t baudrate);
+void UART0_Init(x_uint32_t baudrate);
+void UART1_Init(x_uint32_t baudrate);
+void UART2_Init(x_uint32_t baudrate);
 
 int UART0_SendByte(int ucData);
 int UART1_SendByte(int ucData);

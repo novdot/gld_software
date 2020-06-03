@@ -20,7 +20,6 @@
 
 //TODO
 #include "CyclesSync.h"
-#include "CntrlGLD.h"
 
 /******************************************************************************/
 x_bool_t command_check_lcc(x_uint8_t* a_pBuffer,x_uint32_t a_uCount)
@@ -46,8 +45,7 @@ void command_recieve(void)
 	 
 	//e. end part of packet is absent
 	if (( ToWaitEnd > 25000)) {
-			do
-					rcv_buf[--rcv_num_byt] = 0;
+			do rcv_buf[--rcv_num_byt] = 0;
 			while(rcv_num_byt);
 			
 			rcv_num_byt_old = rcv_num_byt;
@@ -91,7 +89,7 @@ void command_recieve(void)
 					|| (rcv_buf[2] == 0xE8)
 			) {
 					//e. packet length is not valid, so we have the error 
-					ToWaitEnd++;   	
+					ToWaitEnd++; 	
 					return;
 			}
 
@@ -102,8 +100,8 @@ void command_recieve(void)
 			}
 	}
 	//e. checksum is bad 
-	if (command_check_lcc(rcv_buf,rcv_num_byt) == _x_false){
-		 return;
+	if (command_check_lcc(rcv_buf,rcv_num_byt) == _x_false){ 
+        return;
 	} else {
 		rcv_Rdy = 1;	  	
 	}
@@ -253,13 +251,18 @@ void command_handle(void)
         case SUBCMD_M_PARAM_R: command_subcmd_M_PARAM_R();  return;
         case SUBCMD_M_E5RA_W : command_subcmd_M_E5RA_W();  return;
 
-        case SUBCMD_M_RATE  : 
+        //check mask of cmd code
+        case SUBCMD_M_RATE_MASK  : 
             uCmdCodeLong = uCmdCode | (rcv_buf[3] & 0x1F);
             break;
 
-        default:
+        case CMD_MAINT_MASK  : 
+        case SUBCMD_M_MASK  :
             uCmdCodeLong = uCmdCode | (rcv_buf[3] & 0xFF);
             break;
+        default:
+            line_sts = line_sts | CODE_ERR;
+            return;
     }
     
     switch(uCmdCodeLong){
@@ -279,7 +282,9 @@ void command_handle(void)
         case SUBCMD_M_RATE7  :  command_subcmd_M_RATE7(); return;
         case SUBCMD_M_RATE5K :  command_subcmd_M_RATE5K(); return;
         
-        default: break;
+        default: 
+            line_sts = line_sts | MODE_ERR;
+			return;
     }
 }
 /******************************************************************************/

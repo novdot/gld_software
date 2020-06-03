@@ -25,6 +25,7 @@
 #include "hardware/hardware.h"
 #include "core/command.h"
 #include "core/global.h"
+#include "core/config.h"
 
 /******************************************************************************
 **   Main Function  main()
@@ -63,7 +64,8 @@ void init()
     
     hardware_configure_lightup();
     hardware_configure_backlight();
-    hardware_configure_vibro();
+    
+    ignit_init();
     
     DMA_Init();
     //e. start loading of parameters from flash
@@ -72,8 +74,8 @@ void init()
     //e. to calculate SystemCoreClock  for UART particularly
     SystemCoreClockUpdate();
     //e. initialization of UART on 38400
-    UART0_Init();				
-    UART1_Init();
+    UART_Init(CONFIG_COMMANDS_BAUDRATE);
+    
     //e. initialization of exchange with hardware
     DAC_ADC_Exchange_Init();
     hardware_dac_init();
@@ -94,7 +96,9 @@ void init()
     G_Photo_Init();
     
     Out_G_photo(Device_blk.Str.Gain_Ph_A, Device_blk.Str.Gain_Ph_B);
-    open_all_loops(); 
+    
+    open_all_loops();
+    
     Output.Str.HF_reg = Device_blk.Str.HF_min;
     init_PLC();
     init_Dither_reg();
@@ -111,9 +115,9 @@ void loop()
     //WDTFeed();
     
     //prepare ADC for sampling
-    ResetADC(); 
+    hardware_reset_adc(); 
     //state DAC voltage
-    SetDAC(); 
+    hardware_set_dac(); 
     
     Curr_Cnt_Vib = qei_get_position();
     				
@@ -123,9 +127,9 @@ void loop()
     ServiceTime();
     
     //start ADC sampling
-    SetADC();		
+    hardware_set_adc();		
     //start DAC prepearing for writing     
-    ResetDAC();
+    hardware_reset_dac();
     ADC_Input();
     
     DAC_ADC_Exchange();

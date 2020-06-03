@@ -22,6 +22,10 @@
 #define IGNIT_MAX_ITERATIONS 4
 
 /**
+    @brief gld initialize
+*/
+void ignit_init(void);
+/**
     @brief full gld light-up cycle
 */
 gld_error_t ignit_start(void);

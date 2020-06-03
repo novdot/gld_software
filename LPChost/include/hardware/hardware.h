@@ -11,43 +11,46 @@
 #include "hardware/i2c.h"
 
 /**
-configure light-up signal
-поджиг
+    @brief configure light-up signal (поджиг)
+    discharge
+    pulse
 */
 void hardware_configure_lightup(void);
 void hardware_lightup_on(void);
 void hardware_lightup_off(void);
 
 /**
-свето
+    @brief свето
 */
 void hardware_configure_backlight(void);
 void hardware_backlight_on(void);
 void hardware_backlight_off(void);
 
 /**
-вибро1,вибро2
+    @brief модулятор
 */
-void hardware_configure_vibro(void);
-void hardware_vibro1_on(void);
-void hardware_vibro1_off(void);
-void hardware_vibro2_on(void);
-void hardware_vibro2_off(void);
-
 void hardware_modulator(x_uint32_t a_data);
 
 /**
     @brief управление контурами ГВЧ, СРП
 */
-void hardware_write_regul_data(x_uint32_t flag, int*pExchangeErr, int a_HF_reg, int a_WP_reg);
-
+void hardware_regul_data_init();
+void hardware_regul_data_write(x_uint32_t flag, int*pExchangeErr, int a_HF_reg, int a_WP_reg);
+void hardware_regul_data_read(int*a_pBuffer, int cnt, int*pExchangeErr);
 
 /**
-    @brief управление ADC,DAC
+    @brief управление CS ADC,DAC
 */
-void SetDAC();
-void ResetDAC();
-void SetADC();
-void ResetADC();
+void hardware_set_dac();
+void hardware_reset_dac();
+void hardware_set_adc();
+void hardware_reset_adc();
+
+/**
+    @brief управление фоторезистором
+*/
+void hardware_photo_init(void);
+void hardware_photo_exchange(int*pCntDif);
+void hardware_photo_out(x_uint32_t Ph_A, x_uint32_t Ph_B);
 
 #endif

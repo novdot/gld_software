@@ -53,11 +53,14 @@
 #define  CMD_RATE        	0x0000  //e. the code of the Rate command  
 #define  CMD_DELTA       	0x0f00  //e. the code of the Delta command
 #define  CMD_D_PERIOD_W  	0xf000  //e. the code of the D_Period_W command 
-       
+
+#define  CMD_MAINT_MASK     0x9900
 #define  CMD_MAINT       	0x9999  //e. the code of the Maintenance mode command
 
 #define  SUBCMD_M_STIMUL    0x0a00  //e. the code of the Stimul command 
 #define  SUBCMD_M_RESET     0x8000  //e. software device reset(restart) 
+
+#define  SUBCMD_M_MASK      0xda00
 #define  SUBCMD_M_CLEAR     0xda00  //e. reset of the register of errors of line 485 
 #define  SUBCMD_M_MIRR      0xda01  //e. return previous contents of the receiver buffer 
 #define  SUBCMD_M_LDPAR_F   0xda02  //e. load GLD parameters from Flash-memory 
@@ -81,6 +84,7 @@
 #define  SUBCMD_M_PARAM_R   0xe900  //e. reading working parameter of the GLD from the data memory
 #define  SUBCMD_M_E5RA_W    0xea00  //e. writing in 1st additional (A) register of a mode of the Elio5 card  
 
+#define SUBCMD_M_RATE_MASK  0xdd00 //e. delivery of a stack of parameters M_Rate (Rate2, Rate3) 
 #define SUBCMD_M_RATE       0xdd00 //e. delivery of a stack of parameters M_Rate (Rate2, Rate3) 
 #define	SUBCMD_M_RATE1      0xdd01          
 #define	SUBCMD_M_RATE2      0xdd02  
@@ -129,6 +133,7 @@ void command_handle(void);
 /**
     handlers
 */
+void command_cmd_DELTA_PS_EXEC();
 void command_cmd_DELTA_PS();	
 void command_cmd_DELTA_BINS();	
 void command_cmd_DELTA_SF(); 
@@ -192,6 +197,7 @@ void command_subcmd_M_RATE5K();
 void command_ans_device_status(void);
 void command_ans_common(void);
 
+void command_ans_DELTA_PS_EXEC(x_uint32_t paramTmpWord);
 void command_ans_DELTA_PS();	
 void command_ans_DELTA_BINS();	
 void command_ans_DELTA_SF(); 
