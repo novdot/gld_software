@@ -1,8 +1,9 @@
   #include "ThermoCalc.h"
   #include "CyclesSync.h"
   #include "CntrlGLD.h"
-  #include "InputOutput.h"
   #include "mathDSp.h"
+  
+#include "core/global.h"
 
 #define debug
 #define	TEMP_AVER_PERIOD	4 // e. number of seconds for average

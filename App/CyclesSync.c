@@ -17,9 +17,9 @@
 #include "CntrlGLD.h"
 #include "SIP.h"
 #include "el_lin.h"
-#include "inputOutput.h"
 
 #include "hardware/hardware.h"
+#include "core/global.h"
 
  
 uint32_t 	Seconds = 0;    //e. seconds from power on

@@ -99,19 +99,6 @@ void G_Photo_Init(void )
 {
     i2c_init();
 }
-/******************************************************************************
-** Function name:		DAC_ADC_Exchange_Init
-**
-** Descriptions:		Initialization of data exchange with DACs and ADCs
-**
-** parameters:			None
-** Returned value:		None
-** 
-******************************************************************************/
-void DAC_ADC_Exchange_Init()
-{
-    spi_init();
-}
 
 /******************************************************************************
 ** Function name:		Out_G_photo

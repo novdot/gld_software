@@ -27,6 +27,11 @@ typedef enum x_direction_tDef{
 	, _x_minus = 1
 } x_direction_t;
 
+typedef enum x_switch_tDef{ 
+	_x_off = 0
+	, _x_on = 1
+} x_switch_t;
+
 typedef unsigned char x_uint8_t;
 typedef unsigned short int x_uint16_t;
 typedef unsigned long int x_uint32_t;

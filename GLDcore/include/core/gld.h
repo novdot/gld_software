@@ -36,5 +36,67 @@
 #include "sync.h"
 #include "exchange.h"
 
+/**
+    @brief device starting process
+*/
+void gld_start(void);
+x_bool_t gld_is_started(void);
+void gld_set_start_request(x_bool_t flag);
+
+/**
+    @brief procedure of GLD stopping
+*/
+void gld_stop(void);
+x_bool_t gld_is_stop_request(void);
+void gld_set_stop_request(x_bool_t flag);
+
+/**
+    @brief prestart control of GLD parameters
+*/
+void gld_status(void);
+/**
+    @brief Output modes
+*/
+void gld_output(void);
+
+/**
+    @brief управление контурами
+*/
+void gld_loop_laser_set(x_switch_t flag);
+void gld_loop_hf_reg_set(x_switch_t flag);
+void gld_loop_ri_reg_set(x_switch_t flag);
+void gld_loop_wp_reg_set(x_switch_t flag);
+void gld_loop_wp_sin_set(x_switch_t flag);
+void gld_loop_vb_tau_set(x_switch_t flag);
+void gld_loop_vb_freq_set(x_switch_t flag);
+void gld_loop_gld_reg_set(x_switch_t flag);
+void gld_loop_all_regs_set(x_switch_t flag);
+/**/
+x_switch_t gld_loop_is_laser();
+x_switch_t gld_loop_is_hf_reg();
+x_switch_t gld_loop_is_ri_reg();
+x_switch_t gld_loop_is_wp_reg();
+x_switch_t gld_loop_is_wp_sin();
+x_switch_t gld_loop_is_vb_tau();
+x_switch_t gld_loop_is_vb_freq();
+x_switch_t gld_loop_is_gld_reg();
+/**/
+//Loops bits
+#define  LASER_ON        0x0001  		//e. switch on/off laser-up //r. 㫫./㼪뮠䦭池򨾠졧池
+#define  HF_REG_ON       0x0002  		//e. switch on/off the HFO regulator //r. 㫫./㼪뮠믭򳰠Ăנ 
+#define  RI_REG_ON       0x0004  		//e. switch on/off the DS power regulator //r. 㫫./㼪뮠믭򳰠􎟱򨠄ԏ   
+#define  WP_REG_ON       0x0008  		//e. a mask of switch on/off of the CPLC regulator  //r. 𬐠㫫./㼪뮠믭򳰠 ҐϠ 
+#define  WP_SIN_ON       0x0010  		//e. switch on/off search signal of the CPLC //r. 㫫./㼪뮠௨񪮢󩠱餭᫠ҐϠ 
+#define  VB_TAU_ON       0x0020  		//e. switch on/off amplitude regulator of the dither drive //r. 㫫./㼪뮠믭򳰠᭯쩲󤻠㩡𮰨㯤ࠍ
+#define  VB_FREQ_ON      0x0040  		//e. switch on/off frequency regulator of the dither drive //r. 㫫./㼪뮠믭򳰠󠱲ﳻ 㩡𮯰飮堍
+#define  GLD_ON          0x0080  		//e. switch on/off all GLD //r. 㫫./㼪뮠㦱𠃋č
+
+//Loop controls
+#define loop_is_closed(loop_bit) 	((RgConA & (loop_bit)) == loop_bit)
+#define close_loop(loop_bit) 		RgConA |= loop_bit
+#define open_loop(loop_bit) 		RgConA &= ~(loop_bit)
+#define open_all_loops()			RgConA   = 0	
+#define close_all_loops()			RgConA   = 0xFFFF
+/**/
 
 #endif

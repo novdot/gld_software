@@ -13,3 +13,6 @@ extern		 int	TermoCompens_Sum;
 void DithFreqRangeCalc(void);
 void ThermoAverage(void);
 int DynamicDeltaCalc(void);
+
+
+void clc_ThermoSensors(void);

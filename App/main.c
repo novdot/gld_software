@@ -13,13 +13,12 @@
 **--------------------------------------------------------------------------------------------------------       
 *********************************************************************************************************/
 #include "SIP.h"
-#include "el_lin.h"
+//#include "el_lin.h"
 #include "CyclesSync.h"
 #include "Parameters.h"							  
 #include "Dither_Reg.h"
-#include "commandset.h"
+//#include "commandset.h"
 #include "CntrlGLD.h"
-#include "InputOutput.h"
 #include <math.h>
 
 #include "hardware/hardware.h"
@@ -77,7 +76,7 @@ void init()
     UART_Init(CONFIG_COMMANDS_BAUDRATE);
     
     //e. initialization of exchange with hardware
-    DAC_ADC_Exchange_Init();
+    hardware_regul_data_init();
     hardware_dac_init();
     //e. quadrature encoder initialization
     SOI_Init(); 		
@@ -93,9 +92,10 @@ void init()
     uart_dma_init(trm_buf);
     
     //e. initialize channel for setting of photodetector gain
-    G_Photo_Init();
+    //G_Photo_Init();
+    hardware_photo_init();
     
-    Out_G_photo(Device_blk.Str.Gain_Ph_A, Device_blk.Str.Gain_Ph_B);
+    hardware_photo_out(Device_blk.Str.Gain_Ph_A, Device_blk.Str.Gain_Ph_B);
     
     open_all_loops();
     
@@ -130,18 +130,19 @@ void loop()
     hardware_set_adc();		
     //start DAC prepearing for writing     
     hardware_reset_dac();
-    ADC_Input();
-    
-    DAC_ADC_Exchange();
+    exchange_regul_data_read();
+    exchange_regul_data_write();
     
     clc_ThermoSensors();	 
     clc_HFO();
     clc_PLC();
     clc_Dith_regulator(); 
     clc_OutFreq_regulator();
-    Output.Str.WP_sin = clc_WP_sin();  	
+    Output.Str.WP_sin = clc_WP_sin();
+  	
     contrl_GLD();
-    G_Photo_Exchange();
+    
+    hardware_photo_exchange(&Output.Str.Cnt_Dif);
     
     command_recieve();
     command_decode();

@@ -23,3 +23,4 @@ extern	int  		WP_scope3, WP_scope4;
 /*extern	int			Dif_Curr_Array[8];
 extern	int			Dif_Filt_Array[8];	 */
 
+void clc_Pulses(void);

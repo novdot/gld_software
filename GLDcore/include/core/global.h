@@ -21,8 +21,14 @@
         буфферы и флаги контроля работы периферии
 */
 typedef struct gld_globalDef{
+    //regs
     reg_RgConA RgConA;
     reg_RgConB RgConB;
+    reg_valid valid;
+    
+    //dac and adc holders
+    x_uint16_t nADCData[6];
+    x_uint16_t nDACData[2];
     
 }gld_global;
 

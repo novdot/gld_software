@@ -2,11 +2,11 @@
 #include "SIP.h"
 #include "CyclesSync.h"
 #include "CntrlGLD.h"
-#include "InputOutput.h"
 #include "ThermoCalc.h"
-#include "el_lin.h"
+//#include "el_lin.h"
 
 #include "hardware/hardware.h"
+#include "core/global.h"
 
 uint32_t	 Old_Cnt_Vib = 0;
 uint32_t	 Old_Cnt = 0;

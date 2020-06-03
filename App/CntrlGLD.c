@@ -215,6 +215,7 @@ void GLD_Start(void)
 	    start_Go = 0;      //e. activity of process //r. и активности процесса
 #if !defined COMMAND_DEBUG
 	    Out_G_photo(Device_blk.Str.Gain_Ph_A, Device_blk.Str.Gain_Ph_B); 		//e. re-initialise gain factors of photodetector channels //r. повторно инициализировать коэф-ты передачи фотоприемников
+        hardware_photo_out(Device_blk.Str.Gain_Ph_A, Device_blk.Str.Gain_Ph_B);
 #endif
         //close_all_loops();
         
