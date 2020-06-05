@@ -13,8 +13,9 @@
  с программирующим софтом uhost_Prog, т.к. для ее работы необходимо совпадение адреса
  запроса и адреса ответа.
 * */
-
+#include "bootloader/command_bootloader.h"
 #include "hardware/hardware.h"
+#include "core/config.h"
 /******************************************************************************/
 //инициализируем периферию для прошивки
 void init()
@@ -29,7 +30,7 @@ void init()
     //e. to calculate SystemCoreClock  for UART particularly
     SystemCoreClockUpdate();
     //e. initialization of UART on 38400
-    UART0_Init();
+    UART_Init(CONFIG_COMMANDS_BAUDRATE);
     
 }
 
@@ -37,7 +38,9 @@ void init()
 //основной цикл. ждем подключения, если нет - переключаемся на основную программу
 void loop()
 {
-    
+    command_recieve();
+    //decode
+    command_transm();
 }
 
 /******************************************************************************/

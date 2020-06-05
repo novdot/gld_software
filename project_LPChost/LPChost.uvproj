@@ -7,7 +7,7 @@
 
   <Targets>
     <Target>
-      <TargetName>LandTiger_DMA</TargetName>
+      <TargetName>LPChost</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
       <pCCUsed>5060020::V5.06 (build 20)::ARMCC</pCCUsed>
@@ -46,7 +46,7 @@
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
           <OutputDirectory>.\Obj\</OutputDirectory>
-          <OutputName>LandTiger_DMA</OutputName>
+          <OutputName>LPChost</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>1</CreateHexFile>
@@ -79,7 +79,7 @@
           <AfterMake>
             <RunUserProg1>1</RunUserProg1>
             <RunUserProg2>0</RunUserProg2>
-            <UserProg1Name>fromelf --bin --output=.\obj\LandTiger_DMA.bin .\obj\LandTiger_DMA.axf</UserProg1Name>
+            <UserProg1Name>fromelf --bin --output=.\obj\LPChost.bin .\obj\LPChost.axf</UserProg1Name>
             <UserProg2Name></UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
@@ -172,7 +172,7 @@
             <RunIndependent>0</RunIndependent>
             <UpdateFlashBeforeDebugging>1</UpdateFlashBeforeDebugging>
             <Capability>1</Capability>
-            <DriverSelection>4098</DriverSelection>
+            <DriverSelection>4099</DriverSelection>
           </Flash1>
           <bUseTDR>1</bUseTDR>
           <Flash2>Segger\JL2CM3.dll</Flash2>
@@ -440,19 +440,9 @@
               <FilePath>..\App\CntrlGLD.c</FilePath>
             </File>
             <File>
-              <FileName>commandset.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\App\commandset.c</FilePath>
-            </File>
-            <File>
               <FileName>CyclesSync.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\App\CyclesSync.c</FilePath>
-            </File>
-            <File>
-              <FileName>InputOutput.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\App\InputOutput.c</FilePath>
             </File>
             <File>
               <FileName>main.c</FileName>

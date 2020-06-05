@@ -371,7 +371,7 @@
               <MiscControls></MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>..\App;..\xlib\include;..\GLDcore\include;..\LPChost\include</IncludePath>
+              <IncludePath>..\App;..\xlib\include;..\GLDcore\include;..\LPChost\include;..\GLDbootloader\include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -437,7 +437,12 @@
             <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\main.c</FilePath>
+              <FilePath>..\GLDbootloader\source\main.c</FilePath>
+            </File>
+            <File>
+              <FileName>command_bootloader.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\GLDbootloader\source\command_bootloader.c</FilePath>
             </File>
           </Files>
         </Group>
