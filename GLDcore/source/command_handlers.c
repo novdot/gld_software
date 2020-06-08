@@ -17,6 +17,7 @@
   ******************************************************************************
   */
 #include "core/command.h"
+#include "core/command_handlers.h"
 #include "core/global.h"
 #include "core/types.h"
 #include "hardware/hardware.h"
@@ -33,12 +34,10 @@
 //e procedure of set of rate and periodicity of answer 
 void command_utility_SetSpeedPeriod(void)
 {
-	if ((rcv_buf[3] & 0x0080) != 0) //e. is periodic data transmission needed? 
-	{
+	//e. is periodic data transmission needed? 
+	if ((rcv_buf[3] & 0x0080) != 0)  {
 		trm_cycl = 1;		//e. yes, set present flag 
-	}
-	else
-	{  
+	} else {  
 		trm_cycl = 0;		//e. no, reset present flag 
 	}
 	
@@ -46,6 +45,83 @@ void command_utility_SetSpeedPeriod(void)
 	trm_rate = (rcv_buf[3] >> 1) & 0x0030;
 	SRgR |= trm_rate; 			//e. set present transfer rate
 } // SetSpeedPeriod
+
+/******************************************************************************/
+void command_handle(void)
+{
+    x_uint32_t uCmdCode = 0;
+    x_uint32_t uCmdCodeLong = 0;
+
+    uCmdCode = (rcv_buf[2] & 0xFF) << 8;
+    CMD_Code = uCmdCode | (rcv_buf[3] & 0xFF);
+    
+    //e. initialization of the flag of copying of receiving buffer
+	rx_buf_copy = 1;
+    
+    switch(uCmdCode){
+        case CMD_DELTA_PS    : command_cmd_DELTA_PS();	return;
+        case CMD_DELTA_BINS  : command_cmd_DELTA_BINS();	return;
+        case CMD_DELTA_SF	 : command_cmd_DELTA_SF(); return;
+        case CMD_DEV_MODE    : command_cmd_DEV_MODE(); return;
+        case CMD_BIT_MODE    : command_cmd_BIT_MODE();	return;
+        case CMD_RATE        : command_cmd_RATE();	return;
+        case CMD_DELTA       : command_cmd_DELTA();	return;
+        case CMD_D_PERIOD_W  : command_cmd_D_PERIOD_W();	return;
+
+        case SUBCMD_M_STIMUL : command_subcmd_M_STIMUL();  return;
+        case SUBCMD_M_RESET  : command_subcmd_M_RESET();  return;
+
+        case SUBCMD_M_CTL_R  : command_subcmd_M_CTL_R();  return;
+        case SUBCMD_M_CTL_M  : command_subcmd_M_CTL_M();  return;
+
+        case SUBCMD_M_TMP_W  : command_subcmd_M_TMP_W();  return;
+        case SUBCMD_M_TMP_R  : command_subcmd_M_TMP_R();  return;
+        case SUBCMD_M_E5R_W  : command_subcmd_M_E5R_W();  return;
+        case SUBCMD_M_ADC_R  : command_subcmd_M_ADC_R();  return;
+        case SUBCMD_M_VIB_W  : command_subcmd_M_VIB_W();  return;
+        case SUBCMD_M_CNT_R  : command_subcmd_M_CNT_R();  return;
+        case SUBCMD_M_GPH_W  : command_subcmd_M_GPH_W();  return;
+        case SUBCMD_M_FLG_R  : command_subcmd_M_FLG_R();  return;
+        case SUBCMD_M_PARAM_W: command_subcmd_M_PARAM_W();  return;
+        case SUBCMD_M_PARAM_R: command_subcmd_M_PARAM_R();  return;
+        case SUBCMD_M_E5RA_W : command_subcmd_M_E5RA_W();  return;
+
+        //check mask of cmd code
+        case SUBCMD_M_RATE_MASK  : 
+            uCmdCodeLong = uCmdCode | (rcv_buf[3] & 0x1F);
+            break;
+
+        case CMD_MAINT_MASK  : 
+        case SUBCMD_M_MASK  :
+            uCmdCodeLong = uCmdCode | (rcv_buf[3] & 0xFF);
+            break;
+        default:
+            line_sts = line_sts | CODE_ERR;
+            return;
+    }
+    
+    switch(uCmdCodeLong){
+        case CMD_MAINT       :  command_cmd_MAINT(); return;
+
+        case SUBCMD_M_CLEAR  :  command_subcmd_M_CLEAR(); return;
+        case SUBCMD_M_MIRR   :  command_subcmd_M_MIRR(); return;
+        case SUBCMD_M_LDPAR_F:  command_subcmd_M_LDPAR_F(); return;
+        case SUBCMD_M_LDPAR_D:  command_subcmd_M_LDPAR_D(); return;
+        case SUBCMD_M_START  :  command_subcmd_M_START(); return;
+        case SUBCMD_M_STOP   :  command_subcmd_M_STOP(); return;
+        case SUBCMD_M_PULSE  :  command_subcmd_M_PULSE(); return;
+
+        case SUBCMD_M_RATE1  :  command_subcmd_M_RATE1(); return;
+        case SUBCMD_M_RATE2  :  command_subcmd_M_RATE2(); return;
+        case SUBCMD_M_RATE3  :  command_subcmd_M_RATE3(); return;
+        case SUBCMD_M_RATE7  :  command_subcmd_M_RATE7(); return;
+        case SUBCMD_M_RATE5K :  command_subcmd_M_RATE5K(); return;
+        
+        default: 
+            line_sts = line_sts | MODE_ERR;
+			return;
+    }
+}
 
 /******************************************************************************/
 /******************************************************************************/
@@ -496,10 +572,6 @@ void command_subcmd_M_RATE5K()
 /******************************************************************************/
 /******************************************************************************/
 /******************************************************************************/
-#define COMMAND_UTILITY_ANSWER_FIELD(index,ptr_addr,size) \
-	addr_param[index] = ptr_addr; \
-	size_param[index] = size;
-
 /******************************************************************************/
 void command_ans_common(void)
 {

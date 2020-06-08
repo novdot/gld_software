@@ -7,6 +7,7 @@
 
 
 #include "core/command.h"
+#include "core/command_handlers.h"
 #include "core/ignit.h"
 #include "core/global.h"
 

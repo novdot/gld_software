@@ -3,28 +3,79 @@
 
 #include "core/command.h"
 
+/******************************************************************************/
 #define  CMD_WRK_PC      0x0f0f //e. the code of the Wrk_PC comman 
 #define  CMD_MAINT       0x9999 //e. the code of the Maintenance mode command 
-#define  CMD_M_Jump      0xdfa5 //e. the code of the command, that starts the code in PM 
-#define  CMD_M_Load      0xdf5a //e. the code of the command, that loads microprogramme from the BM and starts it 
-#define  CMD_M_Conf      0xdf12 //e. the code of the command, that configurates PLD of uHost card
-#define  CMD_M_Dcnf      0xdf21 //e. the code of the command, that resets PLD flex configuration
+
+#define  CMD_M_SUBCMD1 	 0xdf00 
+#define  CMD_M_JUMP      0xdfa5 //e. the code of the command, that starts the code in PM 
+#define  CMD_M_LOAD      0xdf5a //e. the code of the command, that loads microprogramme from the BM and starts it 
+#define  CMD_M_CONF      0xdf12 //e. the code of the command, that configurates PLD of uHost card
+#define  CMD_M_DCNF      0xdf21 //e. the code of the command, that resets PLD flex configuration
+   
+#define  CMD_M_SUBCMD2 	 0xda00  
+#define  CMD_M_CLEAR     0xda00 //e. the code of the command, that resets the register of errors of line 485
+#define  CMD_M_MIRR      0xda01 //e. the code of the command, that returns previous contents of the receiver buffer
+#define  CMD_M_TSIV1     0xda11 //e. the code of the command, that tests data memory DMOVLAY = 1
+#define  CMD_M_TSOV2     0xda12 //e. the code of the command, that tests data memory DMOVLAY = 2
                              
-#define  CMD_M_Clear     0xda00 //e. the code of the command, that resets the register of errors of line 485
-#define  CMD_M_Mirr      0xda01 //e. the code of the command, that returns previous contents of the receiver buffer
-#define  CMD_M_TsOv1     0xda11 //e. the code of the command, that tests data memory DMOVLAY = 1
-#define  CMD_M_TsOv2     0xda12 //e. the code of the command, that tests data memory DMOVLAY = 2
-                             
-#define  CMD_M_Ptr_R     0xd300 //e. the code of the command, that reads a set of pointers to arrays
-#define  CMD_M_Ptr_W     0xd200 //e. the code of the command, that writes a set of pointers to arrays
-#define  CMD_M_Dat_R     0xd500 //e. the code of the command, that reads block of data
-#define  CMD_M_Dat_W     0xd400 //e. the code of the command, that writes block of data
-#define  CMD_M_Buf_R     0xd700 //e. the code of the command, that reads data from memory bank to buffer
-#define  CMD_M_Buf_W     0xd600 //e. the code of the command, that writes data from buffer to memory bank                                                                       
-#define  CMD_M_Ctl_R     0xd900 //e. the code of the command, that reads the control register of the device
-#define  CMD_M_Ctl_M     0xd800 //e. the code of the command, that modificates of bit of the control register
-#define  CMD_M_FMe_E     0xde00 //e. the code of the command, that erases flash-memory sector
+#define  CMD_M_PTR_R     0xd300 //e. the code of the command, that reads a set of pointers to arrays
+#define  CMD_M_PTR_W     0xd200 //e. the code of the command, that writes a set of pointers to arrays
+#define  CMD_M_DAT_R     0xd500 //e. the code of the command, that reads block of data
+#define  CMD_M_DAT_W     0xd400 //e. the code of the command, that writes block of data
+#define  CMD_M_BUF_R     0xd700 //e. the code of the command, that reads data from memory bank to buffer
+#define  CMD_M_BUF_W     0xd600 //e. the code of the command, that writes data from buffer to memory bank                                                                       
+#define  CMD_M_CTL_R     0xd900 //e. the code of the command, that reads the control register of the device
+#define  CMD_M_CTL_M     0xd800 //e. the code of the command, that modificates of bit of the control register
+#define  CMD_M_FME_E     0xde00 //e. the code of the command, that erases flash-memory sector
 
+/******************************************************************************/
+/**
+    handlers
+*/
+void command_cmd_WRK_PC();
+void command_cmd_MAINT();
+void command_cmd_M_JUMP();
+void command_cmd_M_LOAD();
+void command_cmd_M_CONF();
+void command_cmd_M_DCNF();
+void command_cmd_M_CLEAR();
+void command_cmd_M_MIRR();
+void command_cmd_M_TSIV1();
+void command_cmd_M_TSOV2();
+void command_cmd_M_PTR_R();
+void command_cmd_M_PTR_W();
+void command_cmd_M_DAT_R();
+void command_cmd_M_DAT_W();
+void command_cmd_M_BUF_R();
+void command_cmd_M_BUF_W();
+void command_cmd_M_CTL_R();
+void command_cmd_M_CTL_M();
+void command_cmd_M_FME_E();
 
+/**
+    answer
+*/
+void command_ans_common(void);
 
-#endif
+void command_ans_WRK_PC();
+void command_ans_MAINT();
+void command_ans_M_JUMP();
+void command_ans_M_LOAD();
+void command_ans_M_CONF();
+void command_ans_M_DCNF();
+void command_ans_M_CLEAR();
+void command_ans_M_MIRR();
+void command_ans_M_TSIV1();
+void command_ans_M_TSOV2();
+void command_ans_M_PTR_R();
+void command_ans_M_PTR_W();
+void command_ans_M_DAT_R();
+void command_ans_M_DAT_W();
+void command_ans_M_BUF_R();
+void command_ans_M_BUF_W();
+void command_ans_M_CTL_R();
+void command_ans_M_CTL_M();
+void command_ans_M_FME_E();
+
+#endif//__COMMAND_BOOTLOADER_H_INCLUDE__
