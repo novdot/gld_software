@@ -16,6 +16,8 @@
 #include "bootloader/command_bootloader.h"
 #include "hardware/hardware.h"
 #include "core/config.h"
+#include "core/global.h"
+#include "core/const.h"
 /******************************************************************************/
 //инициализируем периферию для прошивки
 void init()
@@ -25,7 +27,8 @@ void init()
     
     DMA_Init();
     
-    //
+    //read params
+    flash_dma_read(Device_blk.Array,sizeof(Device_blk.Array),CONST_PARAMS_FLASH_START);  
     
     //e. to calculate SystemCoreClock  for UART particularly
     SystemCoreClockUpdate();

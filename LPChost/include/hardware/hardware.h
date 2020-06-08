@@ -53,4 +53,8 @@ void hardware_photo_init(void);
 void hardware_photo_exchange(int*pCntDif);
 void hardware_photo_out(x_uint32_t Ph_A, x_uint32_t Ph_B);
 
+/**
+    @brief управление flash
+*/
+void flash_dma_read(int* array,x_uint16_t size, x_uint32_t shift);
 #endif

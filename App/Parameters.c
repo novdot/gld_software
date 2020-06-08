@@ -124,30 +124,3 @@ void init_DefaultParam(void)
     Device_blk.Str.Device_SerialNumber = DEVICE_SN;
 
 } // init_DefaultParam
-/******************************************************************************
-** Function name:		FlashDMA_Init
-**
-** Descriptions:		Initialisation of DMA channel for flash reading 
-**
-** parameters:			None
-** Returned value:		None
-** 
-******************************************************************************/
-void FlashDMA_Init()
-{
-	LPC_GPDMACH3->CConfig &= ~DMAChannelEn; 
-
-	LPC_GPDMA->IntTCClear = DMA3_IntTCClear;
-	LPC_GPDMA->IntErrClr = DMA3_IntTCClear;
-
-	  /* Ch3 set for M2M transfer from Flash to RAM. */
-	  LPC_GPDMACH3->CSrcAddr = 0x40000;	   //e. address of device parameter block in flash memory (22 sec)
-	  LPC_GPDMACH3->CDestAddr = (uint32_t)&(Device_blk.Array);//e. address of device parameter block in RAM
-
-	  LPC_GPDMACH3->CControl = ((sizeof(Device_blk.Array))>>2)|SrcBSize_1 |DstBSize_1 
-	  							|SrcWidth_32b |DstWidth_32b |SrcInc |DstInc |TCIntEnabl;
-
-	  LPC_GPDMACH3->CConfig = MaskTCInt |MaskErrInt|DMA_MEMORY |DMA_MEMORY |(M2M << 11)| DMAChannelEn;	
-
-  return;
-}

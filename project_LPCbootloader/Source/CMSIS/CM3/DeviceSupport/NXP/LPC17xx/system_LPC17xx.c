@@ -305,17 +305,108 @@
 //  bits 16...23 - PLL0 Pre-Divider value minus 1. Supported divider N range 1...32
 //  Fcc0 = (2 * M * Fin) / N
 //#define PLL0CFG_Val           0x00050063 
-#define PLL0CFG_Val           0x00040055
-
+#define PLL0CFG_Val           0x00040055 //M - 86, N - 5, output = 2 * 86 * 12MHz / 5 = 400MHz
+//#define PLL0CFG_Val           0x0003003d //M - 86, N - 5, output = 2 * 86 * 12MHz / 5 = 400MHz
 #define PLL1_SETUP            1
-#define PLL1CFG_Val           0x00000023
-#define CCLKCFG_Val           0x00000003
-#define USBCLKCFG_Val         0x00000000
-#define PCLKSEL0_Val          0x00000000
-#define PCLKSEL1_Val          0x00000000
-#define PCONP_Val             0x042887DE
-#define CLKOUTCFG_Val         0x00000000
+#define PLL1CFG_Val           0x00000023 //M - 36, N - 1, output = 2 * 36 * 12MHz / 1 = 864MHz?
+//CPU Clock Configure Register
+#define CCLKCFG_Val           0x00000003 //Divide by 4
 
+//USB Clock Configuration register
+//  bits 0...3
+//    5 - PLL0 output is divided by 6. PLL0 output must be 288 MHz
+//    7 - PLL0 output is divided by 8. PLL0 output must be 384 MHz
+//    9 - PLL0 output is divided by 10. PLL0 output must be 480 MHz
+#define USBCLKCFG_Val         0x00000000//default
+//Peripheral Clock Selection register 0
+//  1:0 PCLK_WDT Peripheral clock selection for WDT. 00
+//  3:2 PCLK_TIMER0 Peripheral clock selection for TIMER0. 00
+//  5:4 PCLK_TIMER1 Peripheral clock selection for TIMER1. 00
+//  7:6 PCLK_UART0 Peripheral clock selection for UART0. 00
+//  9:8 PCLK_UART1 Peripheral clock selection for UART1. 00
+//  11:10 - Reserved. NA
+//  13:12 PCLK_PWM1 Peripheral clock selection for PWM1. 00
+//  15:14 PCLK_I2C0 Peripheral clock selection for I2C0. 00
+//  17:16 PCLK_SPI Peripheral clock selection for SPI. 00
+//  19:18 - Reserved. NA
+//  21:20 PCLK_SSP1 Peripheral clock selection for SSP1. 00
+//  23:22 PCLK_DAC Peripheral clock selection for DAC. 00
+//  25:24 PCLK_ADC Peripheral clock selection for ADC. 00
+//  27:26 PCLK_CAN1 Peripheral clock selection for CAN1.[1] 00
+//  29:28 PCLK_CAN2 Peripheral clock selection for CAN2.[1] 00
+//  31:30 PCLK_ACF Peripheral clock selection for CAN acceptance filtering
+//  bits values:
+//  00 PCLK_peripheral = CCLK/4
+//  01 PCLK_peripheral = CCLK
+//  10 PCLK_peripheral = CCLK/2
+//  11 PCLK_peripheral = CCLK/8, except for CAN1, CAN2, and CAN filtering when ӱ1Ԡselects = CCLK/6.
+//#define PCLKSEL0_Val          0x00000010//Peripheral clock selection for TIMER1 - CCLK, other peripherals - CCLK/4
+  #define PCLKSEL0_Val          0x40000150//Peripheral clock selection for TIMER1 - CCLK, other peripherals - CCLK/4
+//#define PCLKSEL0_Val          0x000003d0//Peripheral clock selection for TIMER1 - CCLK, other peripherals - CCLK/4
+//Peripheral Clock Selection register 1
+//  1:0 PCLK_QEI Peripheral clock selection for the Quadrature Encoder Interface.00
+//  3:2 PCLK_GPIOINT Peripheral clock selection for GPIO interrupts. 00
+//  5:4 PCLK_PCB Peripheral clock selection for the Pin Connect block. 00
+//  7:6 PCLK_I2C1 Peripheral clock selection for I2C1. 00
+//  9:8 - Reserved. NA
+//  11:10 PCLK_SSP0 Peripheral clock selection for SSP0. 00
+//  13:12 PCLK_TIMER2 Peripheral clock selection for TIMER2. 00
+//  15:14 PCLK_TIMER3 Peripheral clock selection for TIMER3. 00
+//  17:16 PCLK_UART2 Peripheral clock selection for UART2. 00
+//  19:18 PCLK_UART3 Peripheral clock selection for UART3. 00
+//  21:20 PCLK_I2C2 Peripheral clock selection for I2C2. 00
+//  23:22 PCLK_I2S Peripheral clock selection for I2S. 00
+//  25:24 - Reserved. NA
+//  27:26 PCLK_RIT Peripheral clock selection for Repetitive Interrupt Timer. 00
+//  29:28 PCLK_SYSCON Peripheral clock selection for the System Control block. 00
+//  31:30 PCLK_MC Peripheral clock selection for the Motor Control PWM
+#define PCLKSEL1_Val          0x00000000//CCLK/4
+//Power Control for Peripherals register
+//0 - Reserved. NA
+//1 PCTIM0 Timer/Counter 0 power/clock control bit. 1
+//2 PCTIM1 Timer/Counter 1 power/clock control bit. 1
+//3 PCUART0 UART0 power/clock control bit. 1
+//4 PCUART1 UART1 power/clock control bit. 1
+//5 - Reserved. NA
+//6 PCPWM1 PWM1 power/clock control bit. 1
+//7 PCI2C0 The I2C0 interface power/clock control bit. 1
+//8 PCSPI The SPI interface power/clock control bit. 1
+//9 PCRTC The RTC power/clock control bit. 1
+//10 PCSSP1 The SSP 1 interface power/clock control bit. 1
+//11 - Reserved. NA
+//12 PCADC A/D converter (ADC) power/clock control bit. Note: Clear the PDN bit in the AD0CR before clearing this bit, and set this bit before setting PDN. 0
+//13 PCCAN1 CAN Controller 1 power/clock control bit. 0
+//14 PCCAN2 CAN Controller 2 power/clock control bit. 0
+//15 PCGPIO Power/clock control bit for IOCON, GPIO, and GPIO interrupts. 1
+//16 PCRIT Repetitive Interrupt Timer power/clock control bit. 0
+//17 PCMCPWM Motor Control PWM 0
+//18 PCQEI Quadrature Encoder Interface power/clock control bit. 0
+//19 PCI2C1 The I2C1 interface power/clock control bit. 1
+//20 - Reserved. NA
+//21 PCSSP0 The SSP0 interface power/clock control bit. 1
+//22 PCTIM2 Timer 2 power/clock control bit. 0
+//23 PCTIM3 Timer 3 power/clock control bit. 0
+//24 PCUART2 UART 2 power/clock control bit. 0
+//25 PCUART3 UART 3 power/clock control bit. 0
+//26 PCI2C2 I2C interface 2 power/clock control bit. 1
+#define PCONP_Val         0x046887DE//ADC,CAN1/2,RIT,Timer3,UART2,UART3 disabled
+//Clock Output Configuration register
+//  3:0 CLKOUTSEL Selects the clock source for the CLKOUT function. 0
+//    0000 Selects the CPU clock as the CLKOUT source.
+//    0001 Selects the main oscillator as the CLKOUT source.
+//    0010 Selects the Internal RC oscillator as the CLKOUT source.
+//    0011 Selects the USB clock as the CLKOUT source.
+//    0100 Selects the RTC oscillator as the CLKOUT source.
+//    Others Reserved, do not use these settings.
+//  7:4 CLKOUTDIV Integer value to divide the output clock by, minus one. 0
+//    0000 Clock is divided by 1.
+//    0001 Clock is divided by 2.
+//    0010 Clock is divided by 3.
+//    ... ...
+//    1111 Clock is divided by 16.
+//  8 CLKOUT_EN CLKOUT enable control, allows switching the CLKOUT source without glitches. Clear to stop CLKOUT on the next falling edge. Set to enable CLKOUT. 0
+//  9 CLKOUT_ACT CLKOUT activity indication. Reads as 1 when CLKOUT is enabled. Read as 0 when CLKOUT has been disabled via the CLKOUT_EN bit and the clock has completed being stopped.
+#define CLKOUTCFG_Val         0x00000000//Host4: CLKOUT pin not used
 
 /*--------------------- Flash Accelerator Configuration ----------------------
 //

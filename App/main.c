@@ -25,6 +25,7 @@
 #include "core/command.h"
 #include "core/global.h"
 #include "core/config.h"
+#include "core/const.h"
 
 /******************************************************************************
 **   Main Function  main()
@@ -32,7 +33,7 @@
 
 gld_global g_gld;
 
-/******************************************/
+/******************************************
 #include	"LPC17xx.h"
 
 void delay( ) {
@@ -67,8 +68,8 @@ void init()
     ignit_init();
     
     DMA_Init();
-    //e. start loading of parameters from flash
-    FlashDMA_Init(); 
+    //e. read params
+    flash_dma_read(Device_blk.Array,sizeof(Device_blk.Array),CONST_PARAMS_FLASH_START);  
     
     //e. to calculate SystemCoreClock  for UART particularly
     SystemCoreClockUpdate();

@@ -188,4 +188,25 @@ void hardware_photo_out(x_uint32_t Ph_A, x_uint32_t Ph_B)
     i2c_write(Ph_A,Ph_B);
 }
 /******************************************************************************/
+void flash_dma_read(int* a_array,x_uint16_t a_size, x_uint32_t a_shift)
+{
+	LPC_GPDMACH3->CConfig &= ~DMAChannelEn; 
+
+	LPC_GPDMA->IntTCClear = DMA3_IntTCClear;
+	LPC_GPDMA->IntErrClr = DMA3_IntTCClear;
+
+	 /* Ch3 set for M2M transfer from Flash to RAM. */
+    //e. address of device parameter block in flash memory (22 sec)
+	 LPC_GPDMACH3->CSrcAddr = a_shift;
+    //e. address of device parameter block in RAM
+    LPC_GPDMACH3->CDestAddr = (uint32_t)&(a_array);
+
+    LPC_GPDMACH3->CControl = ((a_size)>>2)|SrcBSize_1 |DstBSize_1 
+                            |SrcWidth_32b |DstWidth_32b |SrcInc |DstInc |TCIntEnabl;
+
+    LPC_GPDMACH3->CConfig = MaskTCInt |MaskErrInt|DMA_MEMORY |DMA_MEMORY |(M2M << 11)| DMAChannelEn;	
+
+  return;
+}
+/******************************************************************************/
 

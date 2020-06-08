@@ -160,7 +160,7 @@
 #define		F_OUT_NORM		(70000>>4)  	//  90000 Гц / 16
 #define		F_OUT_MAX		(300000>>4) 	// 300000 Гц / 16
 
-	//e. constants for the piecewise-linear thermocompensation //r. константы для кусочно-линейной термокомпенсации
+	//e. constants for the piecewise-linear thermocompensation 
 #define 	TERMO_FUNC_SIZE		14 	//e. amount of the points of the table function of thermocompensation //r. количество точек табличной функции термокомпенсации
 #define 	MAX_ORDER			9   //e. maximal value of order for the thermocompensation coefficients //r. максимальная величина порядка для коэффициентов термокомпенсации
 #define 	TSENS_NUMB			4   //e. number of the temperature sensor used for the thermocompensation //r. номер термодатчика, используемого для компенсации

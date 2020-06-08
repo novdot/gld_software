@@ -25,5 +25,6 @@
 #define	DEVICE_SAMPLE_RATE_HZ		10000		//e. sampling frequency 10 kHz 
 #define	DEVICE_SAMPLE_RATE_uks		100000000		//e. sampling frequency 10 kHz
 
+#define CONST_PARAMS_FLASH_START 0x40000
 
 #endif
