@@ -42,7 +42,7 @@ void command_recieve(void)
 	static int ToWaitEnd, ErrReg ;
 
 	uart_recieve(rcv_buf,&rcv_num_byt);
-	 
+    
 	//e. end part of packet is absent
 	if (( ToWaitEnd > 25000)) {
 			do rcv_buf[--rcv_num_byt] = 0;
@@ -95,7 +95,7 @@ void command_recieve(void)
 
 	} else  if (rcv_num_byt == 8) {
 			if ((rcv_buf[2] == 0xE0) || (rcv_buf[2] == 0xE4)) {
-					ToWaitEnd++;   	
+					ToWaitEnd++;
 					return;
 			}
 	}

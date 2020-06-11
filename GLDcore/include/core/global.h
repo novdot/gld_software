@@ -40,9 +40,9 @@ extern x_uint32_t  trm_num_byt;
 extern x_uint32_t  rcv_num_byt;
 extern x_uint32_t  rcv_Rdy;
 
-extern char trm_buf[64];
-extern char rcv_buf[64];
-extern char rcv_copy[64];
+extern x_uint8_t trm_buf[64];
+extern x_uint8_t rcv_buf[64];
+extern x_uint8_t rcv_copy[64];
 
 extern x_uint32_t num_of_par;
 extern void* addr_param[16];

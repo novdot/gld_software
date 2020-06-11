@@ -123,7 +123,7 @@ void UART1_Init(x_uint32_t baudrate)
 }
 
 /******************************************************************************/
-void UART2_Init (x_uint32_t baudrate)
+void UART2_Init(x_uint32_t baudrate)
 {
 	uint16_t usFdiv;
     /* UART2 */
@@ -220,12 +220,12 @@ void uart_recieve(x_uint8_t*a_pBuffer,x_uint32_t*a_uCount)
     //e. reciever contain some information
 #if defined UART1REC
     while ((LPC_UART1->LSR & RecievBufEmpty) != 0) { 
-        a_pBuffer[*a_uCount] = LPC_UART1->RBR;
+        a_pBuffer[(*a_uCount)] = LPC_UART1->RBR;
         (*a_uCount) += 1;
     }
 #else
     while ((LPC_UART0->LSR & RecievBufEmpty) != 0){ 
-        a_pBuffer[*a_uCount] = LPC_UART0->RBR;
+        a_pBuffer[(*a_uCount)] = LPC_UART0->RBR;
         (*a_uCount) += 1;
     }
 #endif	 

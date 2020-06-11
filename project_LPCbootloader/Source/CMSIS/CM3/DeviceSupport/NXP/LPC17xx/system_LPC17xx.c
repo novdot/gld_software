@@ -281,39 +281,17 @@
 // </e>
 */
 #define CLOCK_SETUP           1
-//System control - system control and status register:
-//  bit 4 - main oscillator range:
-//    0 - 1...20MHz
-//    1 - 15...25MHz
-//  bit 5 - main oscillator enable
-//    0 - disabled
-//    1 - enabled
-//  bit 6 - main oscillator status
-//    0 - not ready
-//    1 - ready
-#define SCS_Val               0x00000020
-//Clock Source Select register
-//  bits 0-1:
-//    00 - Selects the Internal RC oscillator as the PLL0 clock source (default)
-//    01 - Selects the main oscillator as the PLL0 clock source
-//    10 - Selects the RTC oscillator as the PLL0 clock source
-//    11 - Reserved, do not use this setting
+#define SCS_Val               0x00000020 
 #define CLKSRCSEL_Val         0x00000001
 #define PLL0_SETUP            1
-//PLL0 Configuration register
-//  bits 0...14 - PLL0 multiplier value minus 1. Supported multiplier M range 6...512
-//  bits 16...23 - PLL0 Pre-Divider value minus 1. Supported divider N range 1...32
-//  Fcc0 = (2 * M * Fin) / N
-//#define PLL0CFG_Val           0x00050063 
 #define PLL0CFG_Val           0x00040055
-
 #define PLL1_SETUP            1
 #define PLL1CFG_Val           0x00000023
 #define CCLKCFG_Val           0x00000003
 #define USBCLKCFG_Val         0x00000000
-#define PCLKSEL0_Val          0x00000000
+#define PCLKSEL0_Val          0x40000150
 #define PCLKSEL1_Val          0x00000000
-#define PCONP_Val             0x042887DE
+#define PCONP_Val             0x046887DE
 #define CLKOUTCFG_Val         0x00000000
 
 

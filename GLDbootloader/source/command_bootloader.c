@@ -10,6 +10,7 @@ void command_handle()
     uCmdCode = (rcv_buf[2] & 0xFF) << 8;
     CMD_Code = uCmdCode | (rcv_buf[3] & 0xFF);
     
+    hardware_backlight_on();
     //e. initialization of the flag of copying of receiving buffer
 	rx_buf_copy = 1;
     

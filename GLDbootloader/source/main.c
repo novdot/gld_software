@@ -26,12 +26,12 @@ void init()
     DMA_Init();
     
     //
+    hardware_configure_backlight();
     
     //e. to calculate SystemCoreClock  for UART particularly
     SystemCoreClockUpdate();
     //e. initialization of UART on 38400
     UART_Init(CONFIG_COMMANDS_BAUDRATE);
-    
 }
 
 /******************************************************************************/
@@ -39,7 +39,7 @@ void init()
 void loop()
 {
     command_recieve();
-    //decode
+    command_decode();
     command_transm();
 }
 
