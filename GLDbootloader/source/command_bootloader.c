@@ -1,6 +1,10 @@
 #include "bootloader/command_bootloader.h"
+#include "hardware/hardware.h"
 #include "core/global.h"
 
+void command_ans_common0();
+void command_ans_common1();
+void command_ans_m_status();
 /******************************************************************************/
 void command_handle()
 {
@@ -10,7 +14,6 @@ void command_handle()
     uCmdCode = (rcv_buf[2] & 0xFF) << 8;
     CMD_Code = uCmdCode | (rcv_buf[3] & 0xFF);
     
-    hardware_backlight_on();
     //e. initialization of the flag of copying of receiving buffer
 	rx_buf_copy = 1;
     
@@ -70,85 +73,93 @@ void command_cmd_MAINT()
 	//Включает режим монитора ГЛД и откладывает старт основной программы.
 	
 	//составляем ответ
-	command_ans_MAINT();
+	command_ans_m_status();
 }
 
 /******************************************************************************/
 void command_cmd_M_JUMP()
 {
-	
+	//run app
 }
 
 /******************************************************************************/
 void command_cmd_M_LOAD()
 {
-	
+	//load from mem
+    //run app
 }
 
 /******************************************************************************/
 void command_cmd_M_CONF()
 {
-	
+	//config pld = nothing
 }
 
 /******************************************************************************/
 void command_cmd_M_DCNF()
 {
-	
+	//reset pld = nothing
 }
 
 /******************************************************************************/
 void command_cmd_M_CLEAR()
 {
-	
+    //очистка регистра ошибок
+    line_err = 0;
+	//составляем ответ
+	command_ans_m_status();
 }
 
 /******************************************************************************/
 void command_cmd_M_MIRR()
 {
-	
+	//TODO
 }
 
 /******************************************************************************/
 void command_cmd_M_TSIV1()
 {
-	
+	command_ans_common0();
 }
 
 /******************************************************************************/
 void command_cmd_M_TSOV2()
 {
-	
+	command_ans_common0();
 }
 
 /******************************************************************************/
 void command_cmd_M_PTR_R()
 {
-	
+	command_utility_SetSpeedPeriod();         		  
+	UART_SwitchSpeed(trm_rate);
 }
 
 /******************************************************************************/
 void command_cmd_M_PTR_W()
 {
-	
+	command_utility_SetSpeedPeriod();         		  
+	UART_SwitchSpeed(trm_rate);
 }
 
 /******************************************************************************/
 void command_cmd_M_DAT_R()
 {
-	
+	command_utility_SetSpeedPeriod();         		  
+	UART_SwitchSpeed(trm_rate);
 }
 
 /******************************************************************************/
 void command_cmd_M_DAT_W()
 {
-	
+	command_utility_SetSpeedPeriod();         		  
+	UART_SwitchSpeed(trm_rate);
 }
 
 /******************************************************************************/
 void command_cmd_M_BUF_R()
 {
-	
+	//
 }
 
 /******************************************************************************/
@@ -172,7 +183,7 @@ void command_cmd_M_CTL_M()
 /******************************************************************************/
 void command_cmd_M_FME_E()
 {
-	
+	//erase flash
 }
 
 /******************************************************************************/
@@ -183,24 +194,34 @@ void command_cmd_M_FME_E()
 /**
     answer
 */
-void command_ans_common()
+void command_ans_common0()
 {
-	
+	num_of_par = 2;
+	COMMAND_UTILITY_ANSWER_FIELD(0,&num_of_par,2);//TODO
+	COMMAND_UTILITY_ANSWER_FIELD(1,&line_err,2);
+	trm_ena = 1;
+}
+
+void command_ans_common1()
+{
+	num_of_par = 2;
+	COMMAND_UTILITY_ANSWER_FIELD(0,&num_of_par,2);
+	COMMAND_UTILITY_ANSWER_FIELD(1,&line_err,2);
+	trm_ena = 1;
 }
 
 void command_ans_m_status()
 {
-	num_of_par = 2;
-	COMMAND_UTILITY_ANSWER_FIELD(0,&blt_in_test,2);
-	COMMAND_UTILITY_ANSWER_FIELD(1,&line_err,2);
-	trm_ena = 1;
+	//num_of_par = 1;
+	//COMMAND_UTILITY_ANSWER_FIELD(0,&blt_in_test,2);
+	//trm_ena = 1;
 }
 
 /******************************************************************************/
 
 void command_ans_WRK_PC()
 {
-	
+	//nothing
 }
 
 /******************************************************************************/
@@ -236,7 +257,7 @@ void command_ans_M_DCNF()
 /******************************************************************************/
 void command_ans_M_CLEAR()
 {
-	
+	command_ans_m_status();
 }
 
 /******************************************************************************/

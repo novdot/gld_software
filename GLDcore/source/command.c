@@ -211,5 +211,23 @@ end:
     rcv_Rdy = 0;
 }
 
+/******************************************************************************/
+//e procedure of set of rate and periodicity of answer 
+void command_utility_SetSpeedPeriod(void)
+{
+	//e. is periodic data transmission needed? 
+	if ((rcv_buf[3] & 0x0080) != 0)  {
+        //e. yes, set present flag 
+		trm_cycl = 1;
+	} else {  
+        //e. no, reset present flag
+		trm_cycl = 0; 
+	}
+	//e. clear the bit of transfer rate
+	SRgR &= 0xffcf;
+	trm_rate = (rcv_buf[3] >> 1) & 0x0030;
+    //e. set present transfer rate
+	SRgR |= trm_rate;
+} // SetSpeedPeriod
 
 /******************************************************************************/

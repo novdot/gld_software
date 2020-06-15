@@ -16,6 +16,7 @@
 #include "bootloader/command_bootloader.h"
 #include "hardware/hardware.h"
 #include "core/config.h"
+#include "core/global.h"
 /******************************************************************************/
 //инициализируем периферию для прошивки
 void init()
@@ -32,6 +33,9 @@ void init()
     SystemCoreClockUpdate();
     //e. initialization of UART on 38400
     UART_Init(CONFIG_COMMANDS_BAUDRATE);
+    
+    //e. initialize DMA channel for UART
+    uart_dma_init(trm_buf);
 }
 
 /******************************************************************************/

@@ -60,6 +60,12 @@
 x_bool_t check_lcc(x_uint8_t* a_pBuffer,x_uint32_t a_uCount);
 
 /**
+    @brief procedure of set of rate and periodicity of answer 
+    @return 
+*/
+void command_utility_SetSpeedPeriod(void);
+
+/**
     @brief чтение пакета информации из периферии и сохранение в буффер
     @return 
 */

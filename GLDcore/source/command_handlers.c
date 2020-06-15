@@ -30,21 +30,6 @@
 #include "CyclesSync.h"
 #include "Parameters.h"
 
-/******************************************************************************/
-//e procedure of set of rate and periodicity of answer 
-void command_utility_SetSpeedPeriod(void)
-{
-	//e. is periodic data transmission needed? 
-	if ((rcv_buf[3] & 0x0080) != 0)  {
-		trm_cycl = 1;		//e. yes, set present flag 
-	} else {  
-		trm_cycl = 0;		//e. no, reset present flag 
-	}
-	
-	SRgR &= 0xffcf;				//e. clear the bit of transfer rate
-	trm_rate = (rcv_buf[3] >> 1) & 0x0030;
-	SRgR |= trm_rate; 			//e. set present transfer rate
-} // SetSpeedPeriod
 
 /******************************************************************************/
 void command_handle(void)
