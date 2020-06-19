@@ -16,6 +16,7 @@
   */
 #include "core/command.h"
 #include "core/global.h"
+#include "bootloader/global.h"
 #include "hardware/hardware.h"
 
 //TODO
@@ -100,7 +101,9 @@ void command_recieve(void)
 			}
 	}
 	//e. checksum is bad 
-	if (command_check_lcc(rcv_buf,rcv_num_byt) == _x_false){ 
+	if (command_check_lcc(rcv_buf,rcv_num_byt) == _x_false){
+        
+    hardware_backlight_on();
         return;
 	} else {
 		rcv_Rdy = 1;	  	

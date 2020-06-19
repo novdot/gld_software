@@ -14,9 +14,11 @@
  запроса и адреса ответа.
 * */
 #include "bootloader/command_bootloader.h"
+#include "bootloader/global.h"
 #include "hardware/hardware.h"
 #include "core/config.h"
 #include "core/global.h"
+
 /******************************************************************************/
 //инициализируем периферию для прошивки
 void init()
@@ -36,6 +38,9 @@ void init()
     
     //e. initialize DMA channel for UART
     uart_dma_init(trm_buf);
+    
+    //initialize software values
+    global_bootloader_init();
 }
 
 /******************************************************************************/

@@ -2,6 +2,7 @@
 #define __COMMAND_BOOTLOADER_H_INCLUDE__
 
 #include "core/command.h"
+#include "bootloader/global.h"
 
 /******************************************************************************/
 #define  CMD_WRK_PC      0x0f0f //e. the code of the Wrk_PC comman 
@@ -68,7 +69,7 @@ void command_ans_M_CLEAR();
 void command_ans_M_MIRR();
 void command_ans_M_TSIV1();
 void command_ans_M_TSOV2();
-void command_ans_M_PTR_R();
+void command_ans_M_PTR_R(x_uint32_t data);
 void command_ans_M_PTR_W();
 void command_ans_M_DAT_R();
 void command_ans_M_DAT_W();

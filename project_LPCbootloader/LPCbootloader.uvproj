@@ -444,6 +444,11 @@
               <FileType>1</FileType>
               <FilePath>..\GLDbootloader\source\command_bootloader.c</FilePath>
             </File>
+            <File>
+              <FileName>global.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\GLDbootloader\source\global.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

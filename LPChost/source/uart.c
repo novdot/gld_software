@@ -100,7 +100,22 @@ void UART1_Init(x_uint32_t baudrate)
     LPC_PINCON->PINSEL4 |= (2 << 0); /* Pin P2.0 used as TXD0 (Com0) */
     LPC_PINCON->PINSEL4 |= (2 << 2); /* Pin P2.1 used as RXD0 (Com0) */
     
-    pclk = SystemCoreClock/4;
+    //pclk = SystemCoreClock/4;
+
+    switch( (LPC_SC->PCLKSEL0 >> 6) & 0x03 ) {
+        case 0x00:
+            pclk = SystemCoreClock/4;
+            break;
+        case 0x01:
+            pclk = SystemCoreClock;
+            break; 
+        case 0x02:
+            pclk = SystemCoreClock/2;
+            break; 
+        case 0x03:
+            pclk = SystemCoreClock/8;
+            break;
+    }    
     
     usFdiv = ((FPCLK  / 16) / baudrate) +1; 
     Fdiv = (pclk / 16) / baudrate; 
