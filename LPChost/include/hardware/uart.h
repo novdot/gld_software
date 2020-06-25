@@ -189,6 +189,13 @@
 #define Sp460800			0x00020
 #define Sp921600			0x00030
 
+typedef enum uart_baudrate_speedDef{
+    _uart_baudrate_38400 = 0
+    , _uart_baudrate_115200 = 1
+    , _uart_baudrate_460800 = 2
+    , _uart_baudrate_921600 = 3
+}uart_baudrate_speed;
+
 /******************************************************************************
 ** Function name:		UARTInit
 **

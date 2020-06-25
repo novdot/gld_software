@@ -99,6 +99,8 @@ void UART1_Init(x_uint32_t baudrate)
      
     LPC_PINCON->PINSEL4 |= (2 << 0); /* Pin P2.0 used as TXD0 (Com0) */
     LPC_PINCON->PINSEL4 |= (2 << 2); /* Pin P2.1 used as RXD0 (Com0) */
+    LPC_PINCON->PINSEL4 |= (2 << 10);
+    LPC_PINCON->PINSEL4 |= (2 << 14);
     
     //pclk = SystemCoreClock/4;
 
@@ -122,15 +124,16 @@ void UART1_Init(x_uint32_t baudrate)
 
     LPC_UART1->LCR  = word_length_8 |one_stop_bit |no_parity |back_trans_dis |DLAB_access;                         
     //LPC_UART1->LCR  = 0x83; 
-    LPC_UART1->DLM  = usFdiv / 256;
-    LPC_UART1->DLL  = usFdiv % 256; 
+    LPC_UART1->DLM  = Fdiv / 256;
+    LPC_UART1->DLL  = Fdiv % 256; 
     LPC_UART1->LCR  &= ~DLAB_access;
     //LPC_UART1->LCR  = 0x03;    
     LPC_UART1->FCR  = TX_FIFO_Reset |RX_FIFO_Reset |FIFOs_En |RX_TrigLvl_14;
 	//LPC_UART1->FCR  = 0x07; 
     LPC_UART1->IER = 0;//RBR_IntEnabl;
 
-	//LPC_UART1->RS485CTRL = (1<<5);
+    //так как на этой линии используется MAX3294 доп пин TXE нужно установить в 3.3В
+	LPC_UART1->RS485CTRL = (1<<5);
 
     //e. DMA mode select 
 	LPC_UART1->FCR |= 0x08;  				
@@ -331,21 +334,21 @@ void UART_SwitchSpeed(unsigned Speed)
 	LPC_UART0->LCR |= DLAB_access;
 #endif //UART1REC
 	switch (Speed) {
-		case Sp38400:
+		case _uart_baudrate_38400:
             Fdiv = (pclk / 16) / 38400; 
             EnablLength = 3240;
             break;
 
-		case Sp115200:
+		case _uart_baudrate_115200:
             Fdiv = (pclk / 16) /115200; 
             EnablLength = 1090;
             break;
 
-		case Sp460800:
+		case _uart_baudrate_460800:
             Fdiv = (pclk / 16) / 460800; 		 
             break;
 
-		case Sp921600:
+		case _uart_baudrate_921600:
             Fdiv = (pclk / 16) / 921600; 
             EnablLength = 140;
             break;
