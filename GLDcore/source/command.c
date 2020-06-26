@@ -102,8 +102,7 @@ void command_recieve(void)
 	}
 	//e. checksum is bad 
 	if (command_check_lcc(rcv_buf,rcv_num_byt) == _x_false){
-        
-    hardware_backlight_on();
+        //hardware_backlight_on();
         return;
 	} else {
 		rcv_Rdy = 1;	  	
@@ -131,6 +130,22 @@ void command_transm(void)
     trm_buf[0] = 0x00dd; //e. header of answering packet 
     trm_buf[1] = Device_blk.Str.My_Addres; //e. own device address       
     CRC = trm_buf[1]; //e. initialization of CRC counter   
+    
+    /*trm_buf[trm_num_byt] = 0x55;
+    CRC += trm_buf[trm_num_byt]; 
+    trm_num_byt++;
+    
+    trm_buf[trm_num_byt] = 0x01;
+    CRC += trm_buf[trm_num_byt]; 
+    trm_num_byt++;
+    
+    trm_buf[trm_num_byt] = 0x02;
+    CRC += trm_buf[trm_num_byt]; 
+    trm_num_byt++;
+    
+    trm_buf[trm_num_byt] = 0x03;
+    CRC += trm_buf[trm_num_byt]; 
+    trm_num_byt++;*/
     
     for ( param = 0; param < num_of_par; param++) //e. data block creation cycle 
     {		  		  	
@@ -222,7 +237,7 @@ void command_utility_SetSpeedPeriod(void)
 	if ((rcv_buf[3] & 0x0080) != 0)  {
         //e. yes, set present flag 
 		trm_cycl = 1;
-	} else {  
+	} else {
         //e. no, reset present flag
 		trm_cycl = 0; 
 	}
@@ -231,6 +246,16 @@ void command_utility_SetSpeedPeriod(void)
 	trm_rate = (rcv_buf[3] >> 1) & 0x0030;
     //e. set present transfer rate
 	SRgR |= trm_rate;
+    //уберем 4 разряда чтобы получить полноценный код
+    trm_rate = trm_rate>>4;
 } // SetSpeedPeriod
 
 /******************************************************************************/
+void command_echo(void)
+{
+    int delay = 10000;
+    int idelay = 0;
+    uart_recieve(rcv_buf,&rcv_num_byt);
+    uart_transm( rcv_num_byt, Device_Mode, rcv_buf);
+    for(idelay=0;idelay<delay;idelay++) {}
+}

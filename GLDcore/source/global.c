@@ -23,7 +23,7 @@ x_uint32_t trm_ena;
 x_uint32_t num_of_par;
 x_uint8_t trm_buf[64];
 
-void* addr_param[16];
+x_uint32_t* addr_param[16];
 x_uint32_t size_param[16];
 x_uint32_t line_err;
 x_uint32_t line_sts;

@@ -141,7 +141,7 @@ void command_cmd_M_PTR_R()
     //читаем что за указатель к нам пришел
     params.word = rcv_buf[3]&0x1F;
     
-    
+    //запишем в нужный контейнер
     switch(params.bit.code) {
         case BOOTLOADER_PTR_CODE_JUMP : 
             data = g_bootloader.ptr.nPtrJump; 
@@ -373,8 +373,14 @@ void command_ans_M_TSOV2()
 }
 
 /******************************************************************************/
+int par0 = 0x55;
+int par1 = 0x01;
+int par2 = 0x02;
+int par3 = 0x03;
+
 void command_ans_M_PTR_R(x_uint32_t data)
 {
+    //hardware_backlight_on();
     g_bootloader.cmd.nCmdCodeH = (rcv_buf[2]&0xFF);
     g_bootloader.cmd.send_data_ptr[0] = (data>>0)&0xff;
     g_bootloader.cmd.send_data_ptr[1] = (data>>8)&0xff;

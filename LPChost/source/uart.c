@@ -320,7 +320,7 @@ void UART_SwitchSpeed(unsigned Speed)
 {
     uint32_t Fdiv;
     uint32_t pclk;
-   
+
     /*
     Переключение скорости только при настройке
     модуля по умолчанию
@@ -352,7 +352,6 @@ void UART_SwitchSpeed(unsigned Speed)
             Fdiv = (pclk / 16) / 921600; 
             EnablLength = 140;
             break;
-
 	}
 #if defined UART1REC	           
     LPC_UART1->DLM  = Fdiv / 256;

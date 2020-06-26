@@ -33,6 +33,7 @@ void init()
     
     //e. to calculate SystemCoreClock  for UART particularly
     SystemCoreClockUpdate();
+    
     //e. initialization of UART on 38400
     UART_Init(CONFIG_COMMANDS_BAUDRATE);
     
@@ -47,9 +48,13 @@ void init()
 //основной цикл. ждем подключения, если нет - переключаемся на основную программу
 void loop()
 {
+    /**/
     command_recieve();
     command_decode();
     command_transm();
+    /**
+    command_echo();
+    /**/
 }
 
 /******************************************************************************/

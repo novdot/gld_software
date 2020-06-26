@@ -36,9 +36,9 @@ typedef struct bootloader_ptrDef{
 }bootloader_ptr;
 
 typedef struct bootloader_cmdDef{
-    x_uint8_t send_data_ptr[3]; //< указатель на отправку
-    x_uint8_t nCmdCodeH; //< код комманды
-    x_uint8_t nCmdCodeL; //< 2ая часть кода команды
+    x_uint32_t send_data_ptr[3]; //< указатель на отправку
+    x_uint32_t nCmdCodeH; //< код комманды
+    x_uint32_t nCmdCodeL; //< 2ая часть кода команды
 }bootloader_cmd;
 
 typedef struct bootloader_globalDef{

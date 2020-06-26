@@ -45,7 +45,7 @@ extern x_uint8_t rcv_buf[64];
 extern x_uint8_t rcv_copy[64];
 
 extern x_uint32_t num_of_par;
-extern void* addr_param[16];
+extern x_uint32_t* addr_param[16]; //void*
 extern x_uint32_t size_param[16];
 extern x_uint32_t trm_rate;
 
