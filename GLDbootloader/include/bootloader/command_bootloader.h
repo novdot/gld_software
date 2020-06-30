@@ -5,6 +5,32 @@
 #include "bootloader/global.h"
 
 /******************************************************************************/
+//e.errors of command execution of the Host-computer
+//r.ошибки выпо~нения команд Host-компьютера
+#define  C_Line_Err     0x0020           //r. ошибка кана~а связи      
+#define  C_PBfL_Err      0x0040          //r. указате~ь буфера меньше нача~ьного адреса буфера
+#define  C_PBfH_Err      0x0060          //r. указате~ь буфера бо~ьше пос~еднего адреса буфера
+#define  C_BDMA_Err      0x0080          //r. ошибка обмена с внешней памятью
+#define  C_Flsh_Err      0x00a0          //r. ошибка операции ф~эш-памяти
+#define  C_TimO_Err      0x00c0          //r. максима~ьное чис~о попыток обращения достигнуто
+#define  C_NoCm_Err      0x00e0          //r. данная команда не поддерживается
+
+//e.errors of the communication channel with Host-computer
+//r.ошибки кана~а связи с Host-компьютером
+#define  Strt_Err        0x0080          //r. ошибка старт-бита
+#define  Stop_Err        0x0040          //r. ошибка стоп-бита
+#define  Size_Err        0x0004          //r. размер принятого пакета не соответствует сог~ашению
+#define  LCC_Err         0x0002          //r. не совпа~а контро~ьная сумма
+#define  NoCMD_Err       0x0100          //r. в принятом пакете нет признака команды
+#define  Code_Err        0x0200          //r. неизвестный код команды
+#define  Mode_Err        0x0400          //r. код команды не соответствует текущему режиму
+#define  Prmt_Err        0x0800          //r. неверно заданные параметры команды
+#define  MxSz_Err        0x1000          //r. перепо~нение буфера приемника
+#define  Addr_Err        0x2000          //r. неверный адрес устройства
+#define  Read_Err        0x4000          //r. останов связи несвоевременным чтением данных
+#define  WAsq_Err        0x8000          //r. ошибка ожидания достоверного ответа
+
+/******************************************************************************/
 #define  CMD_WRK_PC      0x0f0f //e. the code of the Wrk_PC comman 
 #define  CMD_MAINT       0x9999 //e. the code of the Maintenance mode command 
 
@@ -75,8 +101,8 @@ void command_ans_M_DAT_R();
 void command_ans_M_DAT_W();
 void command_ans_M_BUF_R();
 void command_ans_M_BUF_W();
-void command_ans_M_CTL_R();
-void command_ans_M_CTL_M();
+void command_ans_M_CTL_R(x_uint16_t*preg);
+void command_ans_M_CTL_M(x_uint16_t*preg);
 void command_ans_M_FME_E();
 
 #endif//__COMMAND_BOOTLOADER_H_INCLUDE__

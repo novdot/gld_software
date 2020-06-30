@@ -11,12 +11,15 @@ void command_handle()
 {
 	x_uint32_t uCmdCode = 0;
     x_uint32_t uCmdCodeLong = 0;
+    char dbg[64];
 
     uCmdCode = (rcv_buf[2] & 0xFF) << 8;
     CMD_Code = uCmdCode | (rcv_buf[3] & 0xFF);
     
     //e. initialization of the flag of copying of receiving buffer
 	rx_buf_copy = 1;
+    
+    DBG0(dbg,64,"command_handle");
     
     switch(uCmdCode){
 		case  CMD_M_PTR_R    :   command_cmd_M_PTR_R();  return;
@@ -214,9 +217,9 @@ void command_cmd_M_PTR_W()
             g_bootloader.ptr.nPtrDev2 = data; 
         break;
     }
-    command_ans_common();
+    //command_ans_common();
     //формируем ответ
-    //command_ans_M_PTR_W();
+    command_ans_M_PTR_W();
 }
 
 /******************************************************************************/
@@ -248,13 +251,53 @@ void command_cmd_M_BUF_W()
 /******************************************************************************/
 void command_cmd_M_CTL_R()
 {
-	
+    int regType = 0;
+    x_uint16_t reg = 0;
+    
+    g_bootloader.cmd.nCmdCodeH = (rcv_buf[2]&0xFF);
+    g_bootloader.cmd.nCmdCodeL = (rcv_buf[3]&0xFF);
+    
+    //бит выбора регистра
+    regType = (g_bootloader.cmd.nCmdCodeL>>4) & 0x1 ;
+    switch(regType){
+    case 0:
+        reg = g_gld.RgConA.word;
+        break;
+    case 1:
+        reg = g_gld.RgConB.word;
+        break;
+    }
+	command_ans_M_CTL_R(reg);
 }
 
 /******************************************************************************/
 void command_cmd_M_CTL_M()
 {
-	
+    int regType = 0;
+    int regBitInd = 0;
+    int regBitVal = 0;
+    x_uint16_t reg = 0;
+    
+    g_bootloader.cmd.nCmdCodeH = (rcv_buf[2]&0xFF);
+    g_bootloader.cmd.nCmdCodeL = (rcv_buf[3]&0xFF);
+    
+    //бит выбора регистра
+    regType = (g_bootloader.cmd.nCmdCodeL>>4) & 0x1 ;
+    switch(regType){
+    case 0:
+        reg = g_gld.RgConA.word;
+        break;
+    case 1:
+        reg = g_gld.RgConB.word;
+        break;
+    }
+    //перепишем бит
+    regBitInd = g_bootloader.cmd.nCmdCodeL & 0xF;
+    regBitVal = g_bootloader.cmd.nCmdCodeL>>7;
+    
+    //TODO
+    
+	command_ans_M_CTL_M(reg);
 }
 
 /******************************************************************************/
@@ -291,6 +334,7 @@ void command_ans_common0()
 /******************************************************************************/
 void command_ans_common1()
 {
+    char dbg[64];
     //take cmd 
     g_bootloader.cmd.nCmdCodeH = (rcv_buf[2]&0xFF);
     g_bootloader.cmd.nCmdCodeL = (rcv_buf[3]&0xFF);
@@ -298,8 +342,8 @@ void command_ans_common1()
     g_bootloader.cmd.nCmdCodeL &= 0x1F;//TODO add error code
     
 	num_of_par = 2;
-	COMMAND_UTILITY_ANSWER_FIELD(0,&g_bootloader.cmd.nCmdCodeH,1);
-	COMMAND_UTILITY_ANSWER_FIELD(1,&g_bootloader.cmd.nCmdCodeL,1);
+	COMMAND_UTILITY_ANSWER_FIELD(0,&(g_bootloader.cmd.nCmdCodeH),1);
+	COMMAND_UTILITY_ANSWER_FIELD(1,&(g_bootloader.cmd.nCmdCodeL),1);
 	trm_ena = 1;
 }
 
@@ -373,45 +417,25 @@ void command_ans_M_TSOV2()
 }
 
 /******************************************************************************/
-int par0 = 0x55;
-int par1 = 0x01;
-int par2 = 0x02;
-int par3 = 0x03;
-
 void command_ans_M_PTR_R(x_uint32_t data)
 {
-    //hardware_backlight_on();
     g_bootloader.cmd.nCmdCodeH = (rcv_buf[2]&0xFF);
     g_bootloader.cmd.send_data_ptr[0] = (data>>0)&0xff;
     g_bootloader.cmd.send_data_ptr[1] = (data>>8)&0xff;
     g_bootloader.cmd.send_data_ptr[2] = (data>>16)&0xff;
     
-    g_bootloader.cmd.nCmdCodeH = 0x55;
-    g_bootloader.cmd.send_data_ptr[0] = 0x01;
-    g_bootloader.cmd.send_data_ptr[1] = 0x02;
-    g_bootloader.cmd.send_data_ptr[2] = 0x03;
-    
     num_of_par = 4;
 	COMMAND_UTILITY_ANSWER_FIELD(0,&(g_bootloader.cmd.nCmdCodeH),1);
-	COMMAND_UTILITY_ANSWER_FIELD(1,&(g_bootloader.cmd.send_data_ptr[0]),1);
+	COMMAND_UTILITY_ANSWER_FIELD(1,&(g_bootloader.cmd.send_data_ptr[2]),1);
 	COMMAND_UTILITY_ANSWER_FIELD(2,&(g_bootloader.cmd.send_data_ptr[1]),1);
-	COMMAND_UTILITY_ANSWER_FIELD(3,&(g_bootloader.cmd.send_data_ptr[2]),1);
+	COMMAND_UTILITY_ANSWER_FIELD(3,&(g_bootloader.cmd.send_data_ptr[0]),1);
 	trm_ena = 1;
 }
 
 /******************************************************************************/
 void command_ans_M_PTR_W()
 {
-    g_bootloader.cmd.nCmdCodeH = (rcv_buf[2]&0xFF);
-    //take cmd 
-    g_bootloader.cmd.nCmdCodeL = (rcv_buf[3] & 0xFF);
-    //clear error code
-    g_bootloader.cmd.nCmdCodeL &= 0x1F; //TODO add error code
-    
-    num_of_par = 2;
-	COMMAND_UTILITY_ANSWER_FIELD(0,&g_bootloader.cmd.nCmdCodeH,1);
-	COMMAND_UTILITY_ANSWER_FIELD(1,&g_bootloader.cmd.nCmdCodeL,1);
-	trm_ena = 1;
+    command_ans_common1();
 }
 
 /******************************************************************************/
@@ -439,15 +463,29 @@ void command_ans_M_BUF_W()
 }
 
 /******************************************************************************/
-void command_ans_M_CTL_R()
+void command_ans_M_CTL_R(x_uint16_t*preg)
 {
-	
+    //сбросить в нем поля ошибок и номера бита
+    g_bootloader.cmd.nCmdCodeL &= (0x10); 
+    
+    num_of_par = 3;
+	COMMAND_UTILITY_ANSWER_FIELD(0,&(g_bootloader.cmd.nCmdCodeH),1);
+	COMMAND_UTILITY_ANSWER_FIELD(1,&(g_bootloader.cmd.nCmdCodeL),1);
+	COMMAND_UTILITY_ANSWER_FIELD(2,preg,2);
+	trm_ena = 1;
 }
 
 /******************************************************************************/
-void command_ans_M_CTL_M()
+void command_ans_M_CTL_M(x_uint16_t*preg)
 {
-	
+    //сбросить в нем поля ошибок и номера бита
+    g_bootloader.cmd.nCmdCodeL &= (0x10); 
+    
+    num_of_par = 3;
+	COMMAND_UTILITY_ANSWER_FIELD(0,&(g_bootloader.cmd.nCmdCodeH),1);
+	COMMAND_UTILITY_ANSWER_FIELD(1,&(g_bootloader.cmd.nCmdCodeL),1);
+	COMMAND_UTILITY_ANSWER_FIELD(2,(preg),2);
+	trm_ena = 1;
 }
 
 /******************************************************************************/

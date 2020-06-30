@@ -19,6 +19,7 @@
 #include "core/config.h"
 #include "core/global.h"
 
+bootloader_global g_bootloader;
 /******************************************************************************/
 //инициализируем периферию для прошивки
 void init()
@@ -49,7 +50,7 @@ void init()
 void loop()
 {
     /**/
-    command_recieve();
+    command_recieve(_command_recieve_flag_bootloader);
     command_decode();
     command_transm();
     /**

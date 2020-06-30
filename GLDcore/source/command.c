@@ -22,100 +22,174 @@
 //TODO
 #include "CyclesSync.h"
 
+
+void command_recieve_gld();
+void command_recieve_bootloader();
 /******************************************************************************/
 x_bool_t command_check_lcc(x_uint8_t* a_pBuffer,x_uint32_t a_uCount)
 {
 	int iCRC_calc = 0;
 	int CRC_calc = 0;
 	int CRC_real = 0;
+    char dbg[64];
 
 	for (iCRC_calc = 1; iCRC_calc < (a_uCount-2); iCRC_calc++)
 		CRC_calc += a_pBuffer[iCRC_calc];  
 
 	CRC_real = (a_pBuffer[a_uCount-2] << 8) | a_pBuffer[a_uCount-1];
 
-	if( (CRC_real - CRC_calc) == 0) return _x_true;
-	else return _x_false;
+	if( (CRC_real - CRC_calc) == 0) {
+        return _x_true;
+    } else {
+        DBG2(dbg,64,"command_check_lcc FAILED! real:0x%02X calc:0x%02X",CRC_real,CRC_calc);
+        return _x_false;
+    }
 }
 /******************************************************************************/
-void command_recieve(void)
-{ 
-	static int ToWaitEnd, ErrReg ;
-
-	uart_recieve(rcv_buf,&rcv_num_byt);
+void command_recieve_gld()
+{
+    static int ToWaitEnd, ErrReg ;
     
-	//e. end part of packet is absent
+    //e. end part of packet is absent
 	if (( ToWaitEnd > 25000)) {
-			do rcv_buf[--rcv_num_byt] = 0;
-			while(rcv_num_byt);
-			
-			rcv_num_byt_old = rcv_num_byt;
-			uart_recieve_reset();
-			ToWaitEnd = 0;
-			return;
+        do rcv_buf[--rcv_num_byt] = 0;
+        while(rcv_num_byt);
+        
+        rcv_num_byt_old = rcv_num_byt;
+        uart_recieve_reset();
+        ToWaitEnd = 0;
+        return;
 	}
 	//e. we have not received any new bytes
 	if (rcv_num_byt_old == rcv_num_byt) { 
-			if (ToWaitEnd) ToWaitEnd++;
-			return;
+        if (ToWaitEnd) ToWaitEnd++;
+        return;
 	}
 	rcv_num_byt_old = rcv_num_byt;
-
-	if ((rcv_num_byt < 6) || ((rcv_num_byt & 0x0001) == 1)) {
-			ToWaitEnd++;
-			return;
-	}
-
-	//e. the header of packet has not recieved
-	if ((!ToWaitEnd) && (rcv_num_byt > 1))
-			if (
-					(rcv_buf[0] != 0xCC) 
-					|| (( rcv_buf[1] > 2) && ( rcv_buf[1] != 0x1F))
-			) {   
-					//	L1_Rc_err (HEADER_ERR);
-					ErrReg |= 5;
-					ToWaitEnd++;
-					return;
-			}
-	//  if (ErrReg != 0)	//e. trying of recovering of packet 
-	//	  PacketSafing();
-
-
-	if (rcv_num_byt == 6) {	 
-			if (
-					(rcv_buf[2] == 0x0A) 
-					|| (rcv_buf[2] == 0xE0) 
-					|| (rcv_buf[2] == 0xE4) 
-					|| (rcv_buf[2] == 0xE6) 
-					|| (rcv_buf[2] == 0xE8)
-			) {
-					//e. packet length is not valid, so we have the error 
-					ToWaitEnd++; 	
-					return;
-			}
-
-	} else  if (rcv_num_byt == 8) {
-			if ((rcv_buf[2] == 0xE0) || (rcv_buf[2] == 0xE4)) {
-					ToWaitEnd++;
-					return;
-			}
-	}
-	//e. checksum is bad 
+    
+    if ((rcv_num_byt < 6) || ((rcv_num_byt & 0x0001) == 1)) {
+        ToWaitEnd++;
+        return;
+    }
+    //e. the header of packet has not recieved
+    if ((!ToWaitEnd) && (rcv_num_byt > 1))
+        if (
+                (rcv_buf[0] != 0xCC) 
+                || (( rcv_buf[1] > 2) && ( rcv_buf[1] != 0x1F))
+        ) {   
+            ErrReg |= 5; //L1_Rc_err (HEADER_ERR); NoCMD_Err
+            ToWaitEnd++;
+            return;
+        }
+    //
+    if (rcv_num_byt == 6) {	 
+        if (
+            (rcv_buf[2] == 0x0A) 
+            || (rcv_buf[2] == 0xE0) 
+            || (rcv_buf[2] == 0xE4) 
+            || (rcv_buf[2] == 0xE6) 
+            || (rcv_buf[2] == 0xE8)
+        ) {
+            //e. packet length is not valid, so we have the error 
+            ToWaitEnd++; 	
+            return;
+        }
+    } else  if (rcv_num_byt == 8) {
+        if ((rcv_buf[2] == 0xE0) || (rcv_buf[2] == 0xE4)) {
+            ToWaitEnd++;
+            return;
+        }
+    }
+    //e. checksum is bad 
 	if (command_check_lcc(rcv_buf,rcv_num_byt) == _x_false){
-        //hardware_backlight_on();
+        ToWaitEnd++;
         return;
 	} else {
 		rcv_Rdy = 1;	  	
 	}
 	ToWaitEnd = 0;
-
+}
+/******************************************************************************/
+void command_recieve_bootloader()
+{
+    static int ToWaitEnd, ErrReg ;
+    char dbg[64];
+    
+    //e. end part of packet is absent
+	if (( ToWaitEnd > 25000)) {
+        do rcv_buf[--rcv_num_byt] = 0;
+        while(rcv_num_byt);
+        
+        rcv_num_byt_old = rcv_num_byt;
+        uart_recieve_reset();
+        ToWaitEnd = 0;
+        DBG0(dbg,64,"end part of packet is absent");
+        return;
+	}
+    //e. we have not received any new bytes
+	if (rcv_num_byt_old == rcv_num_byt) { 
+        if (ToWaitEnd) ToWaitEnd++;
+        return;
+	}
+	rcv_num_byt_old = rcv_num_byt;
+    
+    
+    //проверим размеры команд. если не подходит - ждем корректную команду
+    if(
+        (rcv_num_byt == 6)
+        ||(rcv_num_byt == 8)
+        ||(rcv_num_byt == 9)
+        ||(rcv_num_byt == 22)
+        ||(rcv_num_byt == 30)
+        ||(rcv_num_byt == 134)
+    ){
+    } else if(rcv_num_byt>134) {
+        //TODO ошибка - нестандартный размер
+        ToWaitEnd++;
+        return;
+    } else {
+        //ждем
+        ToWaitEnd++;
+        return;
+    }
+    //проверим LCC
+    if (command_check_lcc(rcv_buf,rcv_num_byt) == _x_false){
+        //LCC_Err 0x0002
+        ToWaitEnd++;
+        return;
+	} else {
+		rcv_Rdy = 1;	  	
+	}
+	ToWaitEnd = 0;
+}
+/******************************************************************************/
+void command_recieve(command_recieve_flag flag)
+{ 
+    char dbg[64];
+    
+	uart_recieve(rcv_buf,&rcv_num_byt);
+    
+    switch(flag){
+    case _command_recieve_flag_gld:
+        command_recieve_gld();
+        break;
+        
+    case _command_recieve_flag_bootloader:
+        command_recieve_bootloader();
+        break;
+    
+    default:
+        break;
+    }
+	
 	return;
 } 
 /******************************************************************************/
 void command_transm(void)
 {
     x_uint32_t param, param_byte, CRC; 
-    x_int32_t *trans_param;		
+    x_int32_t *trans_param;	
+    char dbg[64];	
     
     //e. is transfer needed?  
     if (trm_ena == 0)										
@@ -147,15 +221,19 @@ void command_transm(void)
     CRC += trm_buf[trm_num_byt]; 
     trm_num_byt++;*/
     
-    for ( param = 0; param < num_of_par; param++) //e. data block creation cycle 
-    {		  		  	
-        trans_param = (int32_t *)addr_param[param]; //e. reading of current output parameter's address 	    
-
+    //e. data block creation cycle 
+    for ( param = 0; param < num_of_par; param++) {		  		  	
+        //e. reading of current output parameter's address 	    
+        trans_param = (int32_t *)addr_param[param]; 
+        
         for (param_byte = 0; param_byte < size_param[param]; param_byte++) {   
-            if ( (param_byte & 0x0001) == 0 ) //e.if we are reading MSB 
-                trm_buf[trm_num_byt] = (*trans_param >> (8)) & 0x00ff;	    	 //e. allocating of the current parameter in the packet 
-            else {
-                trm_buf[trm_num_byt] = *trans_param & 0x00ff;
+            if ( (param_byte & 0x0001) == 0 ) {
+                //e.if we are reading MSB
+                //e. allocating of the current parameter in the packet 
+                if(size_param[param]==2) trm_buf[trm_num_byt] = ( (*trans_param) >> (8)) & 0x00ff;
+                else if(size_param[param]==1) trm_buf[trm_num_byt] = ( (*trans_param) ) & 0x00ff;
+            }else {
+                trm_buf[trm_num_byt] = (*trans_param) & 0x00ff;
                 trans_param ++; //e. go to next memory cell         
             }
             CRC += trm_buf[trm_num_byt]; //e. current CRC calculation              

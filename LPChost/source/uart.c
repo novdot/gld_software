@@ -16,13 +16,6 @@ uint32_t LLI0_TypeDef[4];
 uint32_t LLI1_TypeDef[4];
 uint32_t EnablTx = 0x80;
 uint32_t EnablDMA = 0;
-/*
-Выбрать UART0REC или UART1REC
-в качестве периферии для реализации обмена
-*/
-//#define UART0REC
-#define UART1REC
-//#define UART2REC
 
 #if defined (UART1REC)
     #define CDESTADDR (UART1_DMA_TX_DST)
@@ -45,6 +38,10 @@ void UART_Init(x_uint32_t baudrate)
     UART1_Init(baudrate);
 #elif defined (UART2REC)
     UART2_Init(baudrate);
+#endif
+    
+#if defined(UART0DBG)
+    UART0_Init(38400);
 #endif
 }
 /******************************************************************************/
@@ -70,8 +67,11 @@ void UART0_Init(x_uint32_t baudrate)
     LPC_UART0->FCR  = TX_FIFO_Reset |RX_FIFO_Reset |FIFOs_En |RX_TrigLvl_14;
 	LPC_UART0->IER = 0;//RBR_IntEnabl;
 
+#if defined(UART0DBG)
+#elif defined(UART0REC)
     //e. DMA mode select 
-	LPC_UART0->FCR |= 0x08;  	
+	LPC_UART0->FCR |= 0x08; 
+#endif 	
     
 	// enable signal initialization
     /*LPC_PINCON->PINSEL1 &= ~0x0000C000;	//e. select P0.23 as general purpose
@@ -136,7 +136,10 @@ void UART1_Init(x_uint32_t baudrate)
 	LPC_UART1->RS485CTRL = (1<<5);
 
     //e. DMA mode select 
-	LPC_UART1->FCR |= 0x08;  				
+#if defined(UART1DBG)
+#elif defined(UART1REC)
+	LPC_UART1->FCR |= 0x08; 
+#endif 					
     return; 
 }
 
@@ -159,10 +162,19 @@ void UART2_Init(x_uint32_t baudrate)
 }
 
 /******************************************************************************/
-int UART0_SendByte(int ucData)
+int UART0_SendByte(char ucData)
 {
 	while (!(LPC_UART0->LSR & 0x20));
     return (LPC_UART0->THR = ucData);
+}
+/******************************************************************************/
+void UART0_SendString(char* ucData,int size)
+{
+    int iitem = 0;
+    for(iitem=0;iitem<size;iitem++) {
+        while (!(LPC_UART0->LSR & 0x20));
+        LPC_UART0->THR = ucData[iitem];
+    }
 }
 /******************************************************************************/
 int UART1_SendByte(int ucData)

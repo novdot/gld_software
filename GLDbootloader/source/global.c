@@ -1,6 +1,6 @@
 #include "bootloader/global.h"
 
-bootloader_global g_bootloader;
+
 
 /*****************************************************************************/
 void global_bootloader_init()
