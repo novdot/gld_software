@@ -252,7 +252,7 @@ void command_cmd_M_BUF_W()
 void command_cmd_M_CTL_R()
 {
     int regType = 0;
-    x_uint16_t reg = 0;
+    x_uint32_t reg = 0;
     
     g_bootloader.cmd.nCmdCodeH = (rcv_buf[2]&0xFF);
     g_bootloader.cmd.nCmdCodeL = (rcv_buf[3]&0xFF);
@@ -267,7 +267,7 @@ void command_cmd_M_CTL_R()
         reg = g_gld.RgConB.word;
         break;
     }
-	command_ans_M_CTL_R(reg);
+	command_ans_M_CTL_R(&reg);
 }
 
 /******************************************************************************/
@@ -276,7 +276,7 @@ void command_cmd_M_CTL_M()
     int regType = 0;
     int regBitInd = 0;
     int regBitVal = 0;
-    x_uint16_t reg = 0;
+    x_uint32_t reg = 0;
     
     g_bootloader.cmd.nCmdCodeH = (rcv_buf[2]&0xFF);
     g_bootloader.cmd.nCmdCodeL = (rcv_buf[3]&0xFF);
@@ -297,7 +297,7 @@ void command_cmd_M_CTL_M()
     
     //TODO
     
-	command_ans_M_CTL_M(reg);
+	command_ans_M_CTL_M(&reg);
 }
 
 /******************************************************************************/
@@ -463,7 +463,7 @@ void command_ans_M_BUF_W()
 }
 
 /******************************************************************************/
-void command_ans_M_CTL_R(x_uint16_t*preg)
+void command_ans_M_CTL_R(x_uint32_t*preg)
 {
     //сбросить в нем поля ошибок и номера бита
     g_bootloader.cmd.nCmdCodeL &= (0x10); 
@@ -476,7 +476,7 @@ void command_ans_M_CTL_R(x_uint16_t*preg)
 }
 
 /******************************************************************************/
-void command_ans_M_CTL_M(x_uint16_t*preg)
+void command_ans_M_CTL_M(x_uint32_t*preg)
 {
     //сбросить в нем поля ошибок и номера бита
     g_bootloader.cmd.nCmdCodeL &= (0x10); 

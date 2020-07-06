@@ -101,8 +101,8 @@ void command_ans_M_DAT_R();
 void command_ans_M_DAT_W();
 void command_ans_M_BUF_R();
 void command_ans_M_BUF_W();
-void command_ans_M_CTL_R(x_uint16_t*preg);
-void command_ans_M_CTL_M(x_uint16_t*preg);
+void command_ans_M_CTL_R(x_uint32_t*preg);
+void command_ans_M_CTL_M(x_uint32_t*preg);
 void command_ans_M_FME_E();
 
 #endif//__COMMAND_BOOTLOADER_H_INCLUDE__

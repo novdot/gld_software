@@ -586,7 +586,7 @@ void command_ans_device_status(void)
 void command_ans_DELTA_PS_EXEC(x_uint32_t paramTmpWord)
 {
     num_of_par = 2;
-    COMMAND_UTILITY_ANSWER_FIELD(0,&Output.Str.PS_dif,2);
+    COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint32_t*)&Output.Str.PS_dif,2);
     COMMAND_UTILITY_ANSWER_FIELD(1,&paramTmpWord,2);
     trm_ena = 1; 
 }
@@ -600,7 +600,7 @@ void command_ans_DELTA_PS()
 void command_ans_DELTA_BINS()
 {
 	num_of_par = 2;        			//e. 2 parameters output 
-	COMMAND_UTILITY_ANSWER_FIELD(0,&Output.Str.BINS_dif,4);
+	COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint32_t*)&Output.Str.BINS_dif,4);
 	//COMMAND_UTILITY_ANSWER_FIELD(1,&(g_gld.valid.word),1);
 	COMMAND_UTILITY_ANSWER_FIELD(1,&(Valid_Data),1);
 	//e. allow operation of the transmitter
@@ -611,11 +611,11 @@ void command_ans_DELTA_BINS()
 void command_ans_DELTA_SF()
 {
 	num_of_par = 5;
-	COMMAND_UTILITY_ANSWER_FIELD(0,&Output.Str.SF_dif,8);
+	COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint32_t*)&Output.Str.SF_dif,8);
 	COMMAND_UTILITY_ANSWER_FIELD(1,&Out_main_cycle_latch,4);
 	COMMAND_UTILITY_ANSWER_FIELD(2,&Out_T_latch,2);
-	COMMAND_UTILITY_ANSWER_FIELD(3,&Output.Str.WP_reg,2);	
-	COMMAND_UTILITY_ANSWER_FIELD(4,&Output.Str.Tmp_Out,12);
+	COMMAND_UTILITY_ANSWER_FIELD(3,(x_uint32_t*)&Output.Str.WP_reg,2);	
+	COMMAND_UTILITY_ANSWER_FIELD(4,(x_uint32_t*)&Output.Str.Tmp_Out,12);
 	trm_ena = 1;        			//e. allow operation of the transmitter
 }
 /******************************************************************************/
@@ -660,7 +660,7 @@ void command_ans_M_CTL_R()
 	
 	COMMAND_UTILITY_ANSWER_FIELD(0,&CMD_Code,2);
 	if ((rcv_buf[3] & (1 << 4)) == 0) {
-		COMMAND_UTILITY_ANSWER_FIELD(1,&g_gld.RgConA,2);
+		COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint32_t*)&g_gld.RgConA,2);
 	} else {
 		COMMAND_UTILITY_ANSWER_FIELD(1,&RgConB,2);
 	}
@@ -675,7 +675,7 @@ void command_ans_M_CTL_M()
 	
 	num_of_par = 2;        
 	COMMAND_UTILITY_ANSWER_FIELD(0,&CMD_Code,2);
-	COMMAND_UTILITY_ANSWER_FIELD(1,ptr,2);   
+	COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint32_t*)ptr,2);   
 	
 	//e. is main control register needed?
 	if ((CMD_Code & (1 << 4)) == 0) {
@@ -774,7 +774,7 @@ void command_ans_M_CLEAR()
 void command_ans_M_MIRR()
 {
 	num_of_par = 1;     //e. 1 parameter output 
-	addr_param[0] =  &rcv_copy;         //e. set the address of the receiving buffer 
+	addr_param[0] =  (x_uint32_t*)&rcv_copy;         //e. set the address of the receiving buffer 
 
 	//e. multiply the number of copied words on 2, since each 
 	//e. will be trasferred in two steps: first zero, and then 
@@ -812,20 +812,20 @@ void command_ans_M_RATE1()
 {
     num_of_par = 14;
 	
-    COMMAND_UTILITY_ANSWER_FIELD(0,&(Output.Str.Cnt_Pls),2);
-    COMMAND_UTILITY_ANSWER_FIELD(1,&(Output.Str.Cnt_Mns),2);
-    COMMAND_UTILITY_ANSWER_FIELD(2,&(Output.Str.Cnt_Dif),2);
-    COMMAND_UTILITY_ANSWER_FIELD(3,&(Output.Str.F_ras),2);//частота расщипления
-    COMMAND_UTILITY_ANSWER_FIELD(4,&(Output.Str.HF_reg),2);
-    COMMAND_UTILITY_ANSWER_FIELD(5,&(Output.Str.HF_dif),2);
+    COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint32_t*)&(Output.Str.Cnt_Pls),2);
+    COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint32_t*)&(Output.Str.Cnt_Mns),2);
+    COMMAND_UTILITY_ANSWER_FIELD(2,(x_uint32_t*)&(Output.Str.Cnt_Dif),2);
+    COMMAND_UTILITY_ANSWER_FIELD(3,(x_uint32_t*)&(Output.Str.F_ras),2);//частота расщипления
+    COMMAND_UTILITY_ANSWER_FIELD(4,(x_uint32_t*)&(Output.Str.HF_reg),2);
+    COMMAND_UTILITY_ANSWER_FIELD(5,(x_uint32_t*)&(Output.Str.HF_dif),2);
     COMMAND_UTILITY_ANSWER_FIELD(6,&(Output.Str.T_Vibro),2);
     COMMAND_UTILITY_ANSWER_FIELD(7,&(Output.Str.T_VB_pll),2);
     COMMAND_UTILITY_ANSWER_FIELD(8,&(Output.Str.L_Vibro),2);
-    COMMAND_UTILITY_ANSWER_FIELD(9,&(g_input.word.hf_out),2);
-    COMMAND_UTILITY_ANSWER_FIELD(10,&(Output.Str.WP_reg),2);
-    COMMAND_UTILITY_ANSWER_FIELD(11,&(Output.Str.WP_pll),2);
-    COMMAND_UTILITY_ANSWER_FIELD(12,&(Output.Str.Tmp_Out),12);
-    COMMAND_UTILITY_ANSWER_FIELD(13,&(Output.Str.WP_scope1),4);
+    COMMAND_UTILITY_ANSWER_FIELD(9,(x_uint32_t*)&(g_input.word.hf_out),2);
+    COMMAND_UTILITY_ANSWER_FIELD(10,(x_uint32_t*)&(Output.Str.WP_reg),2);
+    COMMAND_UTILITY_ANSWER_FIELD(11,(x_uint32_t*)&(Output.Str.WP_pll),2);
+    COMMAND_UTILITY_ANSWER_FIELD(12,(x_uint32_t*)&(Output.Str.Tmp_Out),12);
+    COMMAND_UTILITY_ANSWER_FIELD(13,(x_uint32_t*)&(Output.Str.WP_scope1),4);
 	
     trm_ena = 1;        //e. allow operation of the transmitter 
 } 
@@ -834,8 +834,8 @@ void command_ans_M_RATE2()
 {
     num_of_par = 2;     //e. 2 parameters output
 	
-    COMMAND_UTILITY_ANSWER_FIELD(0,&(Output.Str.Cnt_Pls),2);
-    COMMAND_UTILITY_ANSWER_FIELD(1,&(Output.Str.Cnt_Mns),2);
+    COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint32_t*)&(Output.Str.Cnt_Pls),2);
+    COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint32_t*)&(Output.Str.Cnt_Mns),2);
     
     trm_ena = 1;
 } 
@@ -844,8 +844,8 @@ void command_ans_M_RATE3()
 {
     num_of_par = 2;     //e. 2 parameters output
 			
-    COMMAND_UTILITY_ANSWER_FIELD(0,&(Output.Str.WP_scope1),2);
-    COMMAND_UTILITY_ANSWER_FIELD(1,&(Output.Str.WP_scope2),2);
+    COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint32_t*)&(Output.Str.WP_scope1),2);
+    COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint32_t*)&(Output.Str.WP_scope2),2);
     
     trm_ena = 1;        //e. allow operation of the transmitter
 } 
@@ -857,8 +857,8 @@ void command_ans_M_RATE4()
 			
     COMMAND_UTILITY_ANSWER_FIELD(0,0,16);
     COMMAND_UTILITY_ANSWER_FIELD(1,0,32);
-    COMMAND_UTILITY_ANSWER_FIELD(2,&(Output.Str.HF_reg),2);
-    COMMAND_UTILITY_ANSWER_FIELD(3,&(Output.Str.WP_reg),2);
+    COMMAND_UTILITY_ANSWER_FIELD(2,(x_uint32_t*)&(Output.Str.HF_reg),2);
+    COMMAND_UTILITY_ANSWER_FIELD(3,(x_uint32_t*)&(Output.Str.WP_reg),2);
     
     //e. allow operation of the transmitter
     trm_ena = 1; 
@@ -869,11 +869,11 @@ void command_ans_M_RATE7()
 {
     num_of_par = 5; 
     
-    COMMAND_UTILITY_ANSWER_FIELD(0,&(Output.Str.WP_Phase_Det_Array),16);
-    COMMAND_UTILITY_ANSWER_FIELD(1,&(Output.Str.WP_sin_Array),16);
-    COMMAND_UTILITY_ANSWER_FIELD(2,&(Output.Str.WP_reg),2);
-    COMMAND_UTILITY_ANSWER_FIELD(3,&(Output.Str.WP_pll),2);
-    COMMAND_UTILITY_ANSWER_FIELD(4,&(Output.Str.HF_reg),2);
+    COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint32_t*)&(Output.Str.WP_Phase_Det_Array),16);
+    COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint32_t*)&(Output.Str.WP_sin_Array),16);
+    COMMAND_UTILITY_ANSWER_FIELD(2,(x_uint32_t*)&(Output.Str.WP_reg),2);
+    COMMAND_UTILITY_ANSWER_FIELD(3,(x_uint32_t*)&(Output.Str.WP_pll),2);
+    COMMAND_UTILITY_ANSWER_FIELD(4,(x_uint32_t*)&(Output.Str.HF_reg),2);
     
     trm_ena = 1;
 } 

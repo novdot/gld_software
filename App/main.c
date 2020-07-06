@@ -144,7 +144,7 @@ void loop()
     
     hardware_photo_exchange(&Output.Str.Cnt_Dif);
     
-    command_recieve();
+    command_recieve(_command_recieve_flag_gld);
     command_decode();
     command_transm();
     
