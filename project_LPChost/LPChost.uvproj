@@ -371,7 +371,7 @@
               <MiscControls></MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>..\App;..\xlib\include;..\GLDcore\include;..\LPChost\include</IncludePath>
+              <IncludePath>..\App;..\xlib\include;..\GLDcore\include;..\LPChost\include;..\GLDbootloader\include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -534,6 +534,16 @@
               <FileName>ignit.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\GLDcore\source\ignit.c</FilePath>
+            </File>
+            <File>
+              <FileName>IAP.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\LPChost\source\IAP.c</FilePath>
+            </File>
+            <File>
+              <FileName>memory.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\LPChost\source\memory.c</FilePath>
             </File>
           </Files>
         </Group>

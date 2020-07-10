@@ -6,6 +6,7 @@
 void command_ans_common0();
 void command_ans_common1();
 void command_ans_m_status();
+
 /******************************************************************************/
 void command_handle()
 {
@@ -61,6 +62,12 @@ void command_handle()
 	}
 }
 
+void command_save_prevCmd()
+{
+    memcpy(g_bootloader.prevCmd.buf, rcv_buf, rcv_num_byt);
+    g_bootloader.prevCmd.size = rcv_num_byt;
+}
+
 /******************************************************************************/
 /******************************************************************************/
 /******************************************************************************/
@@ -68,14 +75,16 @@ void command_handle()
 /******************************************************************************/
 void command_cmd_WRK_PC()
 {
+    command_save_prevCmd();
 	//nothing
 }
 
 /******************************************************************************/
 void command_cmd_MAINT()
 {
-	//Включает режим монитора ГЛД и откладывает старт основной программы. TODO
-	
+    command_save_prevCmd();
+	//Включает режим монитора ГЛД и откладывает старт основной программы.
+	g_bootloader.bMonitorMode = 1;
 	//составляем ответ
 	command_ans_m_status();
 }
@@ -83,31 +92,42 @@ void command_cmd_MAINT()
 /******************************************************************************/
 void command_cmd_M_JUMP()
 {
-	//run app TODO
+    command_save_prevCmd();
+	//run app
+    hardware_tim_stop();
+    hardware_flash_load_main();
 }
 
 /******************************************************************************/
 void command_cmd_M_LOAD()
 {
+    command_save_prevCmd();
 	//load from mem TODO
     //run app
+    hardware_tim_stop();
+    hardware_flash_load_main();
 }
 
 /******************************************************************************/
 void command_cmd_M_CONF()
 {
-	//config pld = nothing
+    command_save_prevCmd();
+	//config pld
+    command_ans_common1();
 }
 
 /******************************************************************************/
 void command_cmd_M_DCNF()
 {
-	//reset pld = nothing
+    command_save_prevCmd();
+	//reset pld
+    command_ans_common1();
 }
 
 /******************************************************************************/
 void command_cmd_M_CLEAR()
 {
+    command_save_prevCmd();
     //очистка регистра ошибок
     line_err = 0;
 	//составляем ответ
@@ -117,18 +137,28 @@ void command_cmd_M_CLEAR()
 /******************************************************************************/
 void command_cmd_M_MIRR()
 {
-	//TODO
+	//возврат предыдущего содержимого буфера приемника
+    //подкоманда возврата предыдущей команды
+    command_ans_M_MIRR();
 }
 
 /******************************************************************************/
 void command_cmd_M_TSIV1()
 {
+    command_save_prevCmd();
+    //Проверка ОЗУ памяти данных
+    //TODO
+    
 	command_ans_common0();
 }
 
 /******************************************************************************/
 void command_cmd_M_TSOV2()
 {
+    command_save_prevCmd();
+    //Проверка ОЗУ памяти данных
+    //TODO
+    
 	command_ans_common0();
 }
 
@@ -137,6 +167,8 @@ void command_cmd_M_PTR_R()
 {
     bootloader_paramsField params;
     x_uint32_t data = 0;
+    
+    command_save_prevCmd();
     
     //set answer speed
 	command_utility_SetSpeedPeriod();         		  
@@ -182,6 +214,8 @@ void command_cmd_M_PTR_W()
 	bootloader_paramsField params;
     x_uint32_t data;
     
+    command_save_prevCmd();
+    
     //set answer speed
 	command_utility_SetSpeedPeriod();         		  
 	UART_SwitchSpeed(trm_rate);
@@ -217,7 +251,6 @@ void command_cmd_M_PTR_W()
             g_bootloader.ptr.nPtrDev2 = data; 
         break;
     }
-    //command_ans_common();
     //формируем ответ
     command_ans_M_PTR_W();
 }
@@ -225,27 +258,42 @@ void command_cmd_M_PTR_W()
 /******************************************************************************/
 void command_cmd_M_DAT_R()
 {
+    command_save_prevCmd();
+    
 	command_utility_SetSpeedPeriod();         		  
 	UART_SwitchSpeed(trm_rate);
+    
+    //чтение блока данных из буфера у-ва.
 }
 
 /******************************************************************************/
 void command_cmd_M_DAT_W()
 {
+    command_save_prevCmd();
+    
 	command_utility_SetSpeedPeriod();         		  
 	UART_SwitchSpeed(trm_rate);
+    
+    //запись блока данных в буфер у-ва
+    
+    //answer
+    command_ans_common1();
 }
 
 /******************************************************************************/
 void command_cmd_M_BUF_R()
 {
+    command_save_prevCmd();
 	//
+    
 }
 
 /******************************************************************************/
 void command_cmd_M_BUF_W()
 {
-	
+    command_save_prevCmd();
+	//
+    
 }
 
 /******************************************************************************/
@@ -253,6 +301,8 @@ void command_cmd_M_CTL_R()
 {
     int regType = 0;
     x_uint32_t reg = 0;
+    
+    command_save_prevCmd();
     
     g_bootloader.cmd.nCmdCodeH = (rcv_buf[2]&0xFF);
     g_bootloader.cmd.nCmdCodeL = (rcv_buf[3]&0xFF);
@@ -278,6 +328,8 @@ void command_cmd_M_CTL_M()
     int regBitVal = 0;
     x_uint32_t reg = 0;
     
+    command_save_prevCmd();
+    
     g_bootloader.cmd.nCmdCodeH = (rcv_buf[2]&0xFF);
     g_bootloader.cmd.nCmdCodeL = (rcv_buf[3]&0xFF);
     
@@ -295,15 +347,16 @@ void command_cmd_M_CTL_M()
     regBitInd = g_bootloader.cmd.nCmdCodeL & 0xF;
     regBitVal = g_bootloader.cmd.nCmdCodeL>>7;
     
-    //TODO
-    
 	command_ans_M_CTL_M(&reg);
 }
 
 /******************************************************************************/
 void command_cmd_M_FME_E()
 {
-	//TODO erase flash
+    command_save_prevCmd();
+	//erase flash TODO
+    
+    //answer
     command_ans_common1();
 }
 
@@ -401,7 +454,13 @@ void command_ans_M_CLEAR()
 /******************************************************************************/
 void command_ans_M_MIRR()
 {
-	//
+    int ipar = 0;
+	num_of_par = (g_bootloader.prevCmd.size)*2;
+    for(ipar=0;ipar<g_bootloader.prevCmd.size;ipar++){
+        COMMAND_UTILITY_ANSWER_FIELD(ipar*2,0,1);
+        COMMAND_UTILITY_ANSWER_FIELD(ipar*2+1,(x_uint32_t*)&(g_bootloader.prevCmd.buf[ipar]),1);
+    }
+	trm_ena = 1;
 }
 
 /******************************************************************************/

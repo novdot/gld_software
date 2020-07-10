@@ -13,6 +13,8 @@ void global_bootloader_init()
     g_bootloader.ptr.nPtrFlash = 0;
     g_bootloader.ptr.nPtrDev1 = 0;
     g_bootloader.ptr.nPtrDev2 = 0;
+    
+    g_bootloader.bMonitorMode = 0;
 }
 
 /*****************************************************************************/

@@ -2,7 +2,7 @@
   ******************************************************************************
   * @file    const.h
   *
-  * @brief   core
+  * @brief   core gld consts
   *
   * @author  Дмитрий Новиков novikov@elektrooptika.ru
   *
@@ -26,4 +26,4 @@
 #define	DEVICE_SAMPLE_RATE_uks		100000000		//e. sampling frequency 10 kHz
 
 
-#endif
+#endif //GLD_CONST_H_INCLUDED

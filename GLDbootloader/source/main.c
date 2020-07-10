@@ -29,7 +29,7 @@ void init()
     
     DMA_Init();
     
-    //
+    //for tests
     hardware_configure_backlight();
     
     //e. to calculate SystemCoreClock  for UART particularly
@@ -43,19 +43,28 @@ void init()
     
     //initialize software values
     global_bootloader_init();
+    
+    //init timer
+    hardware_tim_init(&g_bootloader.nTimerCnt);
 }
 
 /******************************************************************************/
 //основной цикл. ждем подключения, если нет - переключаемся на основную программу
 void loop()
 {
-    /**/
+    //обработка команд
     command_recieve(_command_recieve_flag_bootloader);
     command_decode();
     command_transm();
-    /**
-    command_echo();
-    /**/
+    
+    //если прибор не введен в режим монитора, то проверим, что прошло время 
+    //ожидания и запустим основную программу
+    if(g_bootloader.bMonitorMode == 0) {
+        if(g_bootloader.nTimerCnt>5000) {
+            hardware_tim_stop();
+            //hardware_flash_load_main();
+        }
+    }
 }
 
 /******************************************************************************/
@@ -65,5 +74,5 @@ int main(void)
     
     do {
         loop();
-    } while(1);	    // main infinie loop            
+    } while(1); //main infinie loop            
 }

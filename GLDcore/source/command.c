@@ -22,7 +22,6 @@
 //TODO
 #include "CyclesSync.h"
 
-
 void command_recieve_gld();
 void command_recieve_bootloader();
 /******************************************************************************/

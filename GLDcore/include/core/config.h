@@ -2,9 +2,10 @@
   ******************************************************************************
   * @file    config.h
   *
-  * @brief
+  * @brief  core gld setups
   *
-  * @author  Дмитрий Новиков novikov@elektrooptika.ru
+  * @author  Дмитрий Новиков
+  * @email  novikov@elektrooptika.ru
   *
   ******************************************************************************
   * @attention
@@ -33,4 +34,4 @@
 #error "Please define __CONFIG_COMMANDS_MBIT or __CONFIG_COMMANDS_DEFAULT!"
 #endif
 
-#endif
+#endif //__GLD_CONFIG_H_INCLUDED

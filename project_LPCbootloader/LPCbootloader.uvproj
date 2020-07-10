@@ -497,6 +497,16 @@
               <FileType>1</FileType>
               <FilePath>..\LPChost\source\i2c.c</FilePath>
             </File>
+            <File>
+              <FileName>memory.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\LPChost\source\memory.c</FilePath>
+            </File>
+            <File>
+              <FileName>IAP.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\LPChost\source\IAP.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

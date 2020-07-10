@@ -1,5 +1,6 @@
 #include "hardware/hardware.h"
-#include  "hardware/ltc1622.h"
+#include "hardware/ltc1622.h"
+#include "hardware/config.h"
 
 #include "lpc17xx.h"
 
@@ -187,5 +188,176 @@ void hardware_photo_out(x_uint32_t Ph_A, x_uint32_t Ph_B)
 {
     i2c_write(Ph_A,Ph_B);
 }
-/******************************************************************************/
 
+/******************************************************************************/
+void hardware_flash_read(x_uint32_t a_sector,x_uint8_t* a_pmemory)
+{
+    int start,end = 0;
+    
+    switch(a_sector){
+        case 0:
+            break;
+        case 1:
+            start = MEMORY_MAIN_MEM_START;
+            end = MEMORY_MAIN_MEM_SIZE;
+            break;
+        case 2:
+            break;
+        case 3:
+            start = MEMORY_COEF_MEM_START;
+            end = MEMORY_COEF_MEM_SIZE;
+            break;
+        default:
+            break;
+    }
+    memory_read(start,a_pmemory);
+}
+/******************************************************************************/
+void hardware_flash_write(x_uint32_t a_sector,x_uint8_t* a_pmemory)
+{
+    int start,end = 0;
+    x_uint32_t addr = 0;
+    x_uint16_t size = 0;
+    
+    switch(a_sector){
+        case 0:
+            break;
+        case 1:
+            start = MEMORY_MAIN_SEC_START;
+            end = MEMORY_MAIN_SEC_END;
+            addr = MEMORY_MAIN_MEM_START;
+            size = MEMORY_MAIN_MEM_SIZE;
+            break;
+        case 2:
+            break;
+        case 3:
+            start = MEMORY_COEF_SEC_START;
+            end = MEMORY_COEF_SEC_END;
+            addr = MEMORY_COEF_MEM_START;
+            size = MEMORY_COEF_MEM_SIZE;
+            break;
+        default:
+            break;
+    }
+    memory_write(start,end,addr,a_pmemory,size);
+}
+/******************************************************************************/
+void hardware_flash_erase(x_uint32_t a_sector)
+{
+    int start,end = 0;
+    switch(a_sector){
+        case 0:
+            start = MEMORY_BOOT_SEC_START;
+            end = MEMORY_BOOT_SEC_END;
+            break;
+        case 1:
+            start = MEMORY_MAIN_SEC_START;
+            end = MEMORY_MAIN_SEC_END;
+            break;
+        case 2:
+            break;
+        case 3:
+            start = MEMORY_COEF_SEC_START;
+            end = MEMORY_COEF_SEC_END;
+            break;
+        default:
+            start = MEMORY_BOOT_SEC_START;
+            end = MEMORY_COEF_SEC_END;
+            break;
+    }
+    memory_erase(start,end);
+}
+/******************************************************************************/
+void hardware_flash_load_main()
+{
+    memory_load(MEMORY_MAIN_MEM_START);
+}
+/******************************************************************************/
+#define SBIT_TIMER0  1
+#define SBIT_TIMER1  2
+
+#define SBIT_MR0I    0
+#define SBIT_MR0R    1
+
+#define SBIT_CNTEN   0
+
+#define PCLK_TIMER0  2
+#define PCLK_TIMER1  4   
+
+/* ms is multiplied by 1000 to get us*/
+#define MiliToMicroSec(x)  (x*1000)  
+
+x_uint32_t* g_mcs_cnt;
+extern unsigned int SystemCoreClock;
+unsigned int getPrescalarForUs(uint8_t timerPclkBit)
+{
+    unsigned int pclk,prescalarForUs;
+    /* get the pclk info for required timer */
+    pclk = (LPC_SC->PCLKSEL0 >> timerPclkBit) & 0x03;  
+
+    /* Decode the bits to determine the pclk*/
+    switch ( pclk ){
+    case 0x00:
+        pclk = SystemCoreClock/4;
+        break;
+
+    case 0x01:
+        pclk = SystemCoreClock;
+        break; 
+
+    case 0x02:
+        pclk = SystemCoreClock/2;
+        break; 
+
+    case 0x03:
+        pclk = SystemCoreClock/8;
+        break;
+
+    default:
+        pclk = SystemCoreClock/4;
+        break;  
+    }
+
+    /* Prescalar for 1us (1000000Counts/sec) */
+    prescalarForUs = pclk/1000000 - 1;                    
+
+    return prescalarForUs;
+}
+
+void hardware_tim_init(x_uint32_t* mcs_cnt)
+{
+    g_mcs_cnt = mcs_cnt;
+    
+    /* Power ON Timer0,1 */
+    LPC_SC->PCONP |= (1<<SBIT_TIMER1);
+    
+    /* Clear TC on MR0 match and Generate Interrupt*/
+    LPC_TIM1->MCR  = (1<<SBIT_MR0I) | (1<<SBIT_MR0R);
+    /* Prescalar for 1us */
+    LPC_TIM1->PR   = getPrescalarForUs(PCLK_TIMER1);
+    /* Load timer value to generate 1000ms delay*/
+    LPC_TIM1->MR0  = MiliToMicroSec(1000);
+}
+void hardware_tim_start()
+{
+    /* Start timer by setting the Counter Enable*/
+    LPC_TIM1->TCR  = (1 << SBIT_CNTEN);
+    /* Enable Timer1 Interrupt */
+    NVIC_EnableIRQ(TIMER1_IRQn);
+}
+void hardware_tim_stop()
+{
+    NVIC_DisableIRQ(TIMER1_IRQn);
+}
+
+__irq void TIMER1_IRQHandler(void)
+{
+    unsigned int isrMask;
+
+    isrMask = LPC_TIM1->IR; 
+    /* Clear the Interrupt Bit */
+    LPC_TIM1->IR = isrMask;
+    
+    (*g_mcs_cnt)+=1000;
+}
+/******************************************************************************/

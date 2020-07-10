@@ -41,9 +41,19 @@ typedef struct bootloader_cmdDef{
     x_uint32_t nCmdCodeL; //< 2ая часть кода команды
 }bootloader_cmd;
 
+/// стуктура предыдущей команды
+typedef struct bootloader_prevCmdBufDef{
+    x_uint8_t buf[134]; //< 
+    x_uint8_t size; //< 
+}bootloader_prevCmdBuf;
+
 typedef struct bootloader_globalDef{
     bootloader_ptr ptr;
     bootloader_cmd cmd;
+    x_bool_t bMonitorMode;
+    x_uint32_t nTimerCnt; //<счетчик времени автоматической загрузки основной программы
+    bootloader_prevCmdBuf prevCmd; //< предыдущая команда буффер
+    x_uint8_t buf_sector[1024]; //< буфер сектора
 }bootloader_global;
 
 extern bootloader_global g_bootloader;
