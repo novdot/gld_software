@@ -1,7 +1,8 @@
 #include "mathDSP.h"
 #include "SIP.h"
 #include "CyclesSync.h"
-#include "CntrlGLD.h"
+#include "core/gld.h"
+//#include "CntrlGLD.h"
 #include "ThermoCalc.h"
 //#include "el_lin.h"
 

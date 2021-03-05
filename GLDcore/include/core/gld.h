@@ -36,6 +36,9 @@
 #include "sync.h"
 #include "exchange.h"
 
+//TODO
+//#include "CntrlGLD.h"
+
 /**
     @brief device starting process
 */
@@ -59,6 +62,7 @@ void gld_status(void);
 */
 void gld_output(void);
 
+void gld_control(void);
 /**
     @brief управление контурами
 */
@@ -82,14 +86,14 @@ x_switch_t gld_loop_is_vb_freq();
 x_switch_t gld_loop_is_gld_reg();
 /**/
 //Loops bits
-#define  LASER_ON        0x0001  		//e. switch on/off laser-up //r. 㫫./㼪뮠䦭池򨾠졧池
-#define  HF_REG_ON       0x0002  		//e. switch on/off the HFO regulator //r. 㫫./㼪뮠믭򳰠Ăנ 
-#define  RI_REG_ON       0x0004  		//e. switch on/off the DS power regulator //r. 㫫./㼪뮠믭򳰠􎟱򨠄ԏ   
-#define  WP_REG_ON       0x0008  		//e. a mask of switch on/off of the CPLC regulator  //r. 𬐠㫫./㼪뮠믭򳰠 ҐϠ 
-#define  WP_SIN_ON       0x0010  		//e. switch on/off search signal of the CPLC //r. 㫫./㼪뮠௨񪮢󩠱餭᫠ҐϠ 
-#define  VB_TAU_ON       0x0020  		//e. switch on/off amplitude regulator of the dither drive //r. 㫫./㼪뮠믭򳰠᭯쩲󤻠㩡𮰨㯤ࠍ
-#define  VB_FREQ_ON      0x0040  		//e. switch on/off frequency regulator of the dither drive //r. 㫫./㼪뮠믭򳰠󠱲ﳻ 㩡𮯰飮堍
-#define  GLD_ON          0x0080  		//e. switch on/off all GLD //r. 㫫./㼪뮠㦱𠃋č
+#define  LASER_ON        (0x0001)  		//< switch on/off laser-up
+#define  HF_REG_ON       (0x0002)  		//< switch on/off the HFO regulator
+#define  RI_REG_ON       (0x0004)  		//< switch on/off the DS power regulator
+#define  WP_REG_ON       (0x0008)  		//< a mask of switch on/off of the CPLC regulator
+#define  WP_SIN_ON       (0x0010)  		//< switch on/off search signal of the CPLC
+#define  VB_TAU_ON       (0x0020)  		//< switch on/off amplitude regulator of the dither drive
+#define  VB_FREQ_ON      (0x0040)  		//< switch on/off frequency regulator of the dither drive
+#define  GLD_ON          (0x0080)  		//< switch on/off all GLD
 
 //Loop controls
 #define loop_is_closed(loop_bit) 	((RgConA & (loop_bit)) == loop_bit)
@@ -97,6 +101,13 @@ x_switch_t gld_loop_is_gld_reg();
 #define open_loop(loop_bit) 		RgConA &= ~(loop_bit)
 #define open_all_loops()			RgConA   = 0	
 #define close_all_loops()			RgConA   = 0xFFFF
+
+	// Status word errors bits
+#define	OUT_FREQ_ERROR		(0x8000)
+#define	DITH_FREQ_ERROR		(0x4000)
+#define	HFO_VOLT_ERROR		(0x2000)
+#define	THERMO_RANGE_ERROR	(0x1000)
+#define	THERMO_DIFF_ERROR	(0x0800)
 /**/
 
 #endif

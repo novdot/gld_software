@@ -1,5 +1,6 @@
 #include "mathDSP.h"
-#include "CntrlGLD.h"
+//#include "CntrlGLD.h"
+#include "core/gld.h"
 #include <math.h>
 
 #include "core/global.h"

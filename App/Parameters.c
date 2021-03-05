@@ -1,4 +1,5 @@
-#include "CntrlGLD.h"
+//#include "CntrlGLD.h"
+#include "core/gld.h"
 #include "lpc17xx.h"
 #include "Parameters.h"
 #include "el_lin.h"

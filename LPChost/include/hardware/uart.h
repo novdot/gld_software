@@ -200,13 +200,13 @@ typedef enum uart_baudrate_speedDef{
 Выбрать UART0REC или UART1REC
 в качестве периферии для реализации обмена
 */
-//#define UART0REC
-#define UART1REC
+#define UART0REC
+//#define UART1REC
 //#define UART2REC
 /**
 UART для отладки
 */
-#define UART0DBG
+//#define UART0DBG
 
 /******************************************************************************
 ** Function name:		UARTInit
@@ -226,7 +226,8 @@ void UART2_Init(x_uint32_t baudrate);
 
 #if defined(UART0DBG)
 #define UART_DBG_SEND(buf,size) UART0_SendString(buf,size);
-#else UART_DBG_SEND(buf,size) 0;
+#else 
+#define UART_DBG_SEND(buf,size) ;
 #endif
 
 #define DBG_SEND(buf,size) \

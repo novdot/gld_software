@@ -208,6 +208,6 @@
 #define close_all_loops()			RgConA   = 0xFFFF
 
 void contrl_GLD(void);
-void gld_output(void);
+//void gld_output(void);
 #endif
 

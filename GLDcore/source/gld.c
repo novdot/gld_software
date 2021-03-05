@@ -1,6 +1,7 @@
 #include "core/gld.h"
 #include "core/global.h"
 #include "core/ignit.h"
+#include "core/command_handlers.h"
 #include "hardware/hardware.h"
 
 //TODO
@@ -79,7 +80,7 @@ void gld_status(void)
         }	
     }	 
 }
-/******************************************************************************
+/******************************************************************************/
 void gld_output(void)
 {
     //latch appeared
@@ -106,6 +107,15 @@ void gld_output(void)
                 break;	
         }
     }
+}
+
+/******************************************************************************/
+void gld_control(void)
+{
+    gld_status(); //e. checking the device status
+    gld_stop();   //e. stop the device, if necessary 
+	ignit_start();
+    gld_output();
 }
 /******************************************************************************
 void gld_loop_laser_set(x_loop_t flag) { g_gld.RgConA.bit.Las = flag;}

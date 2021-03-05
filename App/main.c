@@ -18,13 +18,14 @@
 #include "Parameters.h"							  
 #include "Dither_Reg.h"
 //#include "commandset.h"
-#include "CntrlGLD.h"
+//#include "CntrlGLD.h"
 #include <math.h>
 
 #include "hardware/hardware.h"
 #include "core/command.h"
 #include "core/global.h"
 #include "core/config.h"
+#include "core/gld.h"
 
 /******************************************************************************
 **   Main Function  main()
@@ -54,6 +55,8 @@ void init1()
 /******************************************************************************/
 void init()
 {
+    char dbg[64];
+    
     //e. clocking control initialization
     SystemInit();
     
@@ -101,6 +104,9 @@ void init()
     init_PLC();
     init_Dither_reg();
     RgConB = RATE_VIBRO_1;
+    
+    DBG2(dbg,64,"Build in %s %s",__DATE__,__TIME__);
+    DBG0(dbg,64,"Init done!");
 }
 
 /******************************************************************************/
@@ -138,7 +144,8 @@ void loop()
     clc_OutFreq_regulator();
     Output.Str.WP_sin = clc_WP_sin();
   	
-    contrl_GLD();
+    //contrl_GLD();
+    gld_control();
     
     hardware_photo_exchange(&Output.Str.Cnt_Dif);
     

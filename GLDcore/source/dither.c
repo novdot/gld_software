@@ -16,13 +16,13 @@
   */
 #include "core/dither.h"
 #include "hardware/hardware.h"
+#include "core/gld.h"
 
 #include "core/global.h"
 
 //TODO
 #include "mathDSP.h"
 #include "CyclesSync.h"
-#include "CntrlGLD.h"
 #include "stdlib.h"
 #include "sip.h"
 

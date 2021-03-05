@@ -435,11 +435,6 @@
           <GroupName>APP</GroupName>
           <Files>
             <File>
-              <FileName>CntrlGLD.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\App\CntrlGLD.c</FilePath>
-            </File>
-            <File>
               <FileName>CyclesSync.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\App\CyclesSync.c</FilePath>

@@ -1,9 +1,11 @@
   #include "ThermoCalc.h"
   #include "CyclesSync.h"
-  #include "CntrlGLD.h"
+  //#include "CntrlGLD.h"
+#include "core/gld.h"
   #include "mathDSp.h"
   
 #include "core/global.h"
+#include "core/gld.h"
 
 #define debug
 #define	TEMP_AVER_PERIOD	4 // e. number of seconds for average
@@ -271,7 +273,6 @@ void DithFreqRangeCalc(void) //e. calculation of range of the division factor fo
 	int delta_VB_N;
 	
 	delta_VB_N = mult_r(Device_blk.Str.K_vb_tu >> DITH_VBN_SHIFT, (Temp_Aver - Device_blk.Str.TemperNormal)); //r.200;
-	//r. !!! сделать суммирование с насыщением, а затем сдвиг
 	min_level = VB_Nmin0 + delta_VB_N;
 	max_level = VB_Nmax0 + delta_VB_N;
 	// maximum saturation for unsigned levels
@@ -280,4 +281,4 @@ void DithFreqRangeCalc(void) //e. calculation of range of the division factor fo
 	Device_blk.Str.VB_Nmin = min_level << DITH_VBN_SHIFT;
 	Device_blk.Str.VB_Nmax = max_level << DITH_VBN_SHIFT;
 
-} // DithFreqRange_calc
+}

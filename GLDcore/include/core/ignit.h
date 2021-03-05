@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    ignit.h
+  * @file ignit.h
   *
   * @brief ignit - система управления поджигом лазера
   *
@@ -19,12 +19,11 @@
 
 #include "core/types.h"
 
-#define IGNIT_MAX_ITERATIONS 4
-
 /**
     @brief gld initialize
 */
 void ignit_init(void);
+
 /**
     @brief full gld light-up cycle
 */
@@ -50,5 +49,4 @@ x_bool_t ignit_is_started(void);
 */
 x_bool_t ignit_is_busy(void);
 
-
-#endif
+#endif //__GLD_IGNIT_H_INCLUDED

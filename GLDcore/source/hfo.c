@@ -1,4 +1,5 @@
 #include "core/hfo.h"
+#include "core/gld.h"
 #include "core/global.h"
 
 #define		HFO_NEG_MIN			8738	// -4.5 V
@@ -8,7 +9,6 @@
 
 //TODO
 #include "mathDSP.h"
-#include "CntrlGLD.h"
 
 /******************************************************************************/
 void clc_HFO()

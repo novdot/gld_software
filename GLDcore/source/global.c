@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 //TODO
-#include "CntrlGLD.h"
+#include "core/gld.h"
 
 //
 gld_global g_gld;

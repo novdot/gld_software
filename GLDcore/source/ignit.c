@@ -1,5 +1,11 @@
+/**
+* @brief Логика формирования поджига лазера
+**/
+
 #include "core/ignit.h"
 #include "hardware/hardware.h"
+
+#define IGNIT_MAX_ITERATIONS (4)
 
 gld_error_t handle_pulse(void);
 gld_error_t handle_pause(void);

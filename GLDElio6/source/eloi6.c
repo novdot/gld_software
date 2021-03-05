@@ -2,6 +2,8 @@
 #include "hardware/hardware.h"
 
 #define CS_0 (1<<16)
+
+#define BUFFER_CNT 6
 /******************************************************************************/
 int main(void)
 {
@@ -9,39 +11,32 @@ int main(void)
     int nArrayIn=0;
     int nCount=0;
     int nExchangeErr=0;
+    int buffer[BUFFER_CNT];
     
-    //инициализация GPIO
-    hardware_configure_lightup();
-    //инициализация SPI
+    int* pExchangeErr = &nExchangeErr;
+    
+    //e. clocking control initialization
+    SystemInit();
+    
+    //e. to calculate SystemCoreClock  for UART particularly
+    SystemCoreClockUpdate();
+    
     spi_init();
     
-    //all pins after reset is in GPIO mode, so CS pins needn't to configure
-    LPC_GPIO0->FIODIR |= (CS_0);		// P0.16 defined as CS for ADC
-    LPC_GPIO0->FIOSET |= (CS_0);		// set CS for ADC
-    
-    //all pins after reset is in GPIO mode, so CS pins needn't to configure
-    LPC_GPIO0->FIODIR |= (1<<18);		// P0.16 defined as CS for ADC
-    LPC_GPIO0->FIOSET |= (1<<18);		// set CS for ADC
-    
-    //all pins after reset is in GPIO mode, so CS pins needn't to configure
-    LPC_GPIO0->FIODIR |= (1<<19);		// P0.16 defined as CS for ADC
-    LPC_GPIO0->FIOSET |= (1<<19);		// set CS for ADC
-    
-    //all pins after reset is in GPIO mode, so CS pins needn't to configure
-    LPC_GPIO0->FIODIR |= (1<<20);		// P0.16 defined as CS for ADC
-    LPC_GPIO0->FIOSET |= (1<<20);		// set CS for ADC
-    
-    hardware_lightup_off();
     while(1){
-        hardware_lightup_off();
+        memset(buffer,0,BUFFER_CNT*sizeof(int));
         
-        //Прочтем данные с АЦП
-        spi_set_cs(CS_0);
-        spi_read(&nArrayIn,1,&nExchangeErr);
-        spi_reset_cs(CS_0);
+        hardware_set_adc();	
+        spi_write(buffer,6,pExchangeErr);
+        hardware_reset_adc(); 
+        return;
         
-        for(i=0;i<10000;i++);
-        hardware_lightup_on();
+        
+        
+        //spi_read(buffer,BUFFER_CNT,pExchangeErr);
+        //hardware_reset_adc(); 
+        
+        //for(i=0;i<1000;i++);
     }
     
     return 0;

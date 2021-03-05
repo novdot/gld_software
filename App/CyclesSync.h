@@ -13,7 +13,8 @@
 **--------------------------------------------------------------------------------------------------------       
 *********************************************************************************************************/
 #include "lpc17xx.h"
-#include "CntrlGLD.h"
+//#include "CntrlGLD.h"
+#include "core/gld.h"
 
 #define DELAY_UART_ENBL				4000			//e. delay = DELAY_UART_ENBL*8/CLCK
 #define DELAY_UART_DISBL			2500			//e. delay = DELAY_UART_ENBL*8/CLCK

@@ -1,12 +1,12 @@
 #include "core/cplc.h"
 #include "hardware/hardware.h"
 #include "core/global.h"
+#include "core/gld.h"
 
 //TODO
 #include "mathDSP.h"
 #include "CyclesSync.h"
 #include "ThermoCalc.h"
-#include "CntrlGLD.h"
 #include <math.h>
 
 #define  PLC_SHIFT				(6) 	
