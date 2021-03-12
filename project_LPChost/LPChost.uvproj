@@ -454,16 +454,6 @@
               <FileType>1</FileType>
               <FilePath>..\App\Parameters.c</FilePath>
             </File>
-            <File>
-              <FileName>SIP.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\App\SIP.c</FilePath>
-            </File>
-            <File>
-              <FileName>ThermoCalc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\App\ThermoCalc.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>
@@ -531,20 +521,35 @@
               <FilePath>..\GLDcore\source\ignit.c</FilePath>
             </File>
             <File>
-              <FileName>IAP.c</FileName>
+              <FileName>ring_buffer.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\LPChost\source\IAP.c</FilePath>
+              <FilePath>..\GLDcore\source\ring_buffer.c</FilePath>
             </File>
             <File>
-              <FileName>memory.c</FileName>
+              <FileName>sip.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\LPChost\source\memory.c</FilePath>
+              <FilePath>..\GLDcore\source\sip.c</FilePath>
+            </File>
+            <File>
+              <FileName>math_dsp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\GLDcore\source\math_dsp.c</FilePath>
             </File>
           </Files>
         </Group>
         <Group>
           <GroupName>hardware</GroupName>
           <Files>
+            <File>
+              <FileName>memory.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\LPChost\source\memory.c</FilePath>
+            </File>
+            <File>
+              <FileName>IAP.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\LPChost\source\IAP.c</FilePath>
+            </File>
             <File>
               <FileName>hardware.c</FileName>
               <FileType>1</FileType>

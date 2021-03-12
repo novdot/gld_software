@@ -199,4 +199,44 @@
 #define		HFO_POZ_MIN			-32221	// +10.5 V
 #define		HFO_POZ_MAX			-15837 	// +4.5 V
 
+/////////////////////////////////////////////
+#define		DITH_VBN_SHIFT			2 
+
+////////////////////////////////////////////
+
+	// Status word errors bits
+#define	OUT_FREQ_ERROR		(0x8000)
+#define	DITH_FREQ_ERROR		(0x4000)
+#define	HFO_VOLT_ERROR		(0x2000)
+#define	THERMO_RANGE_ERROR	(0x1000)
+#define	THERMO_DIFF_ERROR	(0x0800)
+
+////////////////////////////////////////////
+//Loops bits
+#define  LASER_ON        (0x0001)  		//< switch on/off laser-up
+#define  HF_REG_ON       (0x0002)  		//< switch on/off the HFO regulator
+#define  RI_REG_ON       (0x0004)  		//< switch on/off the DS power regulator
+#define  WP_REG_ON       (0x0008)  		//< a mask of switch on/off of the CPLC regulator
+#define  WP_SIN_ON       (0x0010)  		//< switch on/off search signal of the CPLC
+#define  VB_TAU_ON       (0x0020)  		//< switch on/off amplitude regulator of the dither drive
+#define  VB_FREQ_ON      (0x0040)  		//< switch on/off frequency regulator of the dither drive
+#define  GLD_ON          (0x0080)  		//< switch on/off all GLD
+/******************************************************************************/
+//e.   device operation modes
+#define  DM_INT_10KHZ_LATCH				1		//e. mode of internal latch 10 kHz 		
+#define  DM_INT_LATCH_DELTA_PS			2
+#define	 DM_INT_LATCH_DELTA_BINS		3
+#define  DM_EXT_LATCH_DELTA_PS_PULSE	4		//e. mode of external latch with output of the Delta_PS command by pulse 
+#define  DM_EXT_LATCH_DELTA_BINS_PULSE	6		//e. mode of external latch with output of the Delta_BINS command by pulse
+#define  DM_EXT_LATCH_DELTA_SF_PULSE	7		//e. mode of Delta Scale factor 
+
+//sync
+#define HALF_PERIOD 0x00000004
+#define WHOLE_PERIOD 0x00000008
+#define RESET_PERIOD 0x0000000C
+//////////////////////////////////////////////////
+
+#define  	PI 	3.14159265
+
+
 #endif //GLD_CONST_H_INCLUDED

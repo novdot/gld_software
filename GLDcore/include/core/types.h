@@ -184,24 +184,24 @@ typedef union {
 /**
     @brief input exchange buffer
 */
-typedef union {
+/*typedef union {
     int ArrayIn[4];
     struct {		  							
         int Tmp_in[2];
         int HF_out;	
         int WP_sel;			       	
     }StrIn;
-} INPUT; 
+} INPUT; */
 
 typedef union {
     int array[6];
     struct {		  							
-        int temp1;//termo1
-        int in1;//currency
-        int in2;	
-        int delta_t;//termo2 + uterm
-        int hf_out;
-        int wp_sel;			       	
+        int temp1;//< termo1
+        int in1;//< currency PhA
+        int in2;//< currency PhB	
+        int delta_t;//< termo2 + uterm
+        int hf_out; //< signal value AmL
+        int wp_sel;	//< signal value AmH		       	
     }word;
 } inputData;
 

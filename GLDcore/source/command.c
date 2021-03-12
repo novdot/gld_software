@@ -40,7 +40,7 @@ x_bool_t command_check_lcc(x_uint8_t* a_pBuffer,x_uint32_t a_uCount)
 	if( (CRC_real - CRC_calc) == 0) {
         return _x_true;
     } else {
-        DBG2(dbg,64,"command_check_lcc FAILED! real:0x%02X calc:0x%02X",CRC_real,CRC_calc);
+        DBG3(dbg,64,"command_check_lcc FAILED! real:0x%02X calc:0x%02X, cnt:%d",CRC_real,CRC_calc,a_uCount);
         return _x_false;
     }
 }
@@ -48,6 +48,7 @@ x_bool_t command_check_lcc(x_uint8_t* a_pBuffer,x_uint32_t a_uCount)
 void command_recieve_gld()
 {
     static int ToWaitEnd, ErrReg ;
+    char dbg[64];
     
     //e. end part of packet is absent
 	if (( ToWaitEnd > 25000)) {
@@ -57,6 +58,7 @@ void command_recieve_gld()
         rcv_num_byt_old = rcv_num_byt;
         uart_recieve_reset();
         ToWaitEnd = 0;
+        DBG0(dbg,64,"end part of packet is absent gld");
         return;
 	}
 	//e. we have not received any new bytes
@@ -122,7 +124,6 @@ void command_recieve_bootloader()
         rcv_num_byt_old = rcv_num_byt;
         uart_recieve_reset();
         ToWaitEnd = 0;
-        DBG0(dbg,64,"end part of packet is absent");
         return;
 	}
     //e. we have not received any new bytes
@@ -157,6 +158,7 @@ void command_recieve_bootloader()
         ToWaitEnd++;
         return;
 	} else {
+        DBG0(dbg,64,"get packet bootloader");
 		rcv_Rdy = 1;	  	
 	}
 	ToWaitEnd = 0;
@@ -164,8 +166,7 @@ void command_recieve_bootloader()
 /******************************************************************************/
 void command_recieve(command_recieve_flag flag)
 { 
-    char dbg[64];
-    
+    x_uint32_t num;
 	uart_recieve(rcv_buf,&rcv_num_byt);
     
     switch(flag){
@@ -253,6 +254,7 @@ void command_decode(void)
   
     //e. is data in receive buffer?
 	if (!rcv_Rdy) return;
+    
 	
     //e. Whether there were errors of receiving of start-bit?
 	if (!line_sts){  
@@ -330,9 +332,18 @@ void command_utility_SetSpeedPeriod(void)
 /******************************************************************************/
 void command_echo(void)
 {
-    int delay = 10000;
-    int idelay = 0;
-    uart_recieve(rcv_buf,&rcv_num_byt);
-    uart_transm( rcv_num_byt, Device_Mode, rcv_buf);
-    for(idelay=0;idelay<delay;idelay++) {}
+    static int delay = 10000;
+    static int idelay = 0;
+    //int ibyte = 0;
+    //char dbg[3];
+    
+    /*for(ibyte=0;ibyte<rcv_num_byt;ibyte++){
+        DBG0(dbg,3,rcv_buf[ibyte]);
+    }*/
+    if(idelay>=delay){
+        uart_recieve(rcv_buf,&rcv_num_byt);
+        uart_transm( rcv_num_byt, Device_Mode, rcv_buf);
+        idelay = 0;
+    }
+    idelay++;
 }

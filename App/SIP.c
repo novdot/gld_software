@@ -3,11 +3,16 @@
 #include "CyclesSync.h"
 #include "core/gld.h"
 //#include "CntrlGLD.h"
-#include "ThermoCalc.h"
+//#include "ThermoCalc.h"
 //#include "el_lin.h"
 
 #include "hardware/hardware.h"
 #include "core/global.h"
+
+#define	 INT32MAX_DIV2				1073741823	//e. 0.5*MAX_QEI_CNT
+#define  INT32MIN_DIV2			   -1073741823	//e. -0.5*MAX_QEI_CNT
+
+#define SHIFT_TO_FRACT				(18) //e. shift for converting integer to float (14.18) format  //r. с¤ўЁгЎ¤мї а±Ґпў°бЁ®гЎ­йї тҐ«®д® уЁ±«аЎЄ е±®в®®с€Ѓ»р›ѓі 14.18
 
 uint32_t	 Old_Cnt_Vib = 0;
 uint32_t	 Old_Cnt = 0;
@@ -114,11 +119,11 @@ void clc_Pulses()
 				//count--;
 	
 				//e. preparing number for output //r. подготовить число для выдачи
-				Output.Str.BINS_dif = PSdif_sum_Vib_32 - TermoCompens_Sum;	 //e. substract the accumulated termocompensational part from the accumulated number //r. из накопленного числа вычитаем накопленную термокомпенсац. составляющую
+				Output.Str.BINS_dif = PSdif_sum_Vib_32 - g_gld.thermo.TermoCompens_Sum;	 //e. substract the accumulated termocompensational part from the accumulated number //r. из накопленного числа вычитаем накопленную термокомпенсац. составляющую
 				Output.Str.PS_dif = Output.Str.BINS_dif >> 16;	
 				LatchPhase = INT32_MAX;	 //in Latch_Event it's indicator of latch appearing
 				Output.Str.SF_dif = PSdif_sum_Vib_64; 
-				TermoCompens_Sum = 0;  //e. nulling the accumulated termocompenstion for beginning of the new cycle of accumulation //r. обнуляем накопленную термокомпенсацию для начала нового цикла накопления
+				g_gld.thermo.TermoCompens_Sum = 0;  //e. nulling the accumulated termocompenstion for beginning of the new cycle of accumulation //r. обнуляем накопленную термокомпенсацию для начала нового цикла накопления
 														 				
 					if ((Device_Mode == DM_EXT_LATCH_DELTA_BINS_PULSE) || \
 					   ((Device_Mode == DM_EXT_LATCH_DELTA_SF_PULSE) && Ext_Latch_ResetEnable))

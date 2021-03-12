@@ -200,13 +200,13 @@ typedef enum uart_baudrate_speedDef{
 Выбрать UART0REC или UART1REC
 в качестве периферии для реализации обмена
 */
-#define UART0REC
-//#define UART1REC
+//#define UART0REC
+#define UART1REC
 //#define UART2REC
 /**
 UART для отладки
 */
-//#define UART0DBG
+#define UART0DBG
 
 /******************************************************************************
 ** Function name:		UARTInit
@@ -222,7 +222,7 @@ void UART0_Init(x_uint32_t baudrate);
 void UART1_Init(x_uint32_t baudrate);
 void UART2_Init(x_uint32_t baudrate);
 
-#define DBG_PREPARE(buf,size) memset(buf,0,size);
+#define DBG_PREPARE(buf,size) memset(buf,' ',size);
 
 #if defined(UART0DBG)
 #define UART_DBG_SEND(buf,size) UART0_SendString(buf,size);
@@ -231,39 +231,39 @@ void UART2_Init(x_uint32_t baudrate);
 #endif
 
 #define DBG_SEND(buf,size) \
-    buf[size-2] = 0x0a;\
-    buf[size-1] = 0x0b;\
+    buf[size-2] = '\n';\
+    buf[size-1] = '\r';\
     UART_DBG_SEND(buf,size);
 
 #define DBG0(buf,size,text)\
-    DBG_PREPARE(buf,size);\
+    DBG_PREPARE(buf,size)\
     sprintf(buf,text);\
-    DBG_SEND(buf,size);
+    DBG_SEND(buf,strlen(buf)+2);
     
 #define DBG1(buf,size,text,par1)\
-    DBG_PREPARE(buf,size);\
+    DBG_PREPARE(buf,size)\
     sprintf(buf,text,par1);\
-    DBG_SEND(buf,size);
+    DBG_SEND(buf,strlen(buf)+2);
     
 #define DBG2(buf,size,text,par1,par2)\
-    DBG_PREPARE(buf,size);\
+    DBG_PREPARE(buf,size)\
     sprintf(buf,text,par1,par2);\
-    DBG_SEND(buf,size);
+    DBG_SEND(buf,strlen(buf)+2);
     
 #define DBG3(buf,size,text,par1,par2,par3)\
-    DBG_PREPARE(buf,size);\
+    DBG_PREPARE(buf,size)\
     sprintf(buf,text,par1,par2,par3);\
-    DBG_SEND(buf,size);
+    DBG_SEND(buf,strlen(buf)+2);
     
 #define DBG4(buf,size,text,par1,par2,par3,par4)\
-    DBG_PREPARE(buf,size);\
+    DBG_PREPARE(buf,size)\
     sprintf(buf,text,par1,par2,par3,par4);\
-    DBG_SEND(buf,size);
+    DBG_SEND(buf,strlen(buf)+2);
     
 #define DBG5(buf,size,text,par1,par2,par3,par4,par5)\
-    DBG_PREPARE(buf,size);\
+    DBG_PREPARE(buf,size)\
     sprintf(buf,text,par1,par2,par3,par4,par5);\
-    DBG_SEND(buf,size);
+    DBG_SEND(buf,strlen(buf)+2);
     
 void UART0_SendString(char* ucData,int size);
 int UART0_SendByte(char ucData);

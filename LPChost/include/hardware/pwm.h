@@ -5,7 +5,6 @@
 
 #define 	SHIFT_7680_12500		15	  //e. 14 digits for 7680 to 12500 clock converting and 1 division digit  
 #define		SHIFT_C_7680_12500		11	  //
-#define		DITH_VBN_SHIFT			2 
 #define		DITH_VB_TAU_SHIFT       2
 #define 	MULT_7680_12500			26667
 

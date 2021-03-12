@@ -14,17 +14,17 @@
   * <h2><center>&copy; 2020 Электрооптика</center></h2>
   ******************************************************************************
   */
-#include "core/dither.h"
 #include "hardware/hardware.h"
+#include "core/dither.h"
 #include "core/gld.h"
-
 #include "core/global.h"
+#include "core/const.h"
+#include "core/sip.h"
 
+#include "stdlib.h"
 //TODO
 #include "mathDSP.h"
 #include "CyclesSync.h"
-#include "stdlib.h"
-#include "sip.h"
 
 x_int32_t RI_diff; //e.input signal of "recovery" APS
 x_int32_t MaxDelay;
@@ -98,10 +98,10 @@ void clc_OutFreq_regulator(void)
     static int temp = 0;
     static int temp_pure = 0;
 
-    if(Dif_Curr_Vib>0)
-        out_freq_sum += Dif_Curr_Vib;
+    if(g_gld.Dif_Curr_Vib>0)
+        out_freq_sum += g_gld.Dif_Curr_Vib;
     else
-        out_freq_sum -= Dif_Curr_Vib;
+        out_freq_sum -= g_gld.Dif_Curr_Vib;
 
     //e. second has elapsed, fix the output frequency value 
     if (time_1_Sec == DEVICE_SAMPLE_RATE_uks) {
@@ -160,7 +160,7 @@ void clc_OutFreq_regulator(void)
 void clc_Dith_regulator(void)
 {	
     static int dith_period = 0;
-    RI_diff = DUP_Filt(Dif_Curr_Vib<<2);
+    RI_diff = DUP_Filt(g_gld.Dif_Curr_Vib<<2);
 
 	if (RI_diff >= 0)
         ph_error = 1;	   			

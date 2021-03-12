@@ -623,7 +623,7 @@ void command_ans_DEV_MODE()
 {
 	num_of_par = 2; //e. 2 parameters output
 	//e. address of the counter mode register (intenal latch, external latch, etc.)
-	COMMAND_UTILITY_ANSWER_FIELD(0,&Device_Mode,2);
+	COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint32_t*)&Device_Mode,2);
 	//e. address of the mode register of the processor card 
 	COMMAND_UTILITY_ANSWER_FIELD(1,&SRgR,2);
 	trm_cycl = 0; //e. forbid cyclic transmission of the parameter 
@@ -718,10 +718,14 @@ void command_ans_M_ADC_R()
 	UART_SwitchSpeed(trm_rate);
 	
 	num_of_par = 4;     		//e. 4 parameters output
-	COMMAND_UTILITY_ANSWER_FIELD(0,0,2);
-	COMMAND_UTILITY_ANSWER_FIELD(1,0,2);
-	COMMAND_UTILITY_ANSWER_FIELD(2,0,2);
-	COMMAND_UTILITY_ANSWER_FIELD(3,&(g_input.word.hf_out),2);
+    //фотоприемник А
+	COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint32_t*)&(g_input.word.in1),2);
+    //фотоприемник Б
+	COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint32_t*)&(g_input.word.in2),2);
+    //ВЧ АМ-детектора
+	COMMAND_UTILITY_ANSWER_FIELD(2,(x_uint32_t*)&(g_input.word.hf_out),2);
+    //НЧ АМ-детектора
+	COMMAND_UTILITY_ANSWER_FIELD(3,(x_uint32_t*)&(g_input.word.wp_sel),2);
 	trm_ena = 1;
 }
 /******************************************************************************/
@@ -732,8 +736,8 @@ void command_ans_M_VIB_W()
 void command_ans_M_CNT_R()
 {
 	num_of_par = 2;     		//e. 2 parameters output
-	COMMAND_UTILITY_ANSWER_FIELD(0,&(Output.Str.Cnt_Pls),2);
-	COMMAND_UTILITY_ANSWER_FIELD(1,&(Output.Str.Cnt_Mns),2);
+	COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint32_t*)&(Output.Str.Cnt_Pls),2);
+	COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint32_t*)&(Output.Str.Cnt_Mns),2);
 	trm_ena = 1;        		//e. allow operation of the transmitter
 }
 /******************************************************************************/

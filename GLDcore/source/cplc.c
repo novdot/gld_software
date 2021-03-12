@@ -6,7 +6,7 @@
 //TODO
 #include "mathDSP.h"
 #include "CyclesSync.h"
-#include "ThermoCalc.h"
+//#include "ThermoCalc.h"
 #include <math.h>
 
 #define  PLC_SHIFT				(6) 	
@@ -19,8 +19,8 @@
 
 int WP_reg32;
 int WP_Phase_Det; //e. output of the phase detector of the CPLC (in a digital kind)
-int WP_reset_heating; //e. voltage of reset at heating
-int WP_reset_cooling; //e. voltage of reset at cooling
+//int WP_reset_heating; //e. voltage of reset at heating
+//int WP_reset_cooling; //e. voltage of reset at cooling
 int MaxDelayPLC;
 int sin_func[100];
 int phase_Digital;
@@ -146,34 +146,34 @@ void clc_PLC(void)
     //e. it is not time for reset 
 	if (!is_zeroing) 	{
         //e. there is no reset
-        if ((WP_reg32 > (Device_blk.Str.WP_rup << PLC_SHIFT)) && IsHeating){
+        if ((WP_reg32 > (Device_blk.Str.WP_rup << PLC_SHIFT)) && g_gld.thermo.IsHeating){
             //e. there is heating
             is_zeroing = 1;
             //e. voltage of reset at heating 
-            WP_reset_heating = CPL_reset_calc(
+            g_gld.thermo.WP_reset_heating = CPL_reset_calc(
                 Device_blk.Str.WP_reset
                 , Device_blk.Str.K_WP_rst_heating
-                , Temp_Aver
+                , g_gld.thermo.Temp_Aver
                 , Device_blk.Str.TemperNormal
                 );
 	  			
 	  			plc_transiton = TRANS_HEATING;
-	  			plc_reset32 = WP_reset_heating << PLC_SHIFT;;
+	  			plc_reset32 = g_gld.thermo.WP_reset_heating << PLC_SHIFT;;
 
 				Device_blk.Str.HF_scl = Device_blk.Str.HF_scl_2;
-	  		} else if ((WP_reg32 < (Device_blk.Str.WP_rdw << PLC_SHIFT)) && !IsHeating)	{
+	  		} else if ((WP_reg32 < (Device_blk.Str.WP_rdw << PLC_SHIFT)) && !g_gld.thermo.IsHeating)	{
                 //e. cooling
 	  			is_zeroing = 1;
 				//e. voltage of reset at cooling 
-				WP_reset_cooling = CPL_reset_calc(
+				g_gld.thermo.WP_reset_cooling = CPL_reset_calc(
                     Device_blk.Str.WP_reset2
                     , Device_blk.Str.K_WP_rst_cooling
-                    , Temp_Aver
+                    , g_gld.thermo.Temp_Aver
                     , Device_blk.Str.TemperNormal
                     );
   			
 	  			plc_transiton = TRANS_COOLING;
-	  			plc_reset32 = WP_reset_cooling << PLC_SHIFT;
+	  			plc_reset32 = g_gld.thermo.WP_reset_cooling << PLC_SHIFT;
 
 				Device_blk.Str.HF_scl = Device_blk.Str.HF_scl_2;
 			} else { 

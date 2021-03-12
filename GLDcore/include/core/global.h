@@ -3,17 +3,22 @@
 
 #include "core/types.h"
 #include "core/const.h"
+#include "core/ring_buffer.h"
+
 
 /******************************************************************************/
-//e.   device operation modes
-#define  DM_INT_10KHZ_LATCH				1		//e. mode of internal latch 10 kHz 		
-#define  DM_INT_LATCH_DELTA_PS			2
-#define	 DM_INT_LATCH_DELTA_BINS		3
-#define  DM_EXT_LATCH_DELTA_PS_PULSE	4		//e. mode of external latch with output of the Delta_PS command by pulse 
-#define  DM_EXT_LATCH_DELTA_BINS_PULSE	6		//e. mode of external latch with output of the Delta_BINS command by pulse
-#define  DM_EXT_LATCH_DELTA_SF_PULSE	7		//e. mode of Delta Scale factor 
 
-/******************************************************************************/
+typedef struct gld_thermoDef{
+    int	TermoCompens_Sum;//< накопление термокомпенсации
+    x_uint8_t IsHeating;//< признак нагрева
+    int dThermoHeatDeltaPer_dTermo[TERMO_FUNC_SIZE];
+    int	dThermoCoolDeltaPer_dTermo[TERMO_FUNC_SIZE];
+    int	dFuncPer_dTermo[TERMO_FUNC_SIZE];
+    int	Temp_Aver; //< the mean temperature for 1 Sec for T4 sensor 
+    int WP_reset_heating;	//e. voltage of reset at heating
+    int WP_reset_cooling;	//e. voltage of reset at cooling
+}gld_thermo;
+
 /**
     @brief Струтрура содержит глобальные поля
         параметры прибора
@@ -29,6 +34,17 @@ typedef struct gld_globalDef{
     //dac and adc holders
     x_uint16_t nADCData[6];
     x_uint16_t nDACData[2];
+    
+    //ringbuffer
+    ringbuffer_Data ringBuf;
+    
+    gld_thermo thermo;
+    
+    //sip
+    //e. current difference output for dithering control in LightUp mode and Dither regulator
+    int32_t	Dif_Curr_Vib;
+    uint32_t Curr_Cnt_Vib;
+    uint32_t Cnt_curr;
     
 }gld_global;
 

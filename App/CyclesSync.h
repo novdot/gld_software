@@ -19,9 +19,6 @@
 #define DELAY_UART_ENBL				4000			//e. delay = DELAY_UART_ENBL*8/CLCK
 #define DELAY_UART_DISBL			2500			//e. delay = DELAY_UART_ENBL*8/CLCK
 
-#define HALF_PERIOD 0x00000004
-#define WHOLE_PERIOD 0x00000008
-#define RESET_PERIOD 0x0000000C
 //-----------------------------PWM Registers----------------------------------------
 
 #define TCR_CNT_EN		0x00000001

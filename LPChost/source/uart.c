@@ -253,7 +253,7 @@ void uart_recieve(x_uint8_t*a_pBuffer,x_uint32_t*a_uCount)
         a_pBuffer[(*a_uCount)] = LPC_UART1->RBR;
         (*a_uCount) += 1;
     }
-#else
+#elif defined UART0REC
     while ((LPC_UART0->LSR & RecievBufEmpty) != 0){ 
         a_pBuffer[(*a_uCount)] = LPC_UART0->RBR;
         (*a_uCount) += 1;

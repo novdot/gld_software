@@ -12,13 +12,14 @@
 ** Descriptions:        
 **--------------------------------------------------------------------------------------------------------       
 *********************************************************************************************************/
-#include "SIP.h"
+//#include "SIP.h"
 //#include "el_lin.h"
 #include "CyclesSync.h"
 #include "Parameters.h"							  
 #include "Dither_Reg.h"
 //#include "commandset.h"
 //#include "CntrlGLD.h"
+
 #include <math.h>
 
 #include "hardware/hardware.h"
@@ -26,6 +27,8 @@
 #include "core/global.h"
 #include "core/config.h"
 #include "core/gld.h"
+#include "core/ring_buffer.h"
+#include "core/sip.h"
 
 /******************************************************************************
 **   Main Function  main()
@@ -51,7 +54,7 @@ void init1()
          v &= 0x3FF;
          delay();   //will allow signal to be observed on a multimeter
     }
-}
+}*/
 /******************************************************************************/
 void init()
 {
@@ -105,6 +108,9 @@ void init()
     init_Dither_reg();
     RgConB = RATE_VIBRO_1;
     
+    //program variables
+    //ringbuffer_init(&g_gld.ringBuf,32);
+    
     DBG2(dbg,64,"Build in %s %s",__DATE__,__TIME__);
     DBG0(dbg,64,"Init done!");
 }
@@ -123,7 +129,7 @@ void loop()
     //state DAC voltage
     hardware_set_dac(); 
     
-    Curr_Cnt_Vib = qei_get_position();
+    g_gld.Curr_Cnt_Vib = qei_get_position();
     				
     Latch_Event();	
     clc_Pulses();
@@ -149,6 +155,7 @@ void loop()
     
     hardware_photo_exchange(&Output.Str.Cnt_Dif);
     
+    //command_echo();
     command_recieve(_command_recieve_flag_gld);
     command_decode();
     command_transm();
