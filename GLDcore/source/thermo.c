@@ -1,11 +1,10 @@
 #include "core/thermo.h"
 #include "core/global.h"
 #include "core/const.h"
+#include "core/math_dsp.h"
 
 #include "math.h"
 
-//TODO
-#include "mathDSP.h"
 
 #define	TEMP_AVER_PERIOD	4 // e. number of seconds for average
 

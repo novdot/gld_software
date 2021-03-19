@@ -110,9 +110,9 @@ typedef union {
         int PI_a6; //  36
         int PI_b1; //  37
         int PI_b2; //  38
-        int PI_b3; //  39
+        int PI_b3; //  39 коэффициент b3 температурной коррекции
         int PI_b4; //  40
-        int PI_b5; //  41
+        int PI_b5; //  41 gain of HF ADC
         int PI_b6; //  42
 
         //e. parameters of normalization of the temperature sensors 
@@ -171,7 +171,7 @@ typedef union {
         x_uint32_t L_Vibro; //e. period of oscillation of the dither drive 
         x_uint32_t T_Vibro; //e. pulse width of the dither drive 
         x_uint32_t T_VB_pll; //e. PD output of the frequency regulator of the dither drive 
-        int PS_dif;
+        int PS_dif; //
         int BINS_dif;
         int Cnt_Dif;
         int Cnt_Pls;
@@ -206,31 +206,31 @@ typedef union {
 } inputData;
 
 /**
-    @brief RgConA - регистр управления A
+    @brief RgConA - регистр управления A, main register of device control
 */
 typedef union{
     struct{
-        unsigned Las: 1;
-        unsigned HFG: 1;
-        unsigned Rlr: 1;
-        unsigned WPr: 1;
-        unsigned WPs: 1;
-        unsigned VBT: 1;
-        unsigned VBF: 1;
-        unsigned GLD: 1;
+        unsigned Las: 1; //< 0- выключить лазер
+        unsigned HFG: 1; //< 0 - выключить контур ГВЧ;
+        unsigned Rlr: 1; //< 0 – выключить контур мощности ДУП;
+        unsigned WPr: 1; //< 0 – выключить контур СРП;
+        unsigned WPs: 1; //< 0 - выключить сигнал поиска СРП
+        unsigned VBT: 1; //< 0 – выключить контур амплитуды вибропривода;
+        unsigned VBF: 1; //< 0 – выключить контур частоты ВП
+        unsigned GLD: 1; //< 0 – выключить все контуры ГЛД
         unsigned : 8;
     }bit;
     x_uint16_t word;
 }reg_RgConA;
 
 /**
-    @brief RgConB- дополнительный регистр управления B
+    @brief RgConB- дополнительный регистр управления B, additional register of device control
 */
 typedef union{
     struct{
-        unsigned Vib0: 1;
-        unsigned Vib1: 1;
-        unsigned RM: 1;
+        unsigned Vib0: 1; //< 1- включить сглаживающую фильтрацию вибросчетчиков лазер;
+        unsigned Vib1: 1; //< 1 – включить контур компенсации виброподставки
+        unsigned RM: 1; //< 1 – включить защелкивание счетчиков по восстановленному меандру
         unsigned : 13;
     }bit;
     x_uint16_t word;
@@ -255,7 +255,11 @@ typedef union{
 }reg_valid;
 
 /**
-    @brief Line_Err - регистр ошибок
+    @brief B.I.T - регистр самотестирования;
+*/
+
+/**
+    @brief Line_Err - регистр ошибок линии
 */
 typedef union{
     struct{

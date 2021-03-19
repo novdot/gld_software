@@ -1,5 +1,9 @@
-#ifndef __SYNC_H_INCLUDED 
-#define __SYNC_H_INCLUDED
+/**
+* @brief irq handlers
+*/
+#ifndef __CORE_SYNC_H_INCLUDED__
+#define __CORE_SYNC_H_INCLUDED__
 
 
-#endif
+
+#endif //__CORE_SYNC_H_INCLUDED__

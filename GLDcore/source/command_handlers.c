@@ -180,7 +180,7 @@ void command_cmd_DELTA_BINS()
 {
 	//e. set in the additional register of device control the mode of work with 
 	//dither counters  and the filter of moving average
-	RgConB = RATE_VIBRO_1;
+	g_gld.RgConB.word = RATE_VIBRO_1;
 	command_utility_SetSpeedPeriod(); 
 	UART_SwitchSpeed(trm_rate);
 	CMD_Mode = 4;
@@ -196,7 +196,7 @@ void command_cmd_DELTA_SF()
 {
 	//e. time for data transfer has come, we work only with dither counters 
 	//dither counters  and the filter of moving average
-	RgConB = RATE_VIBRO_1;
+	g_gld.RgConB.word = RATE_VIBRO_1;
 	// reset all bits of status word
     //g_gld.valid.word = 0;	
     Valid_Data = 0;	
@@ -270,11 +270,15 @@ void command_subcmd_M_STIMUL()
     //Output.ArrayOut[chan] = (((int)rcv_buf[4] << 8) | (int)rcv_buf[5])-0x8000;
     switch(chan) {
         case 0:
+            //PLC_reg - 0
             Output.Str.WP_reg = data;
             break;
         case 2:
+            //Dither - 2 TODO
+            Output.Str.WP_sin = data;
             break;
         case 3:
+            //HFO_reg - 3
             Output.Str.HF_reg = data;
             break;
         default:
@@ -338,8 +342,11 @@ void command_subcmd_M_ADC_R()
 /******************************************************************************/
 void command_subcmd_M_VIB_W()
 {
-	Output.Str.T_Vibro = (rcv_buf[4] << 8) | (rcv_buf[5] & 0xFF); //e. new variable of the period 
-	Output.Str.L_Vibro= (rcv_buf[6] << 8) | (rcv_buf[7] & 0xFF); //e. new variable of the pulse width 
+	Output.Str.T_Vibro = (rcv_buf[4] << 8) | (rcv_buf[5] & 0xFF); //period 
+	Output.Str.L_Vibro= (rcv_buf[6] << 8) | (rcv_buf[7] & 0xFF); //pulse width 
+    Output.Str.L_Vibro = Output.Str.L_Vibro / 2;
+    Device_blk.Str.VB_N = Output.Str.T_Vibro; 
+    Device_blk.Str.VB_tau = Output.Str.L_Vibro;
 	VibroDither_Set();       //e. and output its value to period registers on card
 	trm_cycl = 0;      //e. periodic data transmission is not needed
 	
@@ -407,8 +414,8 @@ void command_subcmd_M_E5RA_W()
 /******************************************************************************/
 void command_cmd_MAINT()
 {
-	if (!RgConB) {
-	    RgConB = RATE_VIBRO_1;
+	if (!g_gld.RgConB.word) {
+	    g_gld.RgConB.word = RATE_VIBRO_1;
 		//e. disable interrupt from referense meander
 		SwitchRefMeandInt(RATE_VIBRO_1);   
 	}
@@ -496,7 +503,7 @@ void command_subcmd_M_RATE1()
     command_utility_SetSpeedPeriod();
     UART_SwitchSpeed(trm_rate);
     
-    RgConB =  RATE_REPER_OR_REFMEANDR;
+    g_gld.RgConB.word =  RATE_REPER_OR_REFMEANDR;
     SwitchRefMeandInt(RATE_REPER_OR_REFMEANDR);
     
     // reset all bits of status word
@@ -515,7 +522,7 @@ void command_subcmd_M_RATE2()
     command_utility_SetSpeedPeriod();
     UART_SwitchSpeed(trm_rate);
     
-    RgConB = RATE_REPER_OR_REFMEANDR;
+    g_gld.RgConB.word = RATE_REPER_OR_REFMEANDR;
     //e. enable interrupt from ref. meander
     SwitchRefMeandInt(RATE_REPER_OR_REFMEANDR);
     
@@ -660,9 +667,9 @@ void command_ans_M_CTL_R()
 	
 	COMMAND_UTILITY_ANSWER_FIELD(0,&CMD_Code,2);
 	if ((rcv_buf[3] & (1 << 4)) == 0) {
-		COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint32_t*)&g_gld.RgConA,2);
+		COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint32_t*)&g_gld.RgConA.word,2);
 	} else {
-		COMMAND_UTILITY_ANSWER_FIELD(1,&RgConB,2);
+		COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint32_t*)&g_gld.RgConB.word,2);
 	}
 
 	trm_ena = 1;                 //e. allow operation of the transmitter of line

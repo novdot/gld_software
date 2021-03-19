@@ -27,16 +27,14 @@ void hardware_configure_backlight(void);
 void hardware_backlight_on(void);
 void hardware_backlight_off(void);
 
-/**
-    @brief модулятор
-*/
-void hardware_modulator(x_uint32_t a_data);
 
 /**
-    @brief управление контурами ГВЧ, СРП
+    @brief управление контурами ГВЧ, СРП посредством ЦАП, АЦП
 */
+
+void hardware_modulator(x_uint32_t a_data);
 void hardware_regul_data_init();
-void hardware_regul_data_write(x_uint32_t flag, int*pExchangeErr, int a_HF_reg, int a_WP_reg);
+void hardware_regul_data_write(x_uint32_t a_ch, int*a_pExchangeErr, int a_reg);
 void hardware_regul_data_read(int*a_pBuffer, int cnt, int*pExchangeErr);
 
 /**

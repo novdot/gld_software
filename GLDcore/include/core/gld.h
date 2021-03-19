@@ -84,11 +84,11 @@ x_switch_t gld_loop_is_vb_freq();
 x_switch_t gld_loop_is_gld_reg();
 /**/
 //Loop controls TODO
-#define loop_is_closed(loop_bit) 	((RgConA & (loop_bit)) == loop_bit)
-#define close_loop(loop_bit) 		RgConA |= loop_bit
-#define open_loop(loop_bit) 		RgConA &= ~(loop_bit)
-#define open_all_loops()			RgConA   = 0	
-#define close_all_loops()			RgConA   = 0xFFFF
+#define loop_is_closed(loop_bit) 	((g_gld.RgConA.word & (loop_bit)) == loop_bit)
+#define close_loop(loop_bit) 		g_gld.RgConA.word |= loop_bit
+#define open_loop(loop_bit) 		g_gld.RgConA.word &= ~(loop_bit)
+#define open_all_loops()			g_gld.RgConA.word   = 0	
+#define close_all_loops()			g_gld.RgConA.word   = 0xFFFF
 
 /**/
 

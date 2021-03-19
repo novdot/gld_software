@@ -17,7 +17,7 @@
 //#include "CntrlGLD.h"
 #include "core/gld.h"
 //#include "SIP.h"
-#include "el_lin.h"
+//#include "el_lin.h"
 
 #include "hardware/hardware.h"
 #include "core/global.h"
@@ -50,7 +50,7 @@ void Latch_Event()
 	  if (LatchPhase < INT32_MAX)  //e. latch is present
 	    {	
 		  Latch_Rdy = 1;		   //e. set the flag for processing below
-		   if (RgConB)			   //e. work whith vibro counters
+		   if (g_gld.RgConB.word)			   //e. work whith vibro counters
 			{
 		  	  if (PreLatch)		   //e. we have had delayed latch
 		     	  PreLatch = 0;		 	  				
@@ -262,9 +262,13 @@ int SwitchMode()
 		time_1_Sec = DEVICE_SAMPLE_RATE_uks;
 		Seconds++;
 	}
-	if (Seconds == 3) { Seconds++;close_all_loops();}	
-	Sys_Clock++; //e. increment of the system clock register //r. инкремент регистра временной сетки системы
-	PrevPeriod = LPC_PWM1->MR0;
+	if (Seconds == 3) { 
+        Seconds++; 
+        close_all_loops();
+    }	
+	Sys_Clock++; //e. increment of the system clock register 
+   
+    PrevPeriod = LPC_PWM1->MR0;
 #if defined PERFOMANCE
 	PrevPeriod = 10000;
 #endif

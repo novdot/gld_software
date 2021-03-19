@@ -53,8 +53,8 @@ x_uint32_t 	trm_cycl;
 
 x_uint32_t Vibro_2_CountIn;
 
-x_uint32_t 	RgConA; //e. main register of device control 
-x_uint32_t 	RgConB; //e. additional register of device control
+//x_uint32_t 	RgConA; //e. main register of device control 
+//x_uint32_t 	RgConB; //e. additional register of device control
 
 x_uint32_t	Valid_Data; //e. the byte-attribute of authentic data, accumulating errors from request to request  
 

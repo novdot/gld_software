@@ -72,8 +72,9 @@ void command_recieve_gld()
         ToWaitEnd++;
         return;
     }
+    
     //e. the header of packet has not recieved
-    if ((!ToWaitEnd) && (rcv_num_byt > 1))
+    if ((!ToWaitEnd) && (rcv_num_byt > 1)){
         if (
                 (rcv_buf[0] != 0xCC) 
                 || (( rcv_buf[1] > 2) && ( rcv_buf[1] != 0x1F))
@@ -82,7 +83,9 @@ void command_recieve_gld()
             ToWaitEnd++;
             return;
         }
-    //
+    }
+        
+    //check packet lenght
     if (rcv_num_byt == 6) {	 
         if (
             (rcv_buf[2] == 0x0A) 
@@ -101,6 +104,7 @@ void command_recieve_gld()
             return;
         }
     }
+    
     //e. checksum is bad 
 	if (command_check_lcc(rcv_buf,rcv_num_byt) == _x_false){
         ToWaitEnd++;
@@ -158,7 +162,7 @@ void command_recieve_bootloader()
         ToWaitEnd++;
         return;
 	} else {
-        DBG0(dbg,64,"get packet bootloader");
+        //DBG0(dbg,64,"get packet bootloader");
 		rcv_Rdy = 1;	  	
 	}
 	ToWaitEnd = 0;
@@ -204,22 +208,6 @@ void command_transm(void)
     trm_buf[0] = 0x00dd; //e. header of answering packet 
     trm_buf[1] = Device_blk.Str.My_Addres; //e. own device address       
     CRC = trm_buf[1]; //e. initialization of CRC counter   
-    
-    /*trm_buf[trm_num_byt] = 0x55;
-    CRC += trm_buf[trm_num_byt]; 
-    trm_num_byt++;
-    
-    trm_buf[trm_num_byt] = 0x01;
-    CRC += trm_buf[trm_num_byt]; 
-    trm_num_byt++;
-    
-    trm_buf[trm_num_byt] = 0x02;
-    CRC += trm_buf[trm_num_byt]; 
-    trm_num_byt++;
-    
-    trm_buf[trm_num_byt] = 0x03;
-    CRC += trm_buf[trm_num_byt]; 
-    trm_num_byt++;*/
     
     //e. data block creation cycle 
     for ( param = 0; param < num_of_par; param++) {		  		  	

@@ -20,10 +20,11 @@
 #include "core/global.h"
 #include "core/const.h"
 #include "core/sip.h"
+#include "core/math_dsp.h"
 
 #include "stdlib.h"
 //TODO
-#include "mathDSP.h"
+//#include "mathDSP.h"
 #include "CyclesSync.h"
 
 x_int32_t RI_diff; //e.input signal of "recovery" APS
@@ -49,9 +50,9 @@ void init_Dither_reg()
   Device_blk.Str.VB_N = 29538;
   VibroDither_Init();
   VibroDither_SwitchOn();
-  init_BandPass(1.0/(float)Vibro_Filter_Aperture, 100.0/(float)DEVICE_SAMPLE_RATE_HZ, DUP);	
+  init_BandPass(1.0/(float)g_gld.Vibro_Filter_Aperture, 100.0/(float)DEVICE_SAMPLE_RATE_HZ, DUP);	
   //e. maximal delay of the meander of the dither drive
-  MaxDelay = Vibro_Filter_Aperture >> 1; 
+  MaxDelay = g_gld.Vibro_Filter_Aperture >> 1; 
   CounterIquiryCycle_Init((Device_blk.Str.VB_N*Vibro_2_CountIn)>>SHIFT_C_7680_12500);  
 }
 
@@ -160,6 +161,10 @@ void clc_OutFreq_regulator(void)
 void clc_Dith_regulator(void)
 {	
     static int dith_period = 0;
+    
+    //#NDA temp off
+    return;
+    
     RI_diff = DUP_Filt(g_gld.Dif_Curr_Vib<<2);
 
 	if (RI_diff >= 0)
@@ -228,9 +233,8 @@ void clc_Dith_regulator(void)
 
 /******************************************************************************/
 void VibroDither_Set()
-{
-    Device_blk.Str.VB_N = Output.Str.T_Vibro; 
-    pwm_set_period(Output.Str.T_Vibro);
+{ 
+    pwm_set(Output.Str.T_Vibro,Output.Str.L_Vibro);
     //to enable inquiry timer reloading
     SwitchCntInq = 1;	 
 }

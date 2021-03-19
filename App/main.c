@@ -106,7 +106,7 @@ void init()
     Output.Str.HF_reg = Device_blk.Str.HF_min;
     init_PLC();
     init_Dither_reg();
-    RgConB = RATE_VIBRO_1;
+    g_gld.RgConB.word = RATE_VIBRO_1;
     
     //program variables
     //ringbuffer_init(&g_gld.ringBuf,32);

@@ -46,6 +46,9 @@ typedef struct gld_globalDef{
     uint32_t Curr_Cnt_Vib;
     uint32_t Cnt_curr;
     
+    //math dsp
+    unsigned int Vibro_Filter_Aperture;
+    
 }gld_global;
 
 extern gld_global g_gld;
@@ -105,8 +108,8 @@ extern x_uint32_t start_Rq; //e. request for device starting
 extern x_uint32_t stop_Rq; //e. request for device stopping
 //extern x_uint32_t pulse_Rq; //e. request for light-up of laser 
 
-extern x_uint32_t RgConA; //e. main register of device control 
-extern x_uint32_t RgConB; //e. additional register of device control 
+//extern x_uint32_t RgConA; //e. main register of device control 
+//extern x_uint32_t RgConB; //e. additional register of device control 
 
 //CycleSync
 extern x_uint32_t Sys_Clock; 

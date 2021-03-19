@@ -17,6 +17,8 @@
 #ifndef GLD_CONST_H_INCLUDED
 #define GLD_CONST_H_INCLUDED
 
+#define FIRMWARE_VER	 0x00 //e. firmware version number 
+
 //e. constants for the piecewise-linear thermocompensation 
 #define TERMO_FUNC_SIZE    14 //e. amount of the points of the table function of thermocompensation 
 #define MAX_ORDER           9 //e. maximal value of order for the thermocompensation coefficients 
@@ -229,6 +231,19 @@
 #define  DM_EXT_LATCH_DELTA_PS_PULSE	4		//e. mode of external latch with output of the Delta_PS command by pulse 
 #define  DM_EXT_LATCH_DELTA_BINS_PULSE	6		//e. mode of external latch with output of the Delta_BINS command by pulse
 #define  DM_EXT_LATCH_DELTA_SF_PULSE	7		//e. mode of Delta Scale factor 
+
+/**
+    @brief device operation modes
+*/
+typedef enum device_modeDef{
+    _device_mode_default = 0
+    , _device_mode_10khz //<1 – режим внутренней защелки импульсами 10 кГц (устанавливается по включении питания),
+    , _device_mode_ref //<2 - режим внутренней защелки импульсами RefMeander,
+    , _device_mode_d_ps //<3 – режим внешней защелки с выдачей команды B_Delta_PS по запросу линии RS422,
+    , _device_mode_d_ps_pulse //<4– режим внешней защелки с выдачей команды B_Delta_PS по импульсу защелки,
+    , _device_mode_d_bins //<5– режим внешней защелки с выдачей команды B_Delta_BINS по запросу линии RS422,
+    , _device_mode_d_bins_pulse //<6– режим внешней защелки с выдачей команды B_Delta_BINS по импульсу защелки.
+}device_mode_t;
 
 //sync
 #define HALF_PERIOD 0x00000004

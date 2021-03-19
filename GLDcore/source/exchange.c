@@ -5,15 +5,25 @@
 #include "hardware/hardware.h"
 
 int ExchangeErr = 0;
+int g_ChInd = 0; //< индекс канала ЦАП
 /******************************************************************************/
 void exchange_regul_data_write()
 {
-    hardware_regul_data_write(
-        Sys_Clock
-        , &ExchangeErr
-        , Output.Str.HF_reg
-        , Output.Str.WP_reg
-    );
+    if(g_ChInd==1) {
+        g_ChInd = 0;
+        hardware_regul_data_write(
+            0
+            , &ExchangeErr
+            , Output.Str.WP_reg
+        );
+    }else{
+        g_ChInd = 1;
+        hardware_regul_data_write(
+            1
+            , &ExchangeErr
+            , Output.Str.HF_reg
+        );
+    }
 }
 /******************************************************************************/
 void exchange_regul_data_read()

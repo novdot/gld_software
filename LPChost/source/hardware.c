@@ -83,10 +83,11 @@ void hardware_regul_data_init()
 //опорник операционного усилителя
 #define SPI_DAC_AMPL_VOLT_REF (2.23)
 #define OUT_VOLT_MAX (15.0)
-#define IN_VAL_MAX (0xd23)
-#define IN_VAL_REF (0x722)
+#define IN_VAL_MAX (0xd23) //< значение из программы управления.верхний уровень
+#define IN_VAL_MIN (0x122) //< значение из программы управления.нижний уровень
+#define IN_VAL_REF (0x722) //< значение из программы управления.нулевой уровень
 
-void hardware_regul_data_write(x_uint32_t flag, int*pExchangeErr, int a_HF_reg, int a_WP_reg)
+void hardware_regul_data_write(x_uint32_t a_ch, int*a_pExchangeErr, int a_reg)
 {
     int data[6] = {0,0,0,0,0,0};
     float v_ampl = 0.0;
@@ -94,36 +95,40 @@ void hardware_regul_data_write(x_uint32_t flag, int*pExchangeErr, int a_HF_reg, 
     x_uint32_t a_data = 0;
     x_uint32_t delta_ref = 0;
     float v_delta_range = 0;
-    static x_uint32_t testData = 0x122;
+    //static x_uint32_t testData = 0x122;
     
     x_uint32_t nDataRef = 2286;
     x_int32_t nDelta = 0;
     x_uint32_t nAmpAvail = 0;
  
-    if (flag & 1) {
+    if (a_ch == 1) {
         data[4] = ltc16xx_create_input_word_hdr(
                 _ltc16xx_cmd_wr_upd
                 , _ltc16xx_addr_dac_a
             );
-        a_data = a_HF_reg;
     } else {
         data[4] = ltc16xx_create_input_word_hdr(
                 _ltc16xx_cmd_wr_upd
                 , _ltc16xx_addr_dac_b
             );
-        a_data = a_WP_reg;
     }
-    testData = 1826 - 512*1;
+    a_data = a_reg;
+    //testData = 1826 - 512*1;
     //0xD23 0x722 0x122
     //if(testData>=0xD23) testData = 0x122;
     //a_data = sqrt(a_data);
     
+    //проверим допустимый диапазон
+    if(a_data>IN_VAL_MAX) a_data = IN_VAL_MAX;
+    else if(a_data<IN_VAL_MIN) a_data = IN_VAL_MIN;
+    
+    //рассчитаем 0 из-за опроника
     nDelta = LTC1622_RESOLUTION/2 - nDataRef;
     if(nDelta>=0) nAmpAvail = 2*nDataRef;
     else nAmpAvail = 2*(LTC1622_RESOLUTION - nDataRef);
     
-    //диапазон значений 0x122..0xD23 приведем к 0x0..0xFFF
-    a_data = (a_data - 0x122)*0xFFF/(0xD23 - 0x122);
+    //диапазон значений 0x122(IN_VAL_MIN)..0xD23(IN_VAL_MAX) приведем к 0x0..0xFFF
+    a_data = (a_data - IN_VAL_MIN)*0xFFF/(IN_VAL_MAX - IN_VAL_MIN);
     
     //сожмем характеристику(из-за опорника для ОУ)
     a_data *= (float)nAmpAvail/(float)(LTC1622_RESOLUTION);
@@ -144,7 +149,7 @@ void hardware_regul_data_write(x_uint32_t flag, int*pExchangeErr, int a_HF_reg, 
     //a_data = 2286;
     
     data[5] = ltc16xx_create_input_word_data(a_data);
-    spi_write(data,6,pExchangeErr);
+    spi_write(data,6,a_pExchangeErr);
 }
 /******************************************************************************/
 void hardware_regul_data_read(int*a_pBuffer, int cnt, int*pExchangeErr)

@@ -65,9 +65,9 @@ x_bool_t check_lcc(x_uint8_t* a_pBuffer,x_uint32_t a_uCount);
 */
 void command_utility_SetSpeedPeriod(void);
 
-typedef enum{
-    _command_recieve_flag_gld = 0
-    , _command_recieve_flag_bootloader = 1
+typedef enum{ 
+    _command_recieve_flag_gld = 0 //< логика ГЛД
+    , _command_recieve_flag_bootloader = 1 //< логика загрузчика
 }command_recieve_flag;
 /**
     @brief чтение пакета информации из периферии и сохранение в буффер

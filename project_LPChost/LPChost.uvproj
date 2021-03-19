@@ -445,11 +445,6 @@
               <FilePath>..\App\main.c</FilePath>
             </File>
             <File>
-              <FileName>mathDSP.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\App\mathDSP.c</FilePath>
-            </File>
-            <File>
               <FileName>Parameters.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\App\Parameters.c</FilePath>

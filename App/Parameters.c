@@ -9,6 +9,7 @@
 #include "core/global.h"
 #include "core/const.h"
 
+#define INT_ERR_TC		0x00000008
 /******************************************************************************
 ** Function name:		LoadFlashParam
 **

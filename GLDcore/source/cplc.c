@@ -2,15 +2,15 @@
 #include "hardware/hardware.h"
 #include "core/global.h"
 #include "core/gld.h"
+#include "core/math_dsp.h"
 
 //TODO
-#include "mathDSP.h"
 #include "CyclesSync.h"
 //#include "ThermoCalc.h"
 #include <math.h>
 
-#define  PLC_SHIFT				(6) 	
-#define	 PLC_PHASE_DET_SHIFT	(18)	//e. 18 - for analog output
+#define  PLC_SHIFT				(6) //(6) 	
+#define	 PLC_PHASE_DET_SHIFT	(18) //for analog output
 
 #define  PLC_RESET_THRESHOLD 	(-3276) //e. correspond to the voltage +1.2 Volts
 #define	 WP_REG32MAX_SATURATION (32767 << PLC_SHIFT)
@@ -49,6 +49,7 @@ void sin_calc_host3()
     }
     
 }
+
 /******************************************************************************/
 void init_PLC(void)
 {
@@ -74,6 +75,7 @@ void init_PLC(void)
 
 	MaxDelayPLC = Device_blk.Str.PI_b3>>1;	//e. max expected delay for phase detector output
 }
+
 /******************************************************************************/
 int PLC_MeanderDelay(int flag)
 {
@@ -117,7 +119,9 @@ void clc_PLC(void)
         TRANS_COOLING	//e. transition is perfromed at cooling 
     } plc_transiton = FINISHED; 
 
-
+    //#NDA temporarly auto off
+    return;
+    
 	if (Output.Str.WP_sin >= 32768) {
 		poz_sin_flag = 0;
 	} else {
@@ -202,18 +206,18 @@ void clc_PLC(void)
 	  				WP_reg32 = plc_reset32;
 				}
 			}
-		} else 
+		} else {
             if (zero_delay < Device_blk.Str.WP_mdy) {
                 zero_delay++;
             } else {
                 //e. resetting was completed 
                 is_zeroing = 0;
             }
+        }
 	}
     //e. the minimum corresponds to a small negative number, appropriate to PLC_RESET_THRESHOLD
     Saturation(WP_reg32, WP_REG32MAX_SATURATION, WP_REG32MIN_NEW_SATURATION);  
-
-	
+    
 	if ( loop_is_closed(WP_REG_ON) ) {
         //e. the regulator loop is closed 
         //e. we use as controlling - voltages of the integrator
