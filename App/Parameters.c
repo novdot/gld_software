@@ -65,8 +65,8 @@ void init_DefaultParam(void)
     Device_blk.Str.HF_scl = HF_SCL_CONST; 
     Device_blk.Str.HF_scl_2 = Device_blk.Str.HF_scl;
     Device_blk.Str.HF_max = HF_MAX_CONST; 
-
     Device_blk.Str.HF_min = HF_MIN_CONST; 
+    
     Device_blk.Str.RI_ref= RI_REF_CONST; 
     Device_blk.Str.RI_scl= RI_SCL_CONST; 
 
@@ -83,7 +83,6 @@ void init_DefaultParam(void)
     Device_blk.Str.VB_Fsc = VB_FSC_CONST;
     Device_blk.Str.VB_Tmin = VB_TMIN_CONST;
     Device_blk.Str.VB_Tmax = VB_TMAX_CONST;
-
     Device_blk.Str.VB_N = T_VIB_START;
     Device_blk.Str.VB_Nmin = T_VIB_START - T_VIB_DELTA;
     Device_blk.Str.VB_Nmax = T_VIB_START + T_VIB_DELTA;

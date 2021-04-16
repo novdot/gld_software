@@ -112,6 +112,8 @@ void spi_read(int*a_pArrayIn,int a_nCount,int*a_pExchangeErr)
         //exchanging has finished, read buffer
         for(iterator=0;iterator<a_nCount;iterator++) {
             a_pArrayIn[iterator] = LPC_SSP0->DR;
+            //Dummy = LPC_SSP0->DR;	
+            //Dummy = LPC_SSP0->DR;	
         }
         
         // clear the RxFIFO

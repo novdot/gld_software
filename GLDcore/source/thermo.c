@@ -87,26 +87,17 @@ void clc_ThermoSensors(void)
     static int TempEvolution = 0;
     int	StartTermoCompens = 0; //н6ачальная термокомпенсация
 
-	/*for (i=0; i<2; i++)
-	{
+	for (i=0; i<2; i++){
 		//e. conversion of temperature values on ADC output 
 		//e. to range -32768 .. +32767 ( additional code; format 1.15 )
-        /*Output.Str.Tmp_Out[i] = mac_r(Device_blk.Str.Tmp_bias[i] << 16,
-												(Input.StrIn.Tmp_in[i] - 0x8000), 
+        Output.Str.Tmp_Out[i] = mac_r(Device_blk.Str.Tmp_bias[i] << 16,
+												(g_input.array[1+i] - 0x8000), 
 												Device_blk.Str.Tmp_scal[i]);
-		Output.Str.Tmp_Out[i+4] = Input.StrIn.Tmp_in[i];																	
-	}*/
-    //#NDA 20200304 temp
-    Output.Str.Tmp_Out[0] = g_input.word.temp1 /2;
-    Output.Str.Tmp_Out[1] = g_input.word.hf_out /2;
-    Output.Str.Tmp_Out[2] = g_input.word.wp_sel /2;
-    Output.Str.Tmp_Out[3] = g_input.word.delta_t /2;
-    
-    Output.Str.Tmp_Out[4] = g_input.word.in1 /2;
-    Output.Str.Tmp_Out[5] = g_input.word.in2 /2;
+		Output.Str.Tmp_Out[i+4] = g_input.array[1+i];																	
+	}
 
     //e. 1 second elapsed
-	if (time_1_Sec == DEVICE_SAMPLE_RATE_uks) {
+	if (g_gld.time_1_Sec == DEVICE_SAMPLE_RATE_uks) {
 		seconds_aver++;
 #if !defined DEBUG
 		//ResetToResetInSeconds++;

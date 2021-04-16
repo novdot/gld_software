@@ -9,6 +9,14 @@
 //
 gld_global g_gld;
 
+/******************************************************************************/
+void gld_global_init(void)
+{
+    g_gld.time_1_Sec = DEVICE_SAMPLE_RATE_uks; 
+    g_gld.time_Seconds = 0;    
+}
+
+/******************************************************************************/
 //command
 x_uint32_t rcv_num_byt;
 x_uint32_t rcv_Rdy;
@@ -73,7 +81,7 @@ x_uint32_t Is_BIT = 0;
 
 //CycleSync
 x_uint32_t 	Sys_Clock;      //e. counter of system ticks
-x_int32_t 	time_1_Sec = DEVICE_SAMPLE_RATE_uks;     //e. pseudosecond timer 
+ 
 
 x_uint32_t	count;
 x_int32_t	PrevPeriod = 0;

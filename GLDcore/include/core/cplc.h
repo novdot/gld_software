@@ -2,10 +2,11 @@
 #define __CPLC_H_INCLUDED
 
 /**
-    @brief Initialization procedure for PLC regulator
+    @brief init_PLC
+    Initialization procedure for PLC regulator
     @return 
 */
-void init_PLC(void);
+void cplc_init(void);
 
 /**
     @brief Outgoing of the delayed meander signal for the PLC regulator
@@ -14,16 +15,18 @@ void init_PLC(void);
 int PLC_MeanderDelay(int flag);
 
 /**
-    @brief Procedure of initial processing for the CPLC regulator
+    @brief clc_PLC
+    Procedure of initial processing for the CPLC regulator
     @return 
 */
-void clc_PLC(void);
+void cplc_regulator(void);
 
 /**
-    @brief Procedure of scan signal generating
+    @brief clc_WP_sin
+    Procedure of scan signal generating
     @return Current code for scan signal DAC of PLC
 */
-int clc_WP_sin(void);
+int cplc_calc_modulator(void);
 
 /**
     @brief Integartion of output of the PD of the CPLC regulator 

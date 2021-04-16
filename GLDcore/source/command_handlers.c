@@ -271,15 +271,16 @@ void command_subcmd_M_STIMUL()
     switch(chan) {
         case 0:
             //PLC_reg - 0
-            Output.Str.WP_reg = data;
+            //преобразов до доп кода и сдвиг
+            Output.Str.WP_reg = (data-2048)<<4;
             break;
         case 2:
-            //Dither - 2 TODO
-            Output.Str.WP_sin = data;
+            //Dither - 2 DS regulator ДУП
+            //Output.Str. = data;
             break;
         case 3:
             //HFO_reg - 3
-            Output.Str.HF_reg = data;
+            Output.Str.HF_reg = (data-2048)<<4;
             break;
         default:
             //check flags bit in stimul cmd
@@ -344,7 +345,12 @@ void command_subcmd_M_VIB_W()
 {
 	Output.Str.T_Vibro = (rcv_buf[4] << 8) | (rcv_buf[5] & 0xFF); //period 
 	Output.Str.L_Vibro= (rcv_buf[6] << 8) | (rcv_buf[7] & 0xFF); //pulse width 
-    Output.Str.L_Vibro = Output.Str.L_Vibro / 2;
+    //Output.Str.L_Vibro /= 2;
+    
+    /*if( Output.Str.L_Vibro<(Output.Str.T_Vibro/100 + 1) ){
+        Output.Str.L_Vibro = Output.Str.T_Vibro/100 + 1;
+    }*/
+    
     Device_blk.Str.VB_N = Output.Str.T_Vibro; 
     Device_blk.Str.VB_tau = Output.Str.L_Vibro;
 	VibroDither_Set();       //e. and output its value to period registers on card
@@ -822,6 +828,7 @@ void command_ans_M_PULSE()
 void command_ans_M_RATE1()
 {
     num_of_par = 14;
+    
 	
     COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint32_t*)&(Output.Str.Cnt_Pls),2);
     COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint32_t*)&(Output.Str.Cnt_Mns),2);
@@ -834,16 +841,16 @@ void command_ans_M_RATE1()
     COMMAND_UTILITY_ANSWER_FIELD(8,&(Output.Str.L_Vibro),2);
     COMMAND_UTILITY_ANSWER_FIELD(9,(x_uint32_t*)&(g_input.word.hf_out),2);
     COMMAND_UTILITY_ANSWER_FIELD(10,(x_uint32_t*)&(Output.Str.WP_reg),2);
-    COMMAND_UTILITY_ANSWER_FIELD(11,(x_uint32_t*)&(Output.Str.WP_pll),2);
-    COMMAND_UTILITY_ANSWER_FIELD(12,(x_uint32_t*)&(Output.Str.Tmp_Out),12);
-    COMMAND_UTILITY_ANSWER_FIELD(13,(x_uint32_t*)&(Output.Str.WP_scope1),4);
+    COMMAND_UTILITY_ANSWER_FIELD(11,(x_uint32_t*)&(Output.Str.WP_pll),2); //phase detector
+    COMMAND_UTILITY_ANSWER_FIELD(12,(x_uint32_t*)&(Output.Str.Tmp_Out),12); //темпер;
+    COMMAND_UTILITY_ANSWER_FIELD(13,(x_uint32_t*)&(Output.Str.WP_scope1),4); //резерв;
 	
-    trm_ena = 1;        //e. allow operation of the transmitter 
+    trm_ena = 1;        //allow operation of the transmitter 
 } 
 /******************************************************************************/
 void command_ans_M_RATE2()
 {
-    num_of_par = 2;     //e. 2 parameters output
+    num_of_par = 2;     //2 parameters output
 	
     COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint32_t*)&(Output.Str.Cnt_Pls),2);
     COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint32_t*)&(Output.Str.Cnt_Mns),2);

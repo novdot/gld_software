@@ -4,10 +4,12 @@
 #include "core/gld.h"
 #include "core/math_dsp.h"
 
+#include <math.h>
+#include <stdlib.h>
+
 //TODO
 #include "CyclesSync.h"
 //#include "ThermoCalc.h"
-#include <math.h>
 
 #define  PLC_SHIFT				(6) //(6) 	
 #define	 PLC_PHASE_DET_SHIFT	(18) //for analog output
@@ -18,63 +20,11 @@
 #define  WP_TMP_THRESHOLD		(7) //e. temperature threshold, defining heats up or cool down the device
 
 int WP_reg32;
-int WP_Phase_Det; //e. output of the phase detector of the CPLC (in a digital kind)
 //int WP_reset_heating; //e. voltage of reset at heating
 //int WP_reset_cooling; //e. voltage of reset at cooling
 int MaxDelayPLC;
-int sin_func[100];
+float g_sin_func[100];
 int phase_Digital;
-
-/******************************************************************************/
-void sin_calc_host3()
-{
-	int i = 0;
-    float temp = 0.0;
-    
-    //e. synthesis of PLC scan signal
-    for (i = 0; i<Device_blk.Str.PI_b3; i++) {
-        //generate sin points
-        temp = sin((float)i*2.0*PI/(float)Device_blk.Str.PI_b3);
-
-        //move up from -1..+1 to 0..+2
-        temp += 1.0;
-        
-        //convert from 0..+2 to 0..0xFFFF
-        sin_func[i] = (int)( temp*(float)(0xFFFF/2) );//65535
-        
-        /*if (sin_func[i] < 0)
-            sin_func[i] += 65536;*/
-        /*sin_func[i]=sin_func[i]<<4;*/
-        //sin_func[i] = (i / Device_blk.Str.PI_b3)*65535;
-    }
-    
-}
-
-/******************************************************************************/
-void init_PLC(void)
-{
-	int i;
-	//e. voltage of reset at heating should not 
-    //e.exceed a limit of the upper threshold of the CPLC
-	if (Device_blk.Str.WP_reset < PLC_RESET_THRESHOLD) {
-		Device_blk.Str.WP_reset = PLC_RESET_THRESHOLD + 1;
-	}
-    //e. WP_reg start voltage is (WP_rup - WP_rdw)/2	
-	Output.Str.WP_reg = (Device_blk.Str.WP_rup + Device_blk.Str.WP_rdw) >> 1; 
-	WP_reg32 = Output.Str.WP_reg<<PLC_SHIFT;
-		   
- 	if ((Device_blk.Str.PI_b3>100)||(Device_blk.Str.PI_b3<10))	//e. if demanded frequency of PLC modulator 
-	      Device_blk.Str.PI_b3 = 40;						//e. is more then 1kHz or less them 100Hz, set f=250Hz
-  
-    sin_calc_host3();
-    
-    //e. calculation of filter coefficients for PLC		
-	init_BandPass( 1.0/(float)Device_blk.Str.PI_b3, 10.0/(float)(DEVICE_SAMPLE_RATE_HZ), PLC);	
-
-	Device_blk.Str.WP_scl <<=  1; //e. during fist 10 seconds after start we state	Device_blk.Str.WP_scl = 2*Device_blk.Str.WP_scl
-
-	MaxDelayPLC = Device_blk.Str.PI_b3>>1;	//e. max expected delay for phase detector output
-}
 
 /******************************************************************************/
 int PLC_MeanderDelay(int flag)
@@ -101,35 +51,125 @@ int PLC_MeanderDelay(int flag)
 	if (poz_counter == Device_blk.Str.WP_ref) { flg_delay = 0; }
 	if (neg_counter == Device_blk.Str.WP_ref) { flg_delay = 1; }
 	return (flg_delay);
-} 
+}
 /******************************************************************************/
-void clc_PLC(void)
+/**
+*   @breif интегрирование выхода ФД контура СРП для технологического вывода
+*/
+int WP_PhaseDetectorRate(int a_nPhaseDetInput, int a_nIntegrateTime) 
 {
-	static int is_zeroing = 0;
-	static int zero_delay = 0;
 
-   int poz_sin_flag;   	 	   
-   int poz_sin_flag_delayed;
- 			
-	static int plc_reset32;
+	static int SampleAndHoldOut = 0;
+	static int WP_PhasDet_integr = 0;//, WP_PhasDetector = 0;
+	
+    //проверяем если накопилась секунда - вернем проинтегрированное значение контура
+	if (a_nIntegrateTime == DEVICE_SAMPLE_RATE_uks) {
+		SampleAndHoldOut = (int)(WP_PhasDet_integr >> PLC_PHASE_DET_SHIFT);  
+		WP_PhasDet_integr = 0;
+	} else {	
+        //время интеграции не накопилось - суммируем
+		WP_PhasDet_integr += a_nPhaseDetInput;
+	}
+	return (SampleAndHoldOut);
+}
+/******************************************************************************/
+void calc_sin_func()
+{
+	int i = 0;
+    float temp = 0.0;
+    
+    //проверим коэф частоты
+    //if demanded frequency of PLC modulator 
+    if ((Device_blk.Str.PI_b3>PI_B3_MAX)||(Device_blk.Str.PI_b3<PI_B3_MIN)){	
+        //is more then 1kHz or less them 100Hz, set f=250Hz
+	    Device_blk.Str.PI_b3 = PI_B3_CONST;
+    }
+    
+    //проверим коэф амплитуды
+    if (Device_blk.Str.PI_a4 == 0) {
+		Device_blk.Str.PI_a4 = PI_A4_CONST;
+	}
+    
+    
+    //e. synthesis of PLC scan signal
+    for (i = 0; i<Device_blk.Str.PI_b3; i++) {
+        //generate sin points
+        temp = sin((float)i*2.0*PI/(float)Device_blk.Str.PI_b3);
+
+        //move up from -1..+1 to 0..+2
+        temp += 1.0;
+        
+        g_sin_func[i] = ( temp );
+        
+        //convert from 0..+2 to 0..0xFFFF
+        //наложим амплитуду - в процессе исполнения
+        //sin_func[i] = (int)( temp*Device_blk.Str.PI_a4);
+    }
+}
+
+
+/******************************************************************************/
+void cplc_init(void)
+{
+	int i;
+	//e. voltage of reset at heating should not 
+    //e.exceed a limit of the upper threshold of the CPLC
+	if (Device_blk.Str.WP_reset < PLC_RESET_THRESHOLD) {
+		Device_blk.Str.WP_reset = PLC_RESET_THRESHOLD + 1;
+	}
+    //e. WP_reg start voltage is (WP_rup - WP_rdw)/2	
+	Output.Str.WP_reg = (Device_blk.Str.WP_rup + Device_blk.Str.WP_rdw) >> 1; 
+	WP_reg32 = Output.Str.WP_reg<<PLC_SHIFT;
+		   
+    calc_sin_func();
+    
+    //e. calculation of filter coefficients for PLC		
+	init_BandPass( 1.0/(float)Device_blk.Str.PI_b3, 10.0/(float)(DEVICE_SAMPLE_RATE_HZ), PLC);	
+
+    //e. during fist 10 seconds after start we state Device_blk.Str.WP_scl = 2*Device_blk.Str.WP_scl
+	Device_blk.Str.WP_scl <<=  1; 
+
+    //e. max expected delay for phase detector output
+	MaxDelayPLC = Device_blk.Str.PI_b3>>1;
+
+    for (i=0; i<7; i++){
+		Output.Str.WP_Phase_Det_Array[i] = 0;
+    }
+    for (i=0; i<21; i++){
+		g_gld.cplc.WP_DelaySin_Array[i]	=0;
+    }
+    for (i=0; i<=7; i++){
+		Output.Str.WP_sin_Array[i] = Output.Str.WP_sin_Array[i+1];
+    }
+}
+
+
+/******************************************************************************/
+void cplc_regulator(void)
+{
+    static int is_zeroing = 0;
+    static int zero_delay = 0;
+    int poz_sin_flag = 0;   	 	   
+    int poz_sin_flag_delayed = 0;
+    static int plc_reset32 = 0;
+    //e. output of the phase detector of the CPLC (in a digital kind)
+    int WP_Phase_Det = 0; 
+    int i =0;
+    
     //e. state of linear transition at reset of the CPLC regulator
 	static enum {
         FINISHED, 		//e. linear transition is completed
         TRANS_HEATING,  //e. transition is perfromed at heating
         TRANS_COOLING	//e. transition is perfromed at cooling 
     } plc_transiton = FINISHED; 
-
-    //#NDA temporarly auto off
-    return;
     
 	if (Output.Str.WP_sin >= 32768) {
 		poz_sin_flag = 0;
 	} else {
 		poz_sin_flag = 1;
 	}
-	
+    
 	//e. band-pass filter for the CPLC regulator 
-	//WP_Phase_Det = PLC_PhaseDetFilt(Input.StrIn.WP_sel);
     WP_Phase_Det = PLC_PhaseDetFilt(g_input.word.wp_sel);
 	
 	if (WP_Phase_Det >0) {
@@ -137,8 +177,24 @@ void clc_PLC(void)
 	} else {
   		phase_Digital = -1;
 	}
+    
+    //if (Device_blk.TermoMode ==0)
+    for (i=0; i<7; i++){
+		Output.Str.WP_Phase_Det_Array[i] = Output.Str.WP_Phase_Det_Array[i+1];
+    }
+	Output.Str.WP_Phase_Det_Array[7] = WP_Phase_Det;
+    
+    for (i=0; i<21; i++){
+		g_gld.cplc.WP_DelaySin_Array[i] = g_gld.cplc.WP_DelaySin_Array[i+1];
+    }
+	g_gld.cplc.WP_DelaySin_Array[20] = Output.Str.WP_sin;
+	
+	for (i=0; i<=7; i++){
+		Output.Str.WP_sin_Array[i] = Output.Str.WP_sin_Array[i+1];
+    }
+	Output.Str.WP_sin_Array[7] = g_gld.cplc.WP_DelaySin_Array[20-Device_blk.Str.WP_ref];
+    
 	// from this WP_Phase_Det - modulated signal like LIM_DIG
- 
 	poz_sin_flag_delayed = PLC_MeanderDelay(poz_sin_flag);
 
 	if(poz_sin_flag_delayed) {
@@ -219,48 +275,58 @@ void clc_PLC(void)
     Saturation(WP_reg32, WP_REG32MAX_SATURATION, WP_REG32MIN_NEW_SATURATION);  
     
 	if ( loop_is_closed(WP_REG_ON) ) {
+        //enable auto regulation
         //e. the regulator loop is closed 
         //e. we use as controlling - voltages of the integrator
 		Output.Str.WP_reg = (int)(WP_reg32 >> PLC_SHIFT);
 	} else {
+        //handle regulation
         //e. the regulator loop is open
         //e. set the previous value of the WP_reg
 		WP_reg32 = Output.Str.WP_reg << PLC_SHIFT;
 	}
 
 	//e. integartion of output of the PD of the CPLC regulator for the technological output on the Rate command
-	Output.Str.WP_pll = WP_PhaseDetectorRate( WP_Phase_Det, time_1_Sec); 
+	Output.Str.WP_pll = WP_PhaseDetectorRate( WP_Phase_Det, g_gld.time_1_Sec); 
 }
 
 /******************************************************************************/
-int clc_WP_sin(void)
+int cplc_calc_modulator(void)
 {
-	static int index = 0;     
+	static int index = 0;
+    int val = 0;
+    int val_noise = 0;
 	index++;
+    
+    //TODO for test temporarly recalculate sin in main loop
+    //calc_sin_func();
+    
+    //modulator ampl
+    if (Device_blk.Str.PI_a4 == 0) {
+		Device_blk.Str.PI_a4 = PI_A4_CONST;
+	}
 
-	if (index >= Device_blk.Str.PI_b3) //40
+    //current array index
+	if (index >= Device_blk.Str.PI_b3)
 		index = 0;
 
+    val = (int)(g_sin_func[index]*Device_blk.Str.PI_a4) 
+        + (PI_A4_MAX - Device_blk.Str.PI_a4);
+    
+    //modulator noise
+    /*if(0){
+        val_noise = Device_blk.Str.PI_a4*rand();
+        val *= val_noise;
+        if (val == 32767){
+            val -=(val << 1);
+        }
+    }*/
+    
     //Modulator
-    hardware_modulator(sin_func[index]);
+    hardware_modulator(val);
 		 
-	return (sin_func[index]);
+	return (val);
 } 
 
-/******************************************************************************/
-int WP_PhaseDetectorRate(int PhaseDetInput, int IntegrateTime) 
-{
-
-	static int SampleAndHoldOut = 0;
-	static int WP_PhasDet_integr = 0;//, WP_PhasDetector = 0;
-	
-	if (IntegrateTime == DEVICE_SAMPLE_RATE_uks) {
-		SampleAndHoldOut = (int)(WP_PhasDet_integr >> PLC_PHASE_DET_SHIFT);  
-		WP_PhasDet_integr = 0;
-	} else {	
-		WP_PhasDet_integr += PhaseDetInput;
-	}
-	return (SampleAndHoldOut);
-}
 
 /******************************************************************************/

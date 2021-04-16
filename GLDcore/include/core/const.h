@@ -24,160 +24,98 @@
 #define MAX_ORDER           9 //e. maximal value of order for the thermocompensation coefficients 
 #define TSENS_NUMB          4 //e. number of the temperature sensor used for the thermocompensation
 
-#define	DEVICE_SAMPLE_RATE_HZ		10000		//e. sampling frequency 10 kHz 
-#define	DEVICE_SAMPLE_RATE_uks		100000000		//e. sampling frequency 10 kHz
+#define	DEVICE_SAMPLE_RATE_HZ		10000 //e. sampling frequency 10 kHz 
+#define	DEVICE_SAMPLE_RATE_uks		100000000//100000000 //e. sampling frequency 10 kHz
 
 	//e. *** Default device parameters
 #define	DEVICE_SN			1		//e. device serial number = 01
 #define	My_Addres_const		0	      //e.    - device own address
-/******************************************************************************/
-#define PARAMS_TEST
-#if defined (PARAMS_TEST)
-    #define	HF_REF_CONST	15000	
-    #define	HF_SCL_CONST	0	    
-    #define	HF_MIN_CONST	( (0x8365a0)>>4 )//-4896  
-    #define	HF_MAX_CONST    -1327
-    #define	HFO_SHIFT		16		
-    
-    #define	WP_REF_CONST	10       
-    #define	WP_SCL_CONST	10	    
-    #define	WP_MDY_CONST	0		
-    #define	WP_RUP_CONST	0	
-    #define	WP_RDW_CONST	0	
-    
-    #define	VB_PHS_CONST	-9     	
-    #define	VB_SCL_CONST	256	
-    #define	T_VIB_START     18960	
-    								
-    #define	T_VIB_DELTA	    1000	
-    
-    #define	VB_NMIN_CONST   12080	
-    #define	VB_NMAX_CONST   64000	
-    #define	VB_FDF_HI_CONST	3	    
-    #define	VB_FDF_LO_CONST	3392  		
-    #define	VB_FSC_CONST	-256	
-    #define	VB_TMIN_CONST	100	
-    #define	VB_TMAX_CONST	12772	
-    #define	L_VIB_START 3324	
+////////////////////////////////////////////////
+//e. =============== parameters of HF regulator     
+#define	HF_REF_CONST	15080	//e. 1 - value of the reference 
+#define	HF_SCL_CONST	1	    // 0x64 //e. 2 - the gain factor (1.15)         
+#define	HF_MIN_CONST	-32668  //e. 3 - minimum of the output value on the regulator DAC (appropriate to maximal voltage on the HFO) 
+#define	HF_MAX_CONST    -17379	//e. 4 - maximum of the output value on the regulator DAC (appropriate to minimal voltage on the HFO) 
+#define	HFO_SHIFT		16		//e. number of digits of fractional part in 32-bit variable of the hf_reg32 varaible 
 
-    #define	VBN_TZD_CONST 400     
-    #define	VBN_RAN_CONST 350     
-    #define	VBN_K_CONST 6000	
-    
-    #define	RI_REF_CONST	0	
-    #define	RI_SCL_CONST	0	    
-    
-    #define	PI_FSC_CONST 128	    
-    #define	PI_FB0_CONST 0	    
-    #define	PI_SCL_CONST 256	    
-    #define	PI_BIA_CONST 0	    
-    
-    #define	PI_A0_CONST	0
-    #define	PI_A1_CONST	0
-    #define	PI_A2_CONST	0
-    #define	PI_A3_CONST	0
-    #define	PI_A4_CONST	0
-    #define	PI_A5_CONST	0
-    #define	PI_A6_CONST	0
-    #define	PI_B1_CONST	0
-    #define	PI_B2_CONST	0
-    #define	PI_B3_CONST	0
-    #define	PI_B4_CONST	0
-    #define	PI_B5_CONST	0
-    #define	PI_B6_CONST	0
-    
-    #define TMP_SCALE 0x4000 
-    #define TMP_BIAS 0
-    #define	WP_RESET_CONST 7360
-    #define WP_RESET2_CONST 29216
-    #define WP_TRANS_STEP 32767	
+//e. =============== parameters of the CPLC regulator
+#define	WP_REF_CONST	5       //e. 7 -  value of the reference                                              
+#define	WP_SCL_CONST	5	    //e. 8 - the gain factor (1.15) 
+#define	WP_MDY_CONST	30		//e. 9 - value of the reset delay                                      
+#define	WP_RUP_CONST	31936	//e. 10 - lower value of DAC adjustment (appropriate to minimal voltage on the heater)                                     
+#define	WP_RDW_CONST	11801	//e. 11 - upper value of the DAC adjustment (appropriate to maximal voltage on the heater) 
 
-    #define	G_PHOTO_STRA 200
-    #define	G_PHOTO_STRB 200
-    
-    #define HEADER_WORD_CONST 0x55aa
-#else
-	//e. =============== parameters of HF regulator     
-	#define	HF_REF_CONST	15080	//e. 1 - value of the reference 
-	#define	HF_SCL_CONST	1	    // 0x64 //e. 2 - the gain factor (1.15)         
-	#define	HF_MIN_CONST	-32668  //e. 3 - minimum of the output value on the regulator DAC (appropriate to maximal voltage on the HFO) 
-	#define	HF_MAX_CONST    -17379	//e. 4 - maximum of the output value on the regulator DAC (appropriate to minimal voltage on the HFO) 
-	#define	HFO_SHIFT		16		//e. number of digits of fractional part in 32-bit variable of the hf_reg32 varaible 
+//e. =============== parameters of the dither drive regulator of the GLD
+#define	VB_PHS_CONST	4     	//e. 12 - the phase delay parameter of the dither drive PLL 
+#define	VB_SCL_CONST	1024	//e. 13 - the gain factor (1.15) of the dither drive PLL
+#define	T_VIB_START     16600	//e. 14 - divider for dither drive period (defines dither period)
+                            //e. _VB_N - the initial value of the oscillation period of the dither drive (406Hz-18916, 17067 - 450Hz)
+#define	T_VIB_DELTA	    1000	    //e. the range of the oscillation period of the dither drive (~ +/- 10 Hz)
 
-	//e. =============== parameters of the CPLC regulator
-	#define	WP_REF_CONST	5       //e. 7 -  value of the reference                                              
-	#define	WP_SCL_CONST	5	    //e. 8 - the gain factor (1.15) 
-	#define	WP_MDY_CONST	30		//e. 9 - value of the reset delay                                      
-	#define	WP_RUP_CONST	31936	//e. 10 - lower value of DAC adjustment (appropriate to minimal voltage on the heater)                                     
-	#define	WP_RDW_CONST	11801	//e. 11 - upper value of the DAC adjustment (appropriate to maximal voltage on the heater) 
-     	
- //e. =============== parameters of the dither drive regulator of the GLD
-	#define	VB_PHS_CONST	4     	//e. 12 - the phase delay parameter of the dither drive PLL 
-	#define	VB_SCL_CONST	1024	//e. 13 - the gain factor (1.15) of the dither drive PLL
-	#define	T_VIB_START     16600	//e. 14 - divider for dither drive period (defines dither period)
-									//e. _VB_N - the initial value of the oscillation period of the dither drive (406Hz-18916, 17067 - 450Hz)
-	#define	T_VIB_DELTA	    1000	    //e. the range of the oscillation period of the dither drive (~ +/- 10 Hz)
+#define	VB_NMIN_CONST   12080	    //e. 15 - minimum of the output value of the oscillation period regulator 
+#define	VB_NMAX_CONST   64000	    //e. 16 - maximum of the output value of the oscillation period regulator 
+#define	VB_FDF_HI_CONST	3	    //e. 17 - adjusted output frequency (H)                     
+#define	VB_FDF_LO_CONST	0  		//e. 18 - (L) (double precision)                    
+#define	VB_FSC_CONST	-2000	//e. 19 - the gain factor of the output frequency regulator 
+#define	VB_TMIN_CONST	100	//e. 20 - minimum of the output value of the Tau regulator 
+#define	VB_TMAX_CONST	10022	//e. 21 - maximum of the output value of the Tau regulator 
+#define	L_VIB_START      5120	//e. 22 - pulse width of the dither drive (before noiseness)
+                         //e. _VB_tau - initial pulse width of the dither drive   
 
-	#define	VB_NMIN_CONST   12080	    //e. 15 - minimum of the output value of the oscillation period regulator 
-	#define	VB_NMAX_CONST   64000	    //e. 16 - maximum of the output value of the oscillation period regulator 
-	#define	VB_FDF_HI_CONST	3	    //e. 17 - adjusted output frequency (H)                     
-	#define	VB_FDF_LO_CONST	0  		//e. 18 - (L) (double precision)                    
-	#define	VB_FSC_CONST	-2000	//e. 19 - the gain factor of the output frequency regulator 
-	#define	VB_TMIN_CONST	100	//e. 20 - minimum of the output value of the Tau regulator 
-	#define	VB_TMAX_CONST	10022	//e. 21 - maximum of the output value of the Tau regulator 
-	#define	L_VIB_START      5120	//e. 22 - pulse width of the dither drive (before noiseness)
-								 //e. _VB_tau - initial pulse width of the dither drive   
+#define	VBN_TZD_CONST	500     //e. 23 - adjusted noise[??] period (user`s constant) 
+#define	VBN_RAN_CONST	400     //e. 24 - range of the random component of noiseness 
+#define	VBN_K_CONST  	7000	//e. 25 - adjusted noise constant (user`s constant) 
 
-	#define	VBN_TZD_CONST	500     //e. 23 - adjusted noise[??] period (user`s constant) 
-	#define	VBN_RAN_CONST	400     //e. 24 - range of the random component of noiseness 
-	#define	VBN_K_CONST  	7000	//e. 25 - adjusted noise constant (user`s constant) 
+//e. =============== parameters of DS power regulator
+#define	RI_REF_CONST	25600	//e. 5 - value of the reference                                             
+#define	RI_SCL_CONST	0	    //e. 6 - the gain factor (1.15) 
 
-   //e. =============== parameters of DS power regulator
-	#define	RI_REF_CONST	25600	//e. 5 - value of the reference                                             
-	#define	RI_SCL_CONST	0	    //e. 6 - the gain factor (1.15) 
-	
-               
-                //e. =============== parameters of processing of accurate data
-	#define	PI_FSC_CONST	128	    //e.  26 - the S_ds scale parameter 
-    #define	PI_FB0_CONST	0	    //e.  27 - the B_ds zero shift of the DS 
-	#define	PI_SCL_CONST	256	    //e.  28 - the Scale scale coefficient of the gyro 
-	#define	PI_BIA_CONST	0	    //e.  29 - the Bias zero shift of the gyro 
+       
+//e. =============== parameters of processing of accurate data
+#define	PI_FSC_CONST	128	    //e.  26 - the S_ds scale parameter 
+#define	PI_FB0_CONST	0	    //e.  27 - the B_ds zero shift of the DS 
+#define	PI_SCL_CONST	256	    //e.  28 - the Scale scale coefficient of the gyro 
+#define	PI_BIA_CONST	0	    //e.  29 - the Bias zero shift of the gyro 
 
-                //e. ===============  coefficients of the temperature correction ================= //r. ===============  믽𴨶馭򻠲歯池򳰭褐믰𥪶騠=================
-	#define	PI_A0_CONST		0	//  30
-	#define	PI_A1_CONST		0	//  31
-	#define	PI_A2_CONST		0	//  32
-	#define	PI_A3_CONST		0	//  33 
-	#define	PI_A4_CONST		0	//  34
-	#define	PI_A5_CONST		0	//  35
-	#define	PI_A6_CONST		0	//  36
-	#define	PI_B1_CONST		0	//  37
-	#define	PI_B2_CONST		0	//  38
-	#define	PI_B3_CONST		0	//  39
-	#define	PI_B4_CONST		0	//  40
-	#define	PI_B5_CONST		0	//  41
-	#define	PI_B6_CONST		0	//  42
+//e. ===============  coefficients of the temperature correction 
+#define	PI_A0_CONST		0	//  30
+#define	PI_A1_CONST		0	//  31
+#define	PI_A2_CONST		0	//  32
+#define	PI_A3_CONST		0	//  33 
+#define	PI_A4_CONST (0x7FFF) //  34 PLC Mod ampl
+#define	PI_A4_MIN (0x0001)
+#define	PI_A4_MAX (0x7FFF)
+#define	PI_A5_CONST		0	//  35
+#define	PI_A6_CONST		0	//  36
+#define	PI_B1_CONST		0	//  37
+#define	PI_B2_CONST		0	//  38
+#define	PI_B3_CONST (40) //  39 PLC Mod freq
+#define	PI_B3_MIN (10)
+#define	PI_B3_MAX (100)
+#define	PI_B4_CONST		0	//  40
+#define	PI_B5_CONST		0	//  41
+#define	PI_B6_CONST		0	//  42
 
-	#define TMP_SCALE		0x4000 // 43 - 54  Tmp_bias[6]; Tmp_scal[6]
-	#define TMP_BIAS		0
-	#define	WP_RESET_CONST 7360	// 55
-	#define WP_RESET2_CONST 29216
-	#define WP_TRANS_STEP	32767		
-    
-	//e. ================ initial gain factor of photodetector channels
-	#define	G_PHOTO_STRA	60     // 56 
-	#define	G_PHOTO_STRB  	60		// 57
+#define TMP_SCALE		0x4000 // 43 - 54  Tmp_bias[6]; Tmp_scal[6]
+#define TMP_BIAS		0
+#define	WP_RESET_CONST 7360	// 55
+#define WP_RESET2_CONST 29216
+#define WP_TRANS_STEP	32767		
 
-	//e. =============== switch of the source of loading GLD variables block === 
-	#define HEADER_WORD_CONST	0x55aa	//e. 58 - magic number flash validity 
-#endif
+//e. ================ initial gain factor of photodetector channels
+#define	G_PHOTO_STRA	60     // 56 
+#define	G_PHOTO_STRB  	60		// 57
+
+//e. =============== switch of the source of loading GLD variables block 
+#define HEADER_WORD_CONST	0x55aa	//e. 58 - magic number flash validity 
+////////////////////////////////////////////////////////
 
 #define  DITHER_REG_PERIOD		40	//e. period of dither regulator (in periods of dither frequency) 
 #define  PLC_RESET_THRESHOLD 	(-3276) //e. correspond to the voltage +1.2 Volts 
 
 	//e. minimal allowable output frequency, at which data are considered authentic  
-    #define		F_RAS_MIN	    10000 	//e.  minimal output frequency at start
-    #define		F_OUT_MIN		(5000>>4)  	//   5000 Ķ / 16
+#define		F_RAS_MIN	    10000 	//e.  minimal output frequency at start
+#define		F_OUT_MIN		(5000>>4)  	//   5000 Ķ / 16
 #define		F_OUT_NORM		(70000>>4)  	//  90000 Ķ / 16
 #define		F_OUT_MAX		(300000>>4) 	// 300000 Ķ / 16
 

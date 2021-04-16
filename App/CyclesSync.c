@@ -23,9 +23,6 @@
 #include "core/global.h"
 #include "core/sip.h"
 
- 
-uint32_t 	Seconds = 0;    //e. seconds from power on
-
 uint32_t	num;
 
 
@@ -255,22 +252,27 @@ int SwitchMode()
 ******************************************************************************/
  void ServiceTime(void)
 {
-  time_1_Sec -= PrevPeriod;
+    static x_uint8_t isStarted = 0;
+    if(g_gld.time_1_Sec<PrevPeriod){
+        g_gld.time_1_Sec = 0;
+    }else{
+        g_gld.time_1_Sec -= PrevPeriod;
+    }
 
-   if (time_1_Sec < (PrevPeriod>>1)) //1 sec elapsed with accurate 0.5 of main period
-	{
-		time_1_Sec = DEVICE_SAMPLE_RATE_uks;
-		Seconds++;
+    //1 sec elapsed with accurate 0.5 of main period
+    if (g_gld.time_1_Sec < (PrevPeriod>>1)){
+        g_gld.time_1_Sec = DEVICE_SAMPLE_RATE_uks;
+        g_gld.time_Seconds++;
 	}
-	if (Seconds == 3) { 
-        Seconds++; 
+	if ( (g_gld.time_Seconds==3) && (isStarted==0)) { 
+        isStarted = 1; 
         close_all_loops();
     }	
 	Sys_Clock++; //e. increment of the system clock register 
    
     PrevPeriod = LPC_PWM1->MR0;
 #if defined PERFOMANCE
-	PrevPeriod = 10000;
+	PrevPeriod = DEVICE_SAMPLE_RATE_HZ;
 #endif
 } // ServiceTime
 
@@ -302,24 +304,23 @@ void WDTFeed( void )
 ** 
 ******************************************************************************/
 void CounterIquiryCycle_Init(uint32_t cycle)
-{ 
-  										//PWM1 enabled after reset by default
-	LPC_SC->PCLKSEL0 &= ~(3<<12);	
- 	LPC_SC->PCLKSEL0 |=  (1<<12);	 	//PWM1 is synchronized by CCLK (100 MHz)
+{ 			
+	LPC_SC->PCLKSEL0 &= ~(3<<12); //PWM1 enabled after reset by default	
+ 	LPC_SC->PCLKSEL0 |=  (1<<12);//PWM1 is synchronized by CCLK (100 MHz)
   
-	LPC_PWM1->TCR = TCR_RESET;	/* Counter Reset */ 
-	LPC_PWM1->MCR = PWMMR0I |PWMMR0R; 	//generate interrupt and reset timer counter
+	LPC_PWM1->TCR = TCR_RESET;	//Counter Reset
+	LPC_PWM1->MCR = PWMMR0I |PWMMR0R; //generate interrupt and reset timer counter
 	
-	LPC_PWM1->CCR = 0x1;				//interrupt from match0 is enabled only	 					   
+	LPC_PWM1->CCR = 0x1; //interrupt from match0 is enabled only	 					   
 		
-    PrevPeriod = 10000;
-    PrevPeriod = cycle;
+    PrevPeriod = DEVICE_SAMPLE_RATE_HZ;
+    //PrevPeriod = cycle;
 
-	LPC_PWM1->MR0 = PrevPeriod;		/* set PWM cycle */
+	LPC_PWM1->MR0 = PrevPeriod;	//set PWM cycle
 
-	LPC_PWM1->PCR = PWMENA1;  			//e. single edge control mode, PWM1 out enabled only
-	LPC_PWM1->LER = LER0_EN ;  			//e. enable updating of register
-	LPC_PWM1->TCR = TCR_CNT_EN | TCR_PWM_EN;	/* counter enable, PWM enable */ 
+	LPC_PWM1->PCR = PWMENA1;  			//single edge control mode, PWM1 out enabled only
+	LPC_PWM1->LER = LER0_EN ;  			//enable updating of register
+	LPC_PWM1->TCR = TCR_CNT_EN | TCR_PWM_EN;	//counter enable, PWM enable
 
   	NVIC_DisableIRQ(PWM1_IRQn);
   return ;

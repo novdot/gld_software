@@ -196,18 +196,6 @@ typedef enum uart_baudrate_speedDef{
     , _uart_baudrate_921600 = 3
 }uart_baudrate_speed;
 
-/*
-Выбрать UART0REC или UART1REC
-в качестве периферии для реализации обмена
-*/
-//#define UART0REC
-#define UART1REC
-//#define UART2REC
-/**
-UART для отладки
-*/
-#define UART0DBG
-
 /******************************************************************************
 ** Function name:		UARTInit
 **

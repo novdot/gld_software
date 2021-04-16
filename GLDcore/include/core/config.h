@@ -24,7 +24,7 @@
 //режим мегабит. скорость 921600 и не изменяется
 //#define __CONFIG_COMMANDS_MBIT 
 //режим по-умолчанию. переключение согласно протоколу
-#define __CONFIG_COMMANDS_DEFAULT 
+//#define __CONFIG_COMMANDS_DEFAULT 
 
 #if defined (__CONFIG_COMMANDS_MBIT)
 #define CONFIG_COMMANDS_BAUDRATE 921600

@@ -63,7 +63,8 @@ void VibroDither_Init()
     
     VB_tau_Ins = Device_blk.Str.VB_tau;
 
-    Output.Str.L_Vibro = Device_blk.Str.VB_tau;  //to update the period and pulse duration for displaying
+    //to update the period and pulse duration for displaying
+    Output.Str.L_Vibro = Device_blk.Str.VB_tau;  
     Output.Str.T_Vibro = Device_blk.Str.VB_N;  
     return;
 }
@@ -93,6 +94,7 @@ void clc_Noise_regulator(void)
 	}
 }
 /******************************************************************************/
+//Амплитудно-частотный контур
 void clc_OutFreq_regulator(void)
 {
     static int out_freq_sum = 0;
@@ -105,7 +107,7 @@ void clc_OutFreq_regulator(void)
         out_freq_sum -= g_gld.Dif_Curr_Vib;
 
     //e. second has elapsed, fix the output frequency value 
-    if (time_1_Sec == DEVICE_SAMPLE_RATE_uks) {
+    if (g_gld.time_1_Sec == DEVICE_SAMPLE_RATE_uks) {
         //e. the regulator loop is closed
         if (loop_is_closed(VB_TAU_ON)) {
             temp = Device_blk.Str.VB_Fdf_Hi << 16;
@@ -162,9 +164,6 @@ void clc_Dith_regulator(void)
 {	
     static int dith_period = 0;
     
-    //#NDA temp off
-    return;
-    
     RI_diff = DUP_Filt(g_gld.Dif_Curr_Vib<<2);
 
 	if (RI_diff >= 0)
@@ -195,7 +194,7 @@ void clc_Dith_regulator(void)
     accum_error += temp2; 
 
     //e. outgoing of the integrated for 1 Sec analog signal of the PD of the dither drive 
-	Output.Str.T_VB_pll = VB_PhaseDetectorRate(temp2, time_1_Sec); 
+	Output.Str.T_VB_pll = VB_PhaseDetectorRate(temp2, g_gld.time_1_Sec); 
     //e. checking status of the dith_period counter  
     if ( dith_period > DITHER_REG_PERIOD ) {  
         dith_period = 0; //e. 40 periods - resetting the counter of dither drive periods                     
@@ -217,8 +216,9 @@ void clc_Dith_regulator(void)
     //e. it was, check the activation of the stabilization regulator 
     if ( loop_is_closed(VB_FREQ_ON) ) {
         Output.Str.T_Vibro = Device_blk.Str.VB_N;  
+        //Output.Str.L_Vibro = Device_blk.Str.VB_tau;  
         //e. has switched on, load calculated values of period 
-        pwm_set_period(Output.Str.T_Vibro);
+        pwm_set(Output.Str.T_Vibro, Output.Str.L_Vibro);
         //e. enable loading counter inquiry timer at the next vibro halfperiod
         SwitchCntInq = 1;  
     }

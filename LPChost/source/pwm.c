@@ -46,14 +46,15 @@ void pwm_init(int a_VB_N,int a_VB_tau)
     //a_VB_N = MCPWM_F2CODE(256.0);
     //a_VB_tau = a_VB_N*0.1;
     
-    LPC_MCPWM->LIM0 = MCPWM_VAL2CODE(a_VB_N);
+    /*LPC_MCPWM->LIM0 = MCPWM_VAL2CODE(a_VB_N);
     //e. set LPC_MCPWM->MAT0 for defineteness
     LPC_MCPWM->MAT0 = MCPWM_VAL2CODE(a_VB_N);
     
     //e. pulse width of the PhA dither drive
     LPC_MCPWM->MAT2 = MCPWM_VAL2CODE(a_VB_tau);
     //e. pulse width of the PhB dither drive  at first time
-    LPC_MCPWM->MAT1 = MCPWM_VAL2CODE(a_VB_N - a_VB_tau);
+    LPC_MCPWM->MAT1 = MCPWM_VAL2CODE(a_VB_N - a_VB_tau);*/
+    pwm_set(a_VB_N,a_VB_tau);
 
     //e. reset dead timer register
     LPC_MCPWM->DT &= ~0x3FF; 
@@ -78,7 +79,9 @@ void pwm_init(int a_VB_N,int a_VB_tau)
 /******************************************************************************/
 void pwm_set(int a_nPeriod,int a_nPulse)
 {
+    a_nPulse /= 2;
     LPC_MCPWM->LIM0 = MCPWM_VAL2CODE(a_nPeriod);
+    LPC_MCPWM->MAT0 = MCPWM_VAL2CODE(a_nPeriod);
     //e. pulse width of the PhA dither drive
     LPC_MCPWM->MAT2 = MCPWM_VAL2CODE(a_nPulse);
     //e. pulse width of the PhB dither drive  at first time
@@ -100,17 +103,17 @@ x_bool_t pwm_pulse_calc(int a_T_Vibro, int a_L_Vibro, int a_Vibro_2_CountIn, x_b
     if (LPC_MCPWM->MAT2 > LPC_MCPWM->MAT1) {
         //inquiry cycle duration must be changed
         //#NDA temporarly off
-        /*if (a_bIsSwitchInq) {
+        if (a_bIsSwitchInq) {
             LPC_PWM1->MR0 = (a_T_Vibro*a_Vibro_2_CountIn)>>SHIFT_C_7680_12500; 		
             //e. enable updating of register
             LPC_PWM1->LER = (1<<0);
-        }*/
-        LPC_MCPWM->MAT1 = (a_T_Vibro*MULT_7680_12500)>>SHIFT_7680_12500;
-        LPC_MCPWM->MAT2 = ((a_T_Vibro - a_L_Vibro)*MULT_7680_12500)>>SHIFT_7680_12500;  
+        }
+        //LPC_MCPWM->MAT1 = (a_T_Vibro*MULT_7680_12500)>>SHIFT_7680_12500;
+        //LPC_MCPWM->MAT2 = ((a_T_Vibro - a_L_Vibro)*MULT_7680_12500)>>SHIFT_7680_12500;  
         return _x_true;
     } else {
-        LPC_MCPWM->MAT2 = (a_T_Vibro*MULT_7680_12500)>>SHIFT_7680_12500;
-        LPC_MCPWM->MAT1 = ((a_T_Vibro - a_L_Vibro)*MULT_7680_12500)>>SHIFT_7680_12500;
+        //LPC_MCPWM->MAT2 = (a_T_Vibro*MULT_7680_12500)>>SHIFT_7680_12500;
+        //LPC_MCPWM->MAT1 = ((a_T_Vibro - a_L_Vibro)*MULT_7680_12500)>>SHIFT_7680_12500;
         return _x_false;	 
     }
 }

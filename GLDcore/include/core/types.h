@@ -105,12 +105,12 @@ typedef union {
         int PI_a1; //  31
         int PI_a2; //  32
         int PI_a3; //  33 
-        int PI_a4; //  34
+        int PI_a4; //  34 PLC Mod ampl
         int PI_a5; //  35
         int PI_a6; //  36
         int PI_b1; //  37
         int PI_b2; //  38
-        int PI_b3; //  39 коэффициент b3 температурной коррекции
+        int PI_b3; //  39 PLC Mod freq
         int PI_b4; //  40
         int PI_b5; //  41 gain of HF ADC
         int PI_b6; //  42
@@ -160,7 +160,7 @@ typedef union {
     struct {
         int	WP_reg; //e. PLC output voltage
         int WP_sin; //e. the signal of CPLC search - sine 250 Hz  
-        int	WP_pll; //e. the XOR output of the PD of the CPLC regulator 
+        int	WP_pll; //e. the XOR output of the PD of the CPLC regulator (phase detector)
         int HF_reg; //e. HFO output voltage
         int HF_dif;
         int WP_Phase_Det_Array[8]; //e. arrays for "worms" output

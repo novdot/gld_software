@@ -60,6 +60,7 @@ void init()
 {
     char dbg[64];
     
+    int i;
     //e. clocking control initialization
     SystemInit();
     
@@ -104,7 +105,7 @@ void init()
     open_all_loops();
     
     Output.Str.HF_reg = Device_blk.Str.HF_min;
-    init_PLC();
+    cplc_init();
     init_Dither_reg();
     g_gld.RgConB.word = RATE_VIBRO_1;
     
@@ -119,6 +120,8 @@ void init()
 void loop()
 {
     static int nSwitch = 0;
+    static char dbg[64];
+    int i;
     
     if (! (LPC_PWM1->IR & 0x0001) ) return;
     //delay();
@@ -145,10 +148,10 @@ void loop()
     
     clc_ThermoSensors();	 
     clc_HFO();
-    clc_PLC();
+    cplc_regulator();
     clc_Dith_regulator(); 
     clc_OutFreq_regulator();
-    Output.Str.WP_sin = clc_WP_sin();
+    Output.Str.WP_sin = cplc_calc_modulator();
   	
     //contrl_GLD();
     gld_control();
@@ -159,6 +162,7 @@ void loop()
     command_recieve(_command_recieve_flag_gld);
     command_decode();
     command_transm();
+    
     
     // data_Rdy &= ~RESET_PERIOD;
     LPC_PWM1->IR = 0x0001; //e. clear interrupt flag 	

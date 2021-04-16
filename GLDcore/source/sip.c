@@ -67,9 +67,9 @@ void clc_Pulses()
    		case RATE_VIBRO_1:
 			if (Latch_Rdy) {	
                 dif_Curr_32_Ext = interpolation(Dif_Curr_32, LatchPhase ); 
-                //#NDA 20200304 temporarly comented
-				//Output.Str.Tmp_Out[2] = (int)((Curr_Cnt_Vib>>16)& 0xffff); 
-				//Output.Str.Tmp_Out[3] = (int)(Curr_Cnt_Vib & 0xffff); 
+                
+				Output.Str.Tmp_Out[2] = (int)((g_gld.Curr_Cnt_Vib>>16)& 0xffff); 
+				Output.Str.Tmp_Out[3] = (int)(g_gld.Curr_Cnt_Vib & 0xffff); 
                 
 				//e. add to the accumulated sum the interpolated sample of an external latch 		
                 PSdif_sum_Vib_32 += dif_Curr_32_Ext; // PSdif_sum_Vib_32 += dif_Curr_32_Ext; 

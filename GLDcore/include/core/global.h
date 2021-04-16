@@ -19,6 +19,10 @@ typedef struct gld_thermoDef{
     int WP_reset_cooling;	//e. voltage of reset at cooling
 }gld_thermo;
 
+typedef struct gld_cplcDef{
+    int WP_DelaySin_Array[21];
+}gld_cplc;
+
 /**
     @brief Струтрура содержит глобальные поля
         параметры прибора
@@ -32,13 +36,14 @@ typedef struct gld_globalDef{
     reg_valid valid;
     
     //dac and adc holders
-    x_uint16_t nADCData[6];
-    x_uint16_t nDACData[2];
+    x_uint32_t nADCData[6];
+    x_uint32_t nDACData[2];
     
     //ringbuffer
     ringbuffer_Data ringBuf;
     
     gld_thermo thermo;
+    gld_cplc cplc;
     
     //sip
     //e. current difference output for dithering control in LightUp mode and Dither regulator
@@ -49,9 +54,18 @@ typedef struct gld_globalDef{
     //math dsp
     unsigned int Vibro_Filter_Aperture;
     
+    //tim
+    x_int32_t time_1_Sec;//e. pseudosecond timer
+    x_uint32_t time_Seconds; //seconds from power on
+    
 }gld_global;
 
 extern gld_global g_gld;
+
+/**
+*   @brief проинициализируем глобальную структуру
+*/
+void gld_global_init(void);
 
 /******************************************************************************/
 //TODO
@@ -113,7 +127,6 @@ extern x_uint32_t stop_Rq; //e. request for device stopping
 
 //CycleSync
 extern x_uint32_t Sys_Clock; 
-extern x_int32_t time_1_Sec;
 
 extern x_int32_t PrevPeriod;	
 extern x_uint32_t Ext_Latch_ResetEnable;
