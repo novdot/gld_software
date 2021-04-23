@@ -14,6 +14,8 @@ void exchange_regul_data_write()
         g_ChInd = 0;
         //вернем сдвиг
         reg = (Output.Str.WP_reg>>4);//+0x800;
+        
+        //TODO maybe move into hardware module
         if(reg>=0) sign = 0;
         else sign = 1;
         

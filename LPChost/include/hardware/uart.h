@@ -206,9 +206,6 @@ typedef enum uart_baudrate_speedDef{
 ** 
 ******************************************************************************/
 void UART_Init(x_uint32_t baudrate);
-void UART0_Init(x_uint32_t baudrate);
-void UART1_Init(x_uint32_t baudrate);
-void UART2_Init(x_uint32_t baudrate);
 
 #define DBG_PREPARE(buf,size) memset(buf,' ',size);
 
@@ -253,10 +250,9 @@ void UART2_Init(x_uint32_t baudrate);
     sprintf(buf,text,par1,par2,par3,par4,par5);\
     DBG_SEND(buf,strlen(buf)+2);
     
-void UART0_SendString(char* ucData,int size);
-int UART0_SendByte(char ucData);
-int UART1_SendByte(int ucData);
-int UART2_SendByte(int ucData);
+void UART_DBG_SendString(char* ucData,int size);
+void UART_SendString(char* ucData,int size);
+int UART_SendByte(char ucData);
 
 /******************************************************************************
 ** Function name:		uart_recieve

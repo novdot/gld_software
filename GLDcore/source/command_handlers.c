@@ -30,7 +30,11 @@
 #include "CyclesSync.h"
 #include "Parameters.h"
 
-
+void command_SwitchSpeed(void)
+{
+    //if(trm_cycl != 1)
+        UART_SwitchSpeed(trm_rate);
+}
 /******************************************************************************/
 void command_handle(void)
 {
@@ -119,7 +123,7 @@ void command_cmd_DELTA_PS()
 {
 	//e. and set the answer transfer rate and its periodicity 
 	command_utility_SetSpeedPeriod();         		  
-	UART_SwitchSpeed(trm_rate);
+    command_SwitchSpeed();
 	//e. work with internal latch
 	if (Device_Mode < 4)	 
 	Device_Mode = DM_INT_LATCH_DELTA_PS;
@@ -182,7 +186,7 @@ void command_cmd_DELTA_BINS()
 	//dither counters  and the filter of moving average
 	g_gld.RgConB.word = RATE_VIBRO_1;
 	command_utility_SetSpeedPeriod(); 
-	UART_SwitchSpeed(trm_rate);
+	command_SwitchSpeed();
 	CMD_Mode = 4;
 	// reset all bits of status word
     //g_gld.valid.word = 0;
@@ -363,7 +367,7 @@ void command_subcmd_M_VIB_W()
 void command_subcmd_M_CNT_R()
 {
 	command_utility_SetSpeedPeriod(); //e. set the answer transfer rate and its periodicity
-	UART_SwitchSpeed(trm_rate);
+	command_SwitchSpeed();
 	
 	command_ans_M_CNT_R();
 	return;
@@ -434,7 +438,7 @@ void command_cmd_MAINT()
 	   Device_Mode = DM_INT_10KHZ_LATCH;
 	   trm_ena = 0;
 	} else {
-		UART_SwitchSpeed(trm_rate);
+		command_SwitchSpeed();
 	}
 	return;
 }    
@@ -443,7 +447,7 @@ void command_subcmd_M_CLEAR()
 {
 	line_err = 0; //e. cleaning the error register 
 	command_ans_device_status(); //e. preparing for trabsfer of the device status
-	UART_SwitchSpeed(trm_rate);
+	command_SwitchSpeed();
 	return;
 } 
 /******************************************************************************/
@@ -507,7 +511,7 @@ void command_subcmd_M_PULSE()
 void command_subcmd_M_RATE1()
 {
     command_utility_SetSpeedPeriod();
-    UART_SwitchSpeed(trm_rate);
+    command_SwitchSpeed();
     
     g_gld.RgConB.word =  RATE_REPER_OR_REFMEANDR;
     SwitchRefMeandInt(RATE_REPER_OR_REFMEANDR);
@@ -526,7 +530,7 @@ void command_subcmd_M_RATE1()
 void command_subcmd_M_RATE2()
 {
     command_utility_SetSpeedPeriod();
-    UART_SwitchSpeed(trm_rate);
+    command_SwitchSpeed();
     
     g_gld.RgConB.word = RATE_REPER_OR_REFMEANDR;
     //e. enable interrupt from ref. meander
@@ -542,7 +546,7 @@ void command_subcmd_M_RATE2()
 void command_subcmd_M_RATE3()
 {
     command_utility_SetSpeedPeriod();
-    UART_SwitchSpeed(trm_rate);
+    command_SwitchSpeed();
     
     wrk_period = 2500;
     
@@ -553,7 +557,7 @@ void command_subcmd_M_RATE3()
 void command_subcmd_M_RATE7()
 {
     command_utility_SetSpeedPeriod();
-    UART_SwitchSpeed(trm_rate);
+    command_SwitchSpeed();
     
     wrk_period = 20000;
     
@@ -728,7 +732,7 @@ void command_ans_M_ADC_R()
 {
 	//e. set the answer transfer rate and its periodicity 
 	command_utility_SetSpeedPeriod(); 
-	UART_SwitchSpeed(trm_rate);
+	command_SwitchSpeed();
 	
 	num_of_par = 4;     		//e. 4 parameters output
     //фотоприемник А

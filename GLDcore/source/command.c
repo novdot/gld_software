@@ -31,6 +31,9 @@ x_bool_t command_check_lcc(x_uint8_t* a_pBuffer,x_uint32_t a_uCount)
 	int CRC_calc = 0;
 	int CRC_real = 0;
     char dbg[64];
+    char dbg_word[64];
+    
+    sprintf(dbg_word,"");
 
 	for (iCRC_calc = 1; iCRC_calc < (a_uCount-2); iCRC_calc++)
 		CRC_calc += a_pBuffer[iCRC_calc];  
@@ -40,7 +43,9 @@ x_bool_t command_check_lcc(x_uint8_t* a_pBuffer,x_uint32_t a_uCount)
 	if( (CRC_real - CRC_calc) == 0) {
         return _x_true;
     } else {
-        DBG3(dbg,64,"command_check_lcc FAILED! real:0x%02X calc:0x%02X, cnt:%d",CRC_real,CRC_calc,a_uCount);
+        for (iCRC_calc = 0; iCRC_calc < (a_uCount); iCRC_calc++)
+            sprintf(dbg_word,"%s%x",dbg_word,a_pBuffer[iCRC_calc]);
+        DBG2(dbg,64,"command_check_lcc FAILED! word:%s, cnt:%d",dbg_word,a_uCount);
         return _x_false;
     }
 }
@@ -48,17 +53,25 @@ x_bool_t command_check_lcc(x_uint8_t* a_pBuffer,x_uint32_t a_uCount)
 void command_recieve_gld()
 {
     static int ToWaitEnd, ErrReg ;
+    int iCRC_calc = 0;
+    int ibyte = 0;
+    int ibyte_head = 0;
     char dbg[64];
+    char dbg_word[64];
     
     //e. end part of packet is absent
 	if (( ToWaitEnd > 25000)) {
+        sprintf(dbg_word,"");
+        for (iCRC_calc = 0; iCRC_calc < (rcv_num_byt); iCRC_calc++)
+            sprintf(dbg_word,"%s%x",dbg_word,rcv_buf[iCRC_calc]);
+        DBG2(dbg,64,"end part of packet is absent %s, cnt:%d",dbg_word,rcv_num_byt);
+        
         do rcv_buf[--rcv_num_byt] = 0;
         while(rcv_num_byt);
         
         rcv_num_byt_old = rcv_num_byt;
         uart_recieve_reset();
         ToWaitEnd = 0;
-        DBG0(dbg,64,"end part of packet is absent gld");
         return;
 	}
 	//e. we have not received any new bytes
@@ -66,15 +79,38 @@ void command_recieve_gld()
         if (ToWaitEnd) ToWaitEnd++;
         return;
 	}
+    //try to move buffer for header sign
+    /*if (rcv_buf[0] != 0xCC) {
+        //try to find header
+        for(ibyte=0;ibyte<rcv_num_byt;ibyte++){
+            if (rcv_buf[ibyte] == 0xCC){
+                ibyte_head = ibyte;
+                break;
+            }
+        }
+        //cant find header - clear all buff
+        if(ibyte_head==0){
+            do rcv_buf[--rcv_num_byt] = 0;
+            while(rcv_num_byt);
+            //ToWaitEnd++;
+            return;
+        }
+        //header finded - move buffer
+        for(ibyte=0;ibyte<(rcv_num_byt-ibyte_head);ibyte++){
+            rcv_buf[ibyte] = rcv_buf[ibyte_head+ibyte];
+        }
+        rcv_num_byt -= ibyte_head;
+    }*/
 	rcv_num_byt_old = rcv_num_byt;
     
+	//e. we received less than 6 bytes or no parity bytes
     if ((rcv_num_byt < 6) || ((rcv_num_byt & 0x0001) == 1)) {
         ToWaitEnd++;
         return;
     }
     
     //e. the header of packet has not recieved
-    if ((!ToWaitEnd) && (rcv_num_byt > 1)){
+    /*if ((!ToWaitEnd) && (rcv_num_byt > 1)){
         if (
                 (rcv_buf[0] != 0xCC) 
                 || (( rcv_buf[1] > 2) && ( rcv_buf[1] != 0x1F))
@@ -83,7 +119,7 @@ void command_recieve_gld()
             ToWaitEnd++;
             return;
         }
-    }
+    }*/
         
     //check packet lenght
     if (rcv_num_byt == 6) {	 
@@ -320,18 +356,18 @@ void command_utility_SetSpeedPeriod(void)
 /******************************************************************************/
 void command_echo(void)
 {
-    static int delay = 10000;
-    static int idelay = 0;
     //int ibyte = 0;
     //char dbg[3];
+    x_uint32_t num = 0;
+	uart_recieve(rcv_buf,&rcv_num_byt);
     
-    /*for(ibyte=0;ibyte<rcv_num_byt;ibyte++){
-        DBG0(dbg,3,rcv_buf[ibyte]);
-    }*/
-    if(idelay>=delay){
-        uart_recieve(rcv_buf,&rcv_num_byt);
-        uart_transm( rcv_num_byt, Device_Mode, rcv_buf);
-        idelay = 0;
-    }
-    idelay++;
+    if (uart_is_ready_transm() == _x_false)										
+        return;
+    
+    //uart_transm( trm_num_byt, Device_Mode, trm_buf);
+    do {
+        UART1_SendByte(rcv_buf[rcv_num_byt]);
+        rcv_buf[--rcv_num_byt] = 0;
+    }while(rcv_num_byt);
 }
+/******************************************************************************/

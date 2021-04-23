@@ -115,8 +115,11 @@ void init()
     DBG2(dbg,64,"Build in %s %s",__DATE__,__TIME__);
     DBG0(dbg,64,"Init done!");
 }
-
 /******************************************************************************/
+void loop_echo()
+{
+    command_echo();
+}
 void loop()
 {
     static int nSwitch = 0;
@@ -175,6 +178,7 @@ int main(void)
     
     do {
         loop();
+        //loop();
     } while(1);	    // main infinie loop            
 }
 

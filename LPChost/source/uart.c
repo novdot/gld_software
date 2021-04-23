@@ -3,12 +3,13 @@
 #include "lpc17xx.h"
 #include "system_LPC17xx.h"
 
-#define FOSC 12000000 
-#define FCCLK (FOSC  * 8) 
-#define FCCO (FCCLK * 3)
-//#define FPCLK (FCCLK / 4)
-#define FPCLK (103200000) 
-
+/* Work on these values of system clock
+* FOSC 12000000 
+* FCCLK (FOSC  * 8) 
+* FCCO (FCCLK * 3)
+* FPCLK (FCCLK / 4)
+* FPCLK (103200000) 
+*/
 extern unsigned int SystemCoreClock; 
 
 uint32_t EnablLength = 12;
@@ -16,6 +17,8 @@ uint32_t LLI0_TypeDef[4];
 uint32_t LLI1_TypeDef[4];
 uint32_t EnablTx = 0x80;
 uint32_t EnablDMA = 0;
+
+#define FRACTIONAL_BAUD
 
 #if defined (UART1REC)
     #define CDESTADDR (UART1_DMA_TX_DST)
@@ -85,13 +88,43 @@ float MULVALList[BR_LOOKUP_SIZE] = {1.0,15.0,14.0,13.0,12.0,11.0,10.0,9.0,8.0,15
 14.0,11.0,8.0,13.0,5.0,12.0,7.0,9.0,11.0,13.0,15.0,2.0,15.0,13.0,11.0,9.0,7.0,12.0,5.0,13.0,8.0,11.0,14.0,3.0,13.0,10.0,7.0,11.0,15.0,
 4.0,13.0,9.0,14.0,5.0,11.0,6.0,13.0,7.0,15.0,8.0,9.0,10.0,11.0,12.0,13.0,14.0,15.0};
 
-/******************************************************************************/
 
+void UART0_Init(x_uint32_t baudrate);
+void UART1_Init(x_uint32_t baudrate);
+void UART2_Init(x_uint32_t baudrate);
+
+int UART0_SendByte(int ucData);
+int UART1_SendByte(int ucData);
+int UART2_SendByte(int ucData);
+
+void UART0_SendString(char* ucData,int size);
+void UART1_SendString(char* ucData,int size);
+void UART2_SendString(char* ucData,int size);
+/******************************************************************************/
+int getPclk()
+{
+    switch( (LPC_SC->PCLKSEL0 >> 6) & 0x03 ) {
+        case 0x00:
+            return SystemCoreClock/4;
+        
+        case 0x01:
+            return SystemCoreClock;
+        
+        case 0x02:
+            return SystemCoreClock/2;
+        
+        case 0x03:
+            return SystemCoreClock/8;
+
+    }
+    return 0;    
+}
 /******************************************************************************/
 /**
  * Return 1 if the double is an int value, 0 if not
  */
-static int isIntValue(double value) {
+int isIntValue(double value) 
+{
 	int intValue = (int)value;
 	if( value == intValue ) {
 		return 1;
@@ -103,7 +136,8 @@ static int isIntValue(double value) {
 /*
  * Get the fraction values for the given FRest value.
  */
-static int getFRValues(double FRest, float *divAddVal, float *mulVal) {
+int getFRValues(double FRest, float *divAddVal, float *mulVal) 
+{
 	float lastDiff = -1;
 	float thisDiff;
 	int index;
@@ -134,7 +168,8 @@ static int getFRValues(double FRest, float *divAddVal, float *mulVal) {
  *
  * Return -1 on error, 0 on success.
  */
-static int getFractionValues(int pclk, int baudRate, int *dlEst, float *divAddVal, float *mulVal) {
+int getFractionValues(int pclk, int baudRate, int *dlEst, float *divAddVal, float *mulVal) 
+{
 	double  dlEstFloat = pclk/(16.0*baudRate);
 	double 	FRestSeed = 1.5;
 	double  FRest;
@@ -174,6 +209,7 @@ static int getFractionValues(int pclk, int baudRate, int *dlEst, float *divAddVa
 	return getFRValues(FRest, divAddVal, mulVal);
 }
 
+
 /******************************************************************************/
 void UART_Init(x_uint32_t baudrate)
 {
@@ -198,30 +234,29 @@ void UART0_Init(x_uint32_t baudrate)
 	int 	dlEest;
 	float 	divAddVal, mulVal;
     
-    //uint32_t baudrate = 38400;
-    
     //switch on UART0
     LPC_SC->PCONP |= (1<<3);	
    
     LPC_PINCON->PINSEL0 |=  0x00000050;            
             
-	pclk = SystemCoreClock/4;
+	pclk = getPclk();
 
     LPC_UART0->LCR  = word_length_8 |one_stop_bit |no_parity |back_trans_dis |DLAB_access;                     
     
+#if defined(FRACTIONAL_BAUD) 
     if( getFractionValues(pclk, baudrate, &dlEest, &divAddVal, &mulVal) == -1 ) {
-		return;
-	}
-    /*Fdiv = (pclk / 16) / baudrate;           
-    LPC_UART0->DLM  = Fdiv / 256;
-    LPC_UART0->DLL  = Fdiv % 256; */
-    
+        return;
+    }    
     LPC_UART0->DLM = dlEest / 256;
     LPC_UART0->DLL = dlEest % 256;
     //Setup the fractional divider register
     LPC_UART0->FDR = (((int)mulVal)<<4)|(int)divAddVal;
-    
-    
+#else
+    Fdiv = (pclk / 16) / baudrate;           
+    LPC_UART0->DLM  = Fdiv / 256;
+    LPC_UART0->DLL  = Fdiv % 256;
+#endif //FRACTIONAL_BAUD
+     
     LPC_UART0->LCR  &= ~DLAB_access;	                      
     LPC_UART0->FCR  = TX_FIFO_Reset |RX_FIFO_Reset |FIFOs_En |RX_TrigLvl_14;
 	LPC_UART0->IER = 0;//RBR_IntEnabl;
@@ -250,8 +285,6 @@ void UART1_Init(x_uint32_t baudrate)
     
     int 	dlEest;
 	float 	divAddVal, mulVal;
-
-    //uint32_t baudrate = 256000;
     
     //switch on UART1
     LPC_SC->PCONP |= (1<<4);
@@ -261,40 +294,25 @@ void UART1_Init(x_uint32_t baudrate)
     LPC_PINCON->PINSEL4 |= (2 << 2); /* Pin P2.1 used as RXD0 (Com0) */
     LPC_PINCON->PINSEL4 |= (2 << 10);
     LPC_PINCON->PINSEL4 |= (2 << 14);
-    
-    pclk = SystemCoreClock/4;
 
-    /*
-    switch( (LPC_SC->PCLKSEL0 >> 6) & 0x03 ) {
-        case 0x00:
-            pclk = SystemCoreClock/4;
-            break;
-        case 0x01:
-            pclk = SystemCoreClock;
-            break; 
-        case 0x02:
-            pclk = SystemCoreClock/2;
-            break; 
-        case 0x03:
-            pclk = SystemCoreClock/8;
-            break;
-    }    */
-    
-    ///usFdiv = ((FPCLK  / 16) / baudrate) +1; 
-    ///Fdiv = (pclk / 16) / baudrate; 
+    pclk = getPclk();
 
     LPC_UART1->LCR  = word_length_8 |one_stop_bit |no_parity |back_trans_dis |DLAB_access;                         
     //LPC_UART1->LCR  = 0x83; 
     
-    ///LPC_UART1->DLM  = Fdiv / 256;
-    ///LPC_UART1->DLL  = Fdiv % 256; 
+#if defined(FRACTIONAL_BAUD) 
     if( getFractionValues(pclk, baudrate, &dlEest, &divAddVal, &mulVal) == -1 ) {
-		return;
-	}
+        return;
+    }    
     LPC_UART1->DLM = dlEest / 256;
     LPC_UART1->DLL = dlEest % 256;
     //Setup the fractional divider register
     LPC_UART1->FDR = (((int)mulVal)<<4)|(int)divAddVal;
+#else
+    Fdiv = (pclk / 16) / baudrate;           
+    LPC_UART1->DLM  = Fdiv / 256;
+    LPC_UART1->DLL  = Fdiv % 256;
+#endif //FRACTIONAL_BAUD
     
     LPC_UART1->LCR  &= ~DLAB_access;
     //LPC_UART1->LCR  = 0x03;    
@@ -316,28 +334,82 @@ void UART1_Init(x_uint32_t baudrate)
 /******************************************************************************/
 void UART2_Init(x_uint32_t baudrate)
 {
-	uint16_t usFdiv;
+    uint32_t Fdiv = 0;
+    uint32_t usFdiv = 0;
+    uint32_t pclk = 0;
+   
+    int dlEest = 0;
+	float divAddVal, mulVal = 0.0;
+    
     /* UART2 */
     LPC_PINCON->PINSEL0 |= (1 << 20); /* Pin P0.10 used as TXD2 (Com2) */
     LPC_PINCON->PINSEL0 |= (1 << 22); /* Pin P0.11 used as RXD2 (Com2) */
 
    	LPC_SC->PCONP = LPC_SC->PCONP|(1<<24);	      
 
-    LPC_UART2->LCR  = 0x83;                      
-    usFdiv = (FPCLK / 16) / baudrate; //115200       
-    LPC_UART2->DLM  = usFdiv / 256;
-    LPC_UART2->DLL  = usFdiv % 256; 
+    LPC_UART2->LCR  = 0x83;              
+        
+    pclk = getPclk();
+    
+#if defined(FRACTIONAL_BAUD) 
+    if( getFractionValues(pclk, baudrate, &dlEest, &divAddVal, &mulVal) == -1 ) {
+        return;
+    }    
+    LPC_UART2->DLM = dlEest / 256;
+    LPC_UART2->DLL = dlEest % 256;
+    //Setup the fractional divider register
+    LPC_UART2->FDR = (((int)mulVal)<<4)|(int)divAddVal;
+#else
+    Fdiv = (pclk / 16) / baudrate;           
+    LPC_UART2->DLM  = Fdiv / 256;
+    LPC_UART2->DLL  = Fdiv % 256;
+#endif //FRACTIONAL_BAUD 
+    
+    
     LPC_UART2->LCR  = 0x03;                      
     LPC_UART2->FCR  = 0x06;
 }
 
+
 /******************************************************************************/
-int UART0_SendByte(char ucData)
+void UART_DBG_SendString(char* ucData,int size)
+{
+#if defined (UART0DBG)
+    UART0_SendString(ucData,size);
+#elif defined (UART1DBG)
+    UART1_SendString(ucData,size);
+#elif defined (UART2DBG)
+    UART2_SendString(ucData,size);
+#endif 
+}
+/******************************************************************************/
+void UART_SendString(char* ucData,int size)
+{
+#if defined (UART0REC)
+    UART0_SendString(ucData,size);
+#elif defined (UART1REC)
+    UART1_SendString(ucData,size);
+#elif defined (UART2REC)
+    UART2_SendString(ucData,size);
+#endif 
+}
+/******************************************************************************/
+int UART_SendByte(char ucData)
+{
+#if defined (UART0REC)
+    return UART0_SendByte(ucData);
+#elif defined (UART1REC)
+    return UART1_SendByte(ucData);
+#elif defined (UART2REC)
+    return UART2_SendByte(ucData);
+#endif 
+}
+/******************************************************************************/
+int UART0_SendByte(int ucData)
 {
 	while (!(LPC_UART0->LSR & 0x20));
     return (LPC_UART0->THR = ucData);
 }
-/******************************************************************************/
 void UART0_SendString(char* ucData,int size)
 {
     int iitem = 0;
@@ -352,13 +424,14 @@ int UART1_SendByte(int ucData)
 	while (!(LPC_UART1->LSR & 0x20));
     return (LPC_UART1->THR = ucData);
 }
-
+void UART1_SendString(char* ucData,int size){}
 /******************************************************************************/
-int UART2_SendByte (int ucData)
+int UART2_SendByte(int ucData)
 {
 	while (!(LPC_UART2->LSR & 0x20));
     return (LPC_UART2->THR = ucData);
 }
+void UART2_SendString(char* ucData,int size){}
 /******************************************************************************/
 void DMA_Init( void )
 {
@@ -500,11 +573,12 @@ void uart_transm(x_uint32_t trm_num_byt, int Device_Mode, x_uint8_t*a_pBufferTra
 /******************************************************************************/
 void UART_SwitchSpeed(unsigned Speed)
 {
-    uint32_t Fdiv;
-    uint32_t pclk;
+    uint32_t Fdiv = 0;
+    uint32_t pclk = 0;
     int baudrate = 0;
-	int 	dlEest = 0;
-	float 	divAddVal, mulVal = 0;
+	int dlEest = 0;
+	float divAddVal, mulVal = 0;
+    char dbg[64];
     
     /*
     Переключение скорости только при настройке
@@ -513,66 +587,90 @@ void UART_SwitchSpeed(unsigned Speed)
 #ifndef __CONFIG_COMMANDS_DEFAULT
     return;
 #endif //__CONFIG_COMMANDS_DEFAULT
-
-    pclk = SystemCoreClock/4;
+    
+    //if(uart_is_ready_transm()==_x_false)
+    //    return;
+    
+    //Stop current transmitting
+    
     
 #if defined  UART1REC
 	LPC_UART1->LCR |= DLAB_access;
+    
 #elif defined  UART2REC
 	LPC_UART2->LCR |= DLAB_access;
+    
 #elif defined  UART0REC
 	LPC_UART0->LCR |= DLAB_access;
+    
 #endif //UART1REC
     
 	switch (Speed) {
 		case _uart_baudrate_38400:
-            //Fdiv = (pclk / 16) / 38400; 
             baudrate = 38400;
             break;
 
 		case _uart_baudrate_115200:
-            //Fdiv = (pclk / 16) /115200; 
             baudrate = 115200;
             break;
 
 		case _uart_baudrate_460800:
-            //Fdiv = (pclk / 16) / 460800; 
             baudrate = 460800;	
             break;
 
 		case _uart_baudrate_921600:
-            //Fdiv = (pclk / 16) / 921600; 
             baudrate = 921600;
             break;
         default:
             break;
 	}
-    baudrate = 921600;
     
+    DBG2(dbg,64,"Switch to BR:%d %d",baudrate,( LPC_GPDMACH1->CConfig & (1<<17)) );
+
+    pclk = getPclk();
+    
+#if defined(FRACTIONAL_BAUD)   
     if( getFractionValues(pclk, baudrate, &dlEest, &divAddVal, &mulVal) == -1 ) {
         return;
     }
-#if defined UART1REC	           
-    //LPC_UART1->DLM  = Fdiv / 256;
-    //LPC_UART1->DLL  = Fdiv % 256; 
+#else
+    Fdiv = (pclk / 16) / baudrate; 
+#endif //FRACTIONAL_BAUD
+    
+#if defined UART1REC
+    #if defined(FRACTIONAL_BAUD)
     LPC_UART1->DLM = dlEest / 256;
     LPC_UART1->DLL = dlEest % 256;
     //Setup the fractional divider register
     LPC_UART1->FDR = (((int)mulVal)<<4)|(int)divAddVal;
+    #else
+    LPC_UART1->DLM  = Fdiv / 256;
+    LPC_UART1->DLL  = Fdiv % 256;
+    #endif //FRACTIONAL_BAUD
     LPC_UART1->LCR  &= ~DLAB_access;
     
 #elif defined UART2REC  
+    #if defined(FRACTIONAL_BAUD)
     LPC_UART2->DLM = dlEest / 256;
     LPC_UART2->DLL = dlEest % 256;
     //Setup the fractional divider register
     LPC_UART2->FDR = (((int)mulVal)<<4)|(int)divAddVal;
+    #else
+    LPC_UART2->DLM  = Fdiv / 256;
+    LPC_UART2->DLL  = Fdiv % 256;
+    #endif //FRACTIONAL_BAUD
     LPC_UART2->LCR  &= ~DLAB_access;
     
 #elif defined UART0REC
+#if defined(FRACTIONAL_BAUD)
     LPC_UART0->DLM = dlEest / 256;
     LPC_UART0->DLL = dlEest % 256;
     //Setup the fractional divider register
     LPC_UART0->FDR = (((int)mulVal)<<4)|(int)divAddVal;
+    #else
+    LPC_UART0->DLM  = Fdiv / 256;
+    LPC_UART0->DLL  = Fdiv % 256;
+    #endif //FRACTIONAL_BAUD
     LPC_UART0->LCR  &= ~DLAB_access;
     
 #endif //UART1REC

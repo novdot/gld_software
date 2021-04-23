@@ -280,7 +280,7 @@
 //
 // </e>
 */
-/**/
+/**
 #define CLOCK_SETUP           1
 #define SCS_Val               0x00000020
 #define CLKSRCSEL_Val         0x00000001
@@ -294,7 +294,7 @@
 #define PCLKSEL1_Val          0x00000000
 #define PCONP_Val             0x042887DE
 #define CLKOUTCFG_Val         0x00000000
-/**
+/**/
 #define CLOCK_SETUP           1
 #define SCS_Val               0x00000020 
 #define CLKSRCSEL_Val         0x00000001
