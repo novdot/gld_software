@@ -23,6 +23,16 @@ typedef struct gld_cplcDef{
     int WP_DelaySin_Array[21];
 }gld_cplc;
 
+typedef struct gld_cmdDef{
+    x_uint32_t trm_rate; //rate from cmd
+    x_uint32_t trm_rate_prev; //set rate to uart
+}gld_cmd;
+
+typedef struct gld_pulsesDef{
+    x_uint32_t Cnt_curr; //< value from qei
+    x_uint32_t Curr_Cnt_Vib; //< value_Vib = diff between curent value and old
+    int32_t	Dif_Curr_Vib; //< diff between curent value_Vib and old
+}gld_pulses;
 /**
     @brief Струтрура содержит глобальные поля
         параметры прибора
@@ -58,6 +68,9 @@ typedef struct gld_globalDef{
     x_int32_t time_1_Sec;//e. pseudosecond timer
     x_uint32_t time_Seconds; //seconds from power on
     
+    //cmd
+    gld_cmd cmd;
+    
 }gld_global;
 
 extern gld_global g_gld;
@@ -80,7 +93,6 @@ extern x_uint8_t rcv_copy[256];
 extern x_uint32_t num_of_par;
 extern x_uint32_t* addr_param[16]; //void*
 extern x_uint32_t size_param[16];
-extern x_uint32_t trm_rate;
 
 extern x_uint32_t rcv_num_byt_old;
 extern x_int32_t rcv_byt_copy;
@@ -89,7 +101,6 @@ extern x_uint32_t trm_ena;
 extern x_uint32_t line_err;
 extern x_uint32_t line_sts;
 extern x_int32_t rx_buf_copy;
-
 
 //extern INPUT Input;
 extern OUTPUT Output;

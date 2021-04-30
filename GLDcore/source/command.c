@@ -346,11 +346,11 @@ void command_utility_SetSpeedPeriod(void)
 	}
 	//e. clear the bit of transfer rate
 	SRgR &= 0xffcf;
-	trm_rate = (rcv_buf[3] >> 1) & 0x0030;
+	g_gld.cmd.trm_rate = (rcv_buf[3] >> 1) & 0x0030;
     //e. set present transfer rate
-	SRgR |= trm_rate;
+	SRgR |= g_gld.cmd.trm_rate;
     //уберем 4 разряда чтобы получить полноценный код
-    trm_rate = trm_rate>>4;
+    g_gld.cmd.trm_rate = g_gld.cmd.trm_rate>>4;
 } // SetSpeedPeriod
 
 /******************************************************************************/

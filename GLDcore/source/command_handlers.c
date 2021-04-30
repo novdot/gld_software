@@ -30,10 +30,27 @@
 #include "CyclesSync.h"
 #include "Parameters.h"
 
+/******************************************************************************/
 void command_SwitchSpeed(void)
 {
-    //if(trm_cycl != 1)
-        UART_SwitchSpeed(trm_rate);
+    int i = 0;
+    //check if trm_rate changed
+    if(g_gld.cmd.trm_rate == g_gld.cmd.trm_rate_prev) {
+        return;
+    }else{
+        g_gld.cmd.trm_rate_prev = g_gld.cmd.trm_rate;
+    }
+    //if changed upd registers
+    
+    //disable DMA
+    //whait until current tranfer ends
+    uart_disable_transm();
+    
+    //switch uart speed
+    UART_SwitchSpeed(g_gld.cmd.trm_rate);
+    
+    //enable DMA
+    uart_enable_transm();
 }
 /******************************************************************************/
 void command_handle(void)
@@ -594,7 +611,7 @@ void command_ans_device_status(void)
 	//e. address of the register of errors of line
 	COMMAND_UTILITY_ANSWER_FIELD(1,&ser_num,2);
 
-	trm_rate = 0;       //e. set the transfer rate to the 38400 bauds
+	g_gld.cmd.trm_rate = 0;       //e. set the transfer rate to the 38400 bauds
 	trm_cycl = 0;       //e. forbid cyclic transmission of the parameter 
 	trm_ena = 1;        //e. allow operation of the transmitter
 }
@@ -803,7 +820,7 @@ void command_ans_M_MIRR()
 	if (size_param[0] >= 64) {
 		size_param[0] = 64;		//e. maximal amount - no more than double length of the copy buffer 
 	}
-	trm_rate = 0;       //e. set the transfer rate to the 38400 bauds
+	g_gld.cmd.trm_rate = 0;       //e. set the transfer rate to the 38400 bauds
 	trm_cycl = 0;       //e. forbid cyclic transmission of the parameter
 	trm_ena = 1;        //e. allow operation of the transmitter
 }
@@ -833,23 +850,37 @@ void command_ans_M_RATE1()
 {
     num_of_par = 14;
     
-	
+    /*(Output.Str.Cnt_Pls = 1);
+    (Output.Str.Cnt_Mns = 2);
+    (Output.Str.Cnt_Dif = 3);
+    (Output.Str.F_ras = 4); 
+    (Output.Str.HF_reg = 5);
+    (Output.Str.HF_dif = 6); 
+    (Output.Str.T_Vibro = 7); 
+    (Output.Str.T_VB_pll = 7); 
+    (Output.Str.L_Vibro = 7); 
+    (g_input.word.hf_out = 7); 
+    (Output.Str.WP_reg = 7); 
+    (Output.Str.WP_pll = 7); 
+    (Output.Str.Tmp_Out);
+    (Output.Str.WP_scope1); */
+    
     COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint32_t*)&(Output.Str.Cnt_Pls),2);
     COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint32_t*)&(Output.Str.Cnt_Mns),2);
     COMMAND_UTILITY_ANSWER_FIELD(2,(x_uint32_t*)&(Output.Str.Cnt_Dif),2);
-    COMMAND_UTILITY_ANSWER_FIELD(3,(x_uint32_t*)&(Output.Str.F_ras),2);//частота расщипления
-    COMMAND_UTILITY_ANSWER_FIELD(4,(x_uint32_t*)&(Output.Str.HF_reg),2);
-    COMMAND_UTILITY_ANSWER_FIELD(5,(x_uint32_t*)&(Output.Str.HF_dif),2);
-    COMMAND_UTILITY_ANSWER_FIELD(6,&(Output.Str.T_Vibro),2);
-    COMMAND_UTILITY_ANSWER_FIELD(7,&(Output.Str.T_VB_pll),2);
-    COMMAND_UTILITY_ANSWER_FIELD(8,&(Output.Str.L_Vibro),2);
-    COMMAND_UTILITY_ANSWER_FIELD(9,(x_uint32_t*)&(g_input.word.hf_out),2);
-    COMMAND_UTILITY_ANSWER_FIELD(10,(x_uint32_t*)&(Output.Str.WP_reg),2);
+    COMMAND_UTILITY_ANSWER_FIELD(3,(x_uint32_t*)&(Output.Str.F_ras),2); //частота расщипления
+    COMMAND_UTILITY_ANSWER_FIELD(4,(x_uint32_t*)&(Output.Str.HF_reg),2); //выход регулятора ГВЧ
+    COMMAND_UTILITY_ANSWER_FIELD(5,(x_uint32_t*)&(Output.Str.HF_dif),2); //сигнал ошибки регулятора ГВЧ
+    COMMAND_UTILITY_ANSWER_FIELD(6,&(Output.Str.T_Vibro),2); //period
+    COMMAND_UTILITY_ANSWER_FIELD(7,&(Output.Str.T_VB_pll),2); //ФД регулятора периода вибропривода
+    COMMAND_UTILITY_ANSWER_FIELD(8,&(Output.Str.L_Vibro),2); //pulse
+    COMMAND_UTILITY_ANSWER_FIELD(9,(x_uint32_t*)&(g_input.word.hf_out),2); //hfo volt
+    COMMAND_UTILITY_ANSWER_FIELD(10,(x_uint32_t*)&(Output.Str.WP_reg),2); //cplc volt
     COMMAND_UTILITY_ANSWER_FIELD(11,(x_uint32_t*)&(Output.Str.WP_pll),2); //phase detector
     COMMAND_UTILITY_ANSWER_FIELD(12,(x_uint32_t*)&(Output.Str.Tmp_Out),12); //темпер;
     COMMAND_UTILITY_ANSWER_FIELD(13,(x_uint32_t*)&(Output.Str.WP_scope1),4); //резерв;
 	
-    trm_ena = 1;        //allow operation of the transmitter 
+    trm_ena = 1;
 } 
 /******************************************************************************/
 void command_ans_M_RATE2()

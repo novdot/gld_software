@@ -36,7 +36,6 @@
 #define	HF_SCL_CONST	1	    // 0x64 //e. 2 - the gain factor (1.15)         
 #define	HF_MIN_CONST	-32668  //e. 3 - minimum of the output value on the regulator DAC (appropriate to maximal voltage on the HFO) 
 #define	HF_MAX_CONST    -17379	//e. 4 - maximum of the output value on the regulator DAC (appropriate to minimal voltage on the HFO) 
-#define	HFO_SHIFT		16		//e. number of digits of fractional part in 32-bit variable of the hf_reg32 varaible 
 
 //e. =============== parameters of the CPLC regulator
 #define	WP_REF_CONST	5       //e. 7 -  value of the reference                                              
@@ -133,11 +132,6 @@
 #define		TS_MIN				-2500 	// minimal temperature for our thermal sensors
 #define		TS_MAX				+13000  // maximal temperature for our thermal sensors
 #define		TS_DIFF_MAX			1300	// maximal difference between 2 thermal sensors
-
-#define		HFO_NEG_MIN			8738	// -4.5 V
-#define		HFO_NEG_MAX			25122	// -10.5 V
-#define		HFO_POZ_MIN			-32221	// +10.5 V
-#define		HFO_POZ_MAX			-15837 	// +4.5 V
 
 /////////////////////////////////////////////
 #define		DITH_VBN_SHIFT			2 

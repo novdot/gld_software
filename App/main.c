@@ -159,7 +159,7 @@ void loop()
     //contrl_GLD();
     gld_control();
     
-    hardware_photo_exchange(&Output.Str.Cnt_Dif);
+    //hardware_photo_exchange(&Output.Str.Cnt_Dif);
     
     //command_echo();
     command_recieve(_command_recieve_flag_gld);

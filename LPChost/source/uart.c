@@ -537,7 +537,21 @@ x_bool_t uart_is_ready_transm(void)
     
     return _x_true;
 }
-
+/******************************************************************************/
+void uart_disable_transm(void)
+{
+    LPC_GPDMACH1->CConfig &= ~(DMAChannelEn&(1<<18));
+    LPC_GPDMACH2->CConfig &= ~(DMAChannelEn&(1<<18));
+    //while( LPC_GPDMACH1->CConfig & (1<<17)) ;
+    //whait until current tranfer ends - TX bit check
+    while( !(LPC_UART1->LSR & (1<<5)) );
+}
+/******************************************************************************/
+void uart_enable_transm(void)
+{
+    LPC_GPDMACH1->CConfig |= DMAChannelEn&(1<<18);
+    LPC_GPDMACH2->CConfig |= DMAChannelEn&(1<<18);
+}
 /******************************************************************************/
 void uart_transm(x_uint32_t trm_num_byt, int Device_Mode, x_uint8_t*a_pBufferTransm)
 {
@@ -587,11 +601,6 @@ void UART_SwitchSpeed(unsigned Speed)
 #ifndef __CONFIG_COMMANDS_DEFAULT
     return;
 #endif //__CONFIG_COMMANDS_DEFAULT
-    
-    //if(uart_is_ready_transm()==_x_false)
-    //    return;
-    
-    //Stop current transmitting
     
     
 #if defined  UART1REC

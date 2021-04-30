@@ -3,11 +3,12 @@
 #include "core/math_dsp.h"
 #include "core/global.h"
 
-#define		HFO_NEG_MIN			8738	// -4.5 V
-#define		HFO_NEG_MAX			25122	// -10.5 V
-#define		HFO_POZ_MIN			-32221	// +10.5 V
-#define		HFO_POZ_MAX			-15837 	// +4.5 V
+#define HFO_NEG_MIN (8738) // -4.5 V
+#define HFO_NEG_MAX (25122) // -10.5 V
+#define HFO_POZ_MIN (-32221) // +10.5 V
+#define HFO_POZ_MAX (-15837) // +4.5 V
 
+#define	HFO_SHIFT (16) //e. number of digits of fractional part in 32-bit variable of the hf_reg32 varaible 
 
 /******************************************************************************/
 void clc_HFO()

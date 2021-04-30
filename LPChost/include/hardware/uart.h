@@ -319,6 +319,7 @@ void uart_dma_init(x_uint8_t*a_pBufferTransm);
 ** 
 ******************************************************************************/
 void UART_SwitchSpeed(unsigned Speed);
-
+void uart_disable_transm(void);
+void uart_enable_transm(void);
 
 #endif

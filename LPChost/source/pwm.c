@@ -114,7 +114,7 @@ x_bool_t pwm_pulse_calc(int a_T_Vibro, int a_L_Vibro, int a_Vibro_2_CountIn, x_b
     } else {
         //LPC_MCPWM->MAT2 = (a_T_Vibro*MULT_7680_12500)>>SHIFT_7680_12500;
         //LPC_MCPWM->MAT1 = ((a_T_Vibro - a_L_Vibro)*MULT_7680_12500)>>SHIFT_7680_12500;
-        return _x_false;	 
+        return _x_false;
     }
 }
 /******************************************************************************/

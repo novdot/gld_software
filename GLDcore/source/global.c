@@ -14,6 +14,9 @@ void gld_global_init(void)
 {
     g_gld.time_1_Sec = DEVICE_SAMPLE_RATE_uks; 
     g_gld.time_Seconds = 0;    
+    
+    g_gld.cmd.trm_rate = 0;
+    g_gld.cmd.trm_rate_prev = 0;
 }
 
 /******************************************************************************/
@@ -29,7 +32,6 @@ x_int32_t rcv_byt_copy;
 x_uint32_t rcv_num_byt_old;
 
 x_uint32_t trm_num_byt;
-x_uint32_t trm_rate;
 x_uint32_t trm_ena;
 x_uint32_t num_of_par;
 x_uint8_t trm_buf[256];//
