@@ -85,7 +85,7 @@ void clc_ThermoSensors(void)
 	static int StartRdy = 1;
 	static int PrevTemp = -7000;
     static int TempEvolution = 0;
-    int	StartTermoCompens = 0; //н6ачальная термокомпенсация
+    int	StartTermoCompens = 0; //начальная термокомпенсация
 
 	for (i=0; i<2; i++){
 		//e. conversion of temperature values on ADC output 
@@ -93,6 +93,7 @@ void clc_ThermoSensors(void)
         Output.Str.Tmp_Out[i] = mac_r(Device_blk.Str.Tmp_bias[i] << 16,
 												(g_input.array[1+i] - 0x8000), 
 												Device_blk.Str.Tmp_scal[i]);
+        
 		Output.Str.Tmp_Out[i+4] = g_input.array[1+i];																	
 	}
 

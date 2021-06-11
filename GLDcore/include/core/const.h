@@ -81,9 +81,9 @@
 #define	PI_A1_CONST		0	//  31
 #define	PI_A2_CONST		0	//  32
 #define	PI_A3_CONST		0	//  33 
-#define	PI_A4_CONST (0x7FFF) //  34 PLC Mod ampl
 #define	PI_A4_MIN (0x0001)
-#define	PI_A4_MAX (0x7FFF)
+#define	PI_A4_MAX (0x5999)//(0x7FFF)
+#define	PI_A4_CONST (PI_A4_MAX) //  34 PLC Mod ampl
 #define	PI_A5_CONST		0	//  35
 #define	PI_A6_CONST		0	//  36
 #define	PI_B1_CONST		0	//  37
@@ -102,8 +102,10 @@
 #define WP_TRANS_STEP	32767		
 
 //e. ================ initial gain factor of photodetector channels
-#define	G_PHOTO_STRA	60     // 56 
-#define	G_PHOTO_STRB  	60		// 57
+#define	G_PHOTO_STR_MIN	    0
+#define	G_PHOTO_STR_MAX	    255
+#define	G_PHOTO_STRA_CONST	60     // 56 
+#define	G_PHOTO_STRB_CONST  60		// 57
 
 //e. =============== switch of the source of loading GLD variables block 
 #define HEADER_WORD_CONST	0x55aa	//e. 58 - magic number flash validity 

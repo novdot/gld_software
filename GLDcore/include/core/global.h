@@ -3,7 +3,8 @@
 
 #include "core/types.h"
 #include "core/const.h"
-#include "core/ring_buffer.h"
+//#include "core/ring_buffer.h"
+#include "xlib/ring_buffer.h"
 
 
 /******************************************************************************/
@@ -23,9 +24,16 @@ typedef struct gld_cplcDef{
     int WP_DelaySin_Array[21];
 }gld_cplc;
 
+#define GLD_RINGBUFFER_SIZE (512)
 typedef struct gld_cmdDef{
     x_uint32_t trm_rate; //rate from cmd
     x_uint32_t trm_rate_prev; //set rate to uart
+    
+    x_ring_buffer_t ring_in;
+    x_ring_buffer_t ring_out;
+    
+    uint8_t buf_in[GLD_RINGBUFFER_SIZE];
+    uint8_t buf_out[GLD_RINGBUFFER_SIZE];
 }gld_cmd;
 
 typedef struct gld_pulsesDef{
@@ -33,6 +41,7 @@ typedef struct gld_pulsesDef{
     x_uint32_t Curr_Cnt_Vib; //< value_Vib = diff between curent value and old
     int32_t	Dif_Curr_Vib; //< diff between curent value_Vib and old
 }gld_pulses;
+
 /**
     @brief Струтрура содержит глобальные поля
         параметры прибора
@@ -49,8 +58,6 @@ typedef struct gld_globalDef{
     x_uint32_t nADCData[6];
     x_uint32_t nDACData[2];
     
-    //ringbuffer
-    ringbuffer_Data ringBuf;
     
     gld_thermo thermo;
     gld_cplc cplc;

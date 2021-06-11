@@ -32,6 +32,9 @@
 
 /******************************************************************************
 **   Main Function  main()
+#DEFINES
+UART1REC UART0DBG __CONFIG_COMMANDS_DEFAULT BOARD_V3
+
 *******************************************************************************/
 
 /******************************************************************************
@@ -100,7 +103,7 @@ void init()
     //G_Photo_Init();
     hardware_photo_init();
     
-    hardware_photo_out(Device_blk.Str.Gain_Ph_A, Device_blk.Str.Gain_Ph_B);
+    hardware_photo_set(Device_blk.Str.Gain_Ph_A, Device_blk.Str.Gain_Ph_B);
     
     open_all_loops();
     
@@ -111,9 +114,10 @@ void init()
     
     //program variables
     //ringbuffer_init(&g_gld.ringBuf,32);
+    x_ring_init(&g_gld.cmd.ring_in,g_gld.cmd.buf_in,GLD_RINGBUFFER_SIZE);
     
-    DBG2(dbg,64,"Build in %s %s",__DATE__,__TIME__);
-    DBG0(dbg,64,"Init done!");
+    //DBG2(dbg,64,"Build in %s %s",__DATE__,__TIME__);
+    //DBG0(dbg,64,"Init done!");
 }
 /******************************************************************************/
 void loop_echo()
@@ -123,8 +127,6 @@ void loop_echo()
 void loop()
 {
     static int nSwitch = 0;
-    static char dbg[64];
-    int i;
     
     if (! (LPC_PWM1->IR & 0x0001) ) return;
     //delay();
@@ -159,13 +161,14 @@ void loop()
     //contrl_GLD();
     gld_control();
     
-    //hardware_photo_exchange(&Output.Str.Cnt_Dif);
+    hardware_photo_exchange(&Output.Str.Cnt_Dif);
     
     //command_echo();
     command_recieve(_command_recieve_flag_gld);
     command_decode();
     command_transm();
     
+    dbg_recieve();
     
     // data_Rdy &= ~RESET_PERIOD;
     LPC_PWM1->IR = 0x0001; //e. clear interrupt flag 	

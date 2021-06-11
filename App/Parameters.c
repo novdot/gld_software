@@ -119,8 +119,8 @@ void init_DefaultParam(void)
     Device_blk.Str.WP_transition_step = WP_TRANS_STEP;
     Device_blk.Str.WP_reset = WP_RESET_CONST;
     Device_blk.Str.WP_reset2 = WP_RESET2_CONST;
-    Device_blk.Str.Gain_Ph_A = G_PHOTO_STRA;
-    Device_blk.Str.Gain_Ph_B = G_PHOTO_STRB;
+    Device_blk.Str.Gain_Ph_A = G_PHOTO_STRA_CONST;
+    Device_blk.Str.Gain_Ph_B = G_PHOTO_STRB_CONST;
 
     Device_blk.Str.Device_SerialNumber = DEVICE_SN;
 

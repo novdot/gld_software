@@ -4,6 +4,7 @@
 
 #define TIMEOUT (1000)
 
+#define I2C_WRITELENGTH		0x00000006	/*Buffer length*/
 volatile x_uint32_t I2CMasterState = I2C_IDLE;
 volatile x_uint32_t I2CMasterBuffer[I2C_WRITELENGTH];
 
@@ -32,7 +33,7 @@ void i2c_init(void)
     LPC_I2C0->CONSET = I2CONSET_I2EN;
 }
 /******************************************************************************/
-void i2c_read(int *cnt_dif)
+void i2c_send()
 {
     uint32_t StatValue;
     static uint32_t WrIndex;
@@ -77,13 +78,13 @@ void i2c_read(int *cnt_dif)
             if  (WrIndex == I2C_WRITELENGTH) {  
                 I2CMasterState = I2C_IDLE;
                 LPC_I2C0->CONSET = I2CONSET_STO;      //e. Set Stop flag
-                *cnt_dif = 300;
+                //*cnt_dif = 300;
             } else if (WrIndex == 3){
                 LPC_I2C0->CONSET = I2CONSET_STA; 
-                *cnt_dif = 200;
+                //*cnt_dif = 200;
             }else{
                 LPC_I2C0->DAT = I2CMasterBuffer[WrIndex++];  //e. send another byte	
-                *cnt_dif = 100;
+                //*cnt_dif = 100;
             }
             LPC_I2C0->CONCLR = I2CONCLR_SIC;	//e. clear interrupt bit
             break;
@@ -98,7 +99,7 @@ void i2c_read(int *cnt_dif)
     return;
 }
 /******************************************************************************/
-void i2c_write(x_uint32_t Ph_A, x_uint32_t Ph_B)
+void i2c_setData(x_uint32_t Ph_A, x_uint32_t Ph_B)
 {
     I2CMasterBuffer[2] = Ph_A;
     I2CMasterBuffer[5] = Ph_B;	

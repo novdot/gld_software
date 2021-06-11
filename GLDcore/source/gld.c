@@ -38,7 +38,7 @@ end:
     //gld_loop_all_regs_set(_x_close);
     ignit_set_start_request(_x_false);
     //e. re-initialise gain factors of photodetector channels
-    hardware_photo_out(Device_blk.Str.Gain_Ph_A, Device_blk.Str.Gain_Ph_B);
+    hardware_photo_set(Device_blk.Str.Gain_Ph_A, Device_blk.Str.Gain_Ph_B);
 }
 /******************************************************************************/
 x_bool_t gld_is_stop_request(void)

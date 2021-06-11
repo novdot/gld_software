@@ -48,6 +48,5 @@ typedef double x_double_t;
 
 #define X_CONVERT_DIGIT2ASCII(byte) (byte + 48)
 
-#define X_TIMEOUT 1000
 
 #endif //TYPES_H_INCLUDED

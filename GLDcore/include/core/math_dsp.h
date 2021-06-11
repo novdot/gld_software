@@ -21,7 +21,7 @@ typedef enum BAND_PASS_TYPE_{
 #define	CPL_reset_calc(U0, Kgrad, Ti, T0)	U0 + L_mult( Kgrad, (Ti - T0) )	
 
 /**
-* @brief HFO_MovAverFilt
+* @brief HFO_MovAverFilt 
     Moving average filter for ammplitude signal filtration 
 */
 int HFO_MovAverFilt (int );

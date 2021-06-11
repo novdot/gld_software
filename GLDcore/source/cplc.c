@@ -301,9 +301,15 @@ int cplc_calc_modulator(void)
     //TODO for test temporarly recalculate sin in main loop
     //calc_sin_func();
     
+    Device_blk.Str.PI_a4 = PI_A4_MAX;
+    
     //modulator ampl
     if (Device_blk.Str.PI_a4 == 0) {
 		Device_blk.Str.PI_a4 = PI_A4_CONST;
+	}
+    
+    if (Device_blk.Str.PI_a4 > PI_A4_MAX) {
+		Device_blk.Str.PI_a4 = PI_A4_MAX;
 	}
 
     //current array index

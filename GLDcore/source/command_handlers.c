@@ -397,7 +397,7 @@ void command_subcmd_M_GPH_W()
 	Device_blk.Str.Gain_Ph_B = rcv_buf[5];
 
 	//e. display these values to digital potentiometers 
-	hardware_photo_out(Device_blk.Str.Gain_Ph_A, Device_blk.Str.Gain_Ph_B);
+	hardware_photo_set(Device_blk.Str.Gain_Ph_A, Device_blk.Str.Gain_Ph_B);
 	
 	trm_cycl = 0;      //e. periodic data transmission is not needed
 	command_ans_common();
@@ -850,34 +850,22 @@ void command_ans_M_RATE1()
 {
     num_of_par = 14;
     
-    /*(Output.Str.Cnt_Pls = 1);
-    (Output.Str.Cnt_Mns = 2);
-    (Output.Str.Cnt_Dif = 3);
-    (Output.Str.F_ras = 4); 
-    (Output.Str.HF_reg = 5);
-    (Output.Str.HF_dif = 6); 
-    (Output.Str.T_Vibro = 7); 
-    (Output.Str.T_VB_pll = 7); 
-    (Output.Str.L_Vibro = 7); 
-    (g_input.word.hf_out = 7); 
-    (Output.Str.WP_reg = 7); 
-    (Output.Str.WP_pll = 7); 
-    (Output.Str.Tmp_Out);
-    (Output.Str.WP_scope1); */
+    Output.Str.Tmp_Out[2] = g_input.word.in1;
+    Output.Str.Tmp_Out[3] = g_input.word.in2;
     
-    COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint32_t*)&(Output.Str.Cnt_Pls),2);
-    COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint32_t*)&(Output.Str.Cnt_Mns),2);
-    COMMAND_UTILITY_ANSWER_FIELD(2,(x_uint32_t*)&(Output.Str.Cnt_Dif),2);
-    COMMAND_UTILITY_ANSWER_FIELD(3,(x_uint32_t*)&(Output.Str.F_ras),2); //частота расщипления
-    COMMAND_UTILITY_ANSWER_FIELD(4,(x_uint32_t*)&(Output.Str.HF_reg),2); //выход регулятора ГВЧ
-    COMMAND_UTILITY_ANSWER_FIELD(5,(x_uint32_t*)&(Output.Str.HF_dif),2); //сигнал ошибки регулятора ГВЧ
-    COMMAND_UTILITY_ANSWER_FIELD(6,&(Output.Str.T_Vibro),2); //period
-    COMMAND_UTILITY_ANSWER_FIELD(7,&(Output.Str.T_VB_pll),2); //ФД регулятора периода вибропривода
+    COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint32_t*)&(Output.Str.Cnt_Pls),2); //2-3
+    COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint32_t*)&(Output.Str.Cnt_Mns),2); //4-5
+    COMMAND_UTILITY_ANSWER_FIELD(2,(x_uint32_t*)&(Output.Str.Cnt_Dif),2); //6-7
+    COMMAND_UTILITY_ANSWER_FIELD(3,(x_uint32_t*)&(Output.Str.F_ras),2); //частота расщепления //8-9
+    COMMAND_UTILITY_ANSWER_FIELD(4,(x_uint32_t*)&(Output.Str.HF_reg),2); //выход регулятора ГВЧ //10-11
+    COMMAND_UTILITY_ANSWER_FIELD(5,(x_uint32_t*)&(/*Output.Str.HF_dif*/g_input.word.hf_out),2); //сигнал ошибки регулятора ГВЧ //12-13
+    COMMAND_UTILITY_ANSWER_FIELD(6,&(Output.Str.T_Vibro),2); //period //14-15
+    COMMAND_UTILITY_ANSWER_FIELD(7,&(Output.Str.T_VB_pll),2); //ФД регулятора периода вибропривода //16-17
     COMMAND_UTILITY_ANSWER_FIELD(8,&(Output.Str.L_Vibro),2); //pulse
     COMMAND_UTILITY_ANSWER_FIELD(9,(x_uint32_t*)&(g_input.word.hf_out),2); //hfo volt
     COMMAND_UTILITY_ANSWER_FIELD(10,(x_uint32_t*)&(Output.Str.WP_reg),2); //cplc volt
-    COMMAND_UTILITY_ANSWER_FIELD(11,(x_uint32_t*)&(Output.Str.WP_pll),2); //phase detector
-    COMMAND_UTILITY_ANSWER_FIELD(12,(x_uint32_t*)&(Output.Str.Tmp_Out),12); //темпер;
+    COMMAND_UTILITY_ANSWER_FIELD(11,(x_uint32_t*)&(Output.Str.WP_pll),2); //phase detector 22-23
+    COMMAND_UTILITY_ANSWER_FIELD(12,(x_uint32_t*)&(Output.Str.Tmp_Out),12); //темпер; 24-25 26-27 28-29 30-31
     COMMAND_UTILITY_ANSWER_FIELD(13,(x_uint32_t*)&(Output.Str.WP_scope1),4); //резерв;
 	
     trm_ena = 1;

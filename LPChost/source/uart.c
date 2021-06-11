@@ -503,6 +503,25 @@ void uart_recieve(x_uint8_t*a_pBuffer,x_uint32_t*a_uCount)
     }
 #endif	 
 }
+/******************************************************************************/
+void uart_recieve_n(x_uint8_t a_ind, x_uint8_t*a_pBuffer, x_uint32_t*a_uCount)
+{
+    switch(a_ind){
+        case 0:
+            while ((LPC_UART0->LSR & RecievBufEmpty) != 0) { 
+                a_pBuffer[(*a_uCount)] = LPC_UART0->RBR;
+                (*a_uCount) += 1;
+            }
+            break;
+            
+        case 1:
+            while ((LPC_UART1->LSR & RecievBufEmpty) != 0) { 
+                a_pBuffer[(*a_uCount)] = LPC_UART1->RBR;
+                (*a_uCount) += 1;
+            }
+            break;
+    }
+}
 
 /******************************************************************************/
 void uart_recieve_reset(void)
@@ -634,7 +653,7 @@ void UART_SwitchSpeed(unsigned Speed)
             break;
 	}
     
-    DBG2(dbg,64,"Switch to BR:%d %d",baudrate,( LPC_GPDMACH1->CConfig & (1<<17)) );
+    //DBG2(dbg,64,"Switch to BR:%d %d",baudrate,( LPC_GPDMACH1->CConfig & (1<<17)) );
 
     pclk = getPclk();
     

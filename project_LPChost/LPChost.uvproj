@@ -456,6 +456,13 @@
         </Group>
         <Group>
           <GroupName>xlib</GroupName>
+          <Files>
+            <File>
+              <FileName>ring_buffer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\xlib\source\ring_buffer.c</FilePath>
+            </File>
+          </Files>
         </Group>
         <Group>
           <GroupName>core</GroupName>

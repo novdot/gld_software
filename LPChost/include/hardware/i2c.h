@@ -38,13 +38,12 @@
 #define I2SCLH_SCLH			0x00000080  /* I2C SCL Duty Cycle High Reg */
 #define I2SCLL_SCLL			0x00000080  /* I2C SCL Duty Cycle Low Reg */
 
-#define I2C_WRITELENGTH		0x00000006	/*Buffer length*/
 #define A_ADDRESS			0x0000005E	/*address of slave potentiometer (table 6-2 of pot's manual)*/
 #define B_ADDRESS			0x0000005C	/*address of slave potentiometer (table 6-2 of pot's manual)*/
 #define WRITE_CMD			0x00000000	/*address of wiper0 register in memory map*/
 
 void i2c_init(void);
-void i2c_read(int *cnt_dif);
-void i2c_write(x_uint32_t Ph_A, x_uint32_t Ph_B);
+void i2c_send();
+void i2c_setData(x_uint32_t Ph_A, x_uint32_t Ph_B);
 
 #endif

@@ -250,6 +250,11 @@ void UART_Init(x_uint32_t baudrate);
     sprintf(buf,text,par1,par2,par3,par4,par5);\
     DBG_SEND(buf,strlen(buf)+2);
     
+#define DBG6(buf,size,text,par1,par2,par3,par4,par5,par6)\
+    DBG_PREPARE(buf,size)\
+    sprintf(buf,text,par1,par2,par3,par4,par5,par6);\
+    DBG_SEND(buf,strlen(buf)+2);
+    
 void UART_DBG_SendString(char* ucData,int size);
 void UART_SendString(char* ucData,int size);
 int UART_SendByte(char ucData);
@@ -264,7 +269,7 @@ int UART_SendByte(char ucData);
 ** 
 ******************************************************************************/
 void uart_recieve(x_uint8_t*a_pBuffer,x_uint32_t*a_uCount);
-
+void uart_recieve_n(x_uint8_t a_ind, x_uint8_t*a_pBuffer, x_uint32_t*a_uCount);
 /******************************************************************************
 ** Function name:		uart_recieve_reset
 **

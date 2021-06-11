@@ -18,7 +18,7 @@
 #include "core/global.h"
 #include "bootloader/global.h"
 #include "hardware/hardware.h"
-
+#include "xlib/ring_buffer.h"
 //TODO
 #include "CyclesSync.h"
 
@@ -369,5 +369,85 @@ void command_echo(void)
         UART1_SendByte(rcv_buf[rcv_num_byt]);
         rcv_buf[--rcv_num_byt] = 0;
     }while(rcv_num_byt);
+}
+/******************************************************************************/
+void dbg_recieve()
+{
+    static char dbg[64];
+    x_uint8_t _rcv_buf[128];
+    int _rcv_num_byt = 0;
+    x_uint8_t data = 0;
+    x_uint8_t idata = 0;
+    
+    uart_recieve_n(0,_rcv_buf,&_rcv_num_byt);
+    if (_rcv_num_byt == 0)
+        return;
+    
+    for(idata=0;idata<_rcv_num_byt;idata++){
+    //while(_rcv_num_byt>0){
+        //_rcv_num_byt--;
+        x_ring_put(_rcv_buf[idata],&g_gld.cmd.ring_in);
+    }
+    
+    if (x_ring_get_count(&g_gld.cmd.ring_in) < 2)
+        return;
+    
+    switch(x_ring_pop(&g_gld.cmd.ring_in)){
+        case 0x0:
+            DBG2(dbg,64,"Build in %s %s\n"
+                "01xx - ADC\n"
+                "02xx - DAC\n"
+                "03xx - rate\n"
+                ,__DATE__,__TIME__);
+        goto clear;
+        
+        case 0x1:
+            data = x_ring_pop(&g_gld.cmd.ring_in);
+            if(data>=6) goto clear;
+            DBG1(dbg,64,"%u"
+            ,g_gld.nADCData[data]);
+        goto clear;
+        
+        case 0x2:
+            data = x_ring_pop(&g_gld.cmd.ring_in);
+            if(data>=2) goto clear;
+            DBG1(dbg,64,"%u"
+            ,g_gld.nDACData[data]);
+        goto clear;
+        
+        case 0x3:
+            data = x_ring_pop(&g_gld.cmd.ring_in);
+            switch(data){
+                case 0 : DBG1(dbg,64,"%u",(Output.Str.Cnt_Pls)     ); goto clear;
+                case 1 : DBG1(dbg,64,"%u",(Output.Str.Cnt_Mns)     ); goto clear;
+                case 2 : DBG1(dbg,64,"%u",(Output.Str.Cnt_Dif)     ); goto clear;
+                case 3 : DBG1(dbg,64,"%u",(Output.Str.F_ras)       ); goto clear;
+                case 4 : DBG1(dbg,64,"%u",(Output.Str.HF_reg)      ); goto clear;
+                case 5 : DBG1(dbg,64,"%u",(g_input.word.hf_out)    ); goto clear;
+                case 6 : DBG1(dbg,64,"%u",(Output.Str.T_Vibro)     ); goto clear;
+                case 7 : DBG1(dbg,64,"%u",(Output.Str.T_VB_pll)    ); goto clear;
+                case 8 : DBG1(dbg,64,"%u",(Output.Str.L_Vibro)     ); goto clear;
+                case 9 : DBG1(dbg,64,"%u",(g_input.word.hf_out)    ); goto clear;
+                case 10: DBG1(dbg,64,"%u",(Output.Str.WP_reg)      ); goto clear;
+                case 11: DBG1(dbg,64,"%u",(Output.Str.WP_pll)      ); goto clear;
+                case 12: DBG1(dbg,64,"%u",(Output.Str.Tmp_Out[0])  ); goto clear;
+                case 13: DBG1(dbg,64,"%u",(Output.Str.Tmp_Out[1])  ); goto clear;
+                case 14: DBG1(dbg,64,"%u",(Output.Str.Tmp_Out[2])  ); goto clear;
+                case 15: DBG1(dbg,64,"%u",(Output.Str.Tmp_Out[3])  ); goto clear;
+                case 16: DBG1(dbg,64,"%u",(Output.Str.WP_scope1)   ); goto clear;
+                case 17: DBG1(dbg,64,"%u",(Output.Str.WP_scope2)   ); goto clear;
+            }
+        goto clear;
+        
+        
+        default:
+            DBG0(dbg,64,"fail cmd");
+            goto clear;
+    }
+    
+    return;
+clear:
+    x_ring_clear(&g_gld.cmd.ring_in);
+    _rcv_num_byt = 0;    
 }
 /******************************************************************************/

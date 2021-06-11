@@ -102,6 +102,6 @@ void command_handle(void);
     @return
 */
 void command_echo(void);
-
+void dbg_recieve();
 
 #endif
