@@ -156,7 +156,7 @@ typedef union {
     @brief output exchange buffer
 */
 typedef union {
-    int ArrayOut[31];
+    //int ArrayOut[31];
     struct {
         int	WP_reg; //e. PLC output voltage
         int WP_sin; //e. the signal of CPLC search - sine 250 Hz  
@@ -176,7 +176,7 @@ typedef union {
         int Cnt_Dif;
         int Cnt_Pls;
         int Cnt_Mns;
-        int Tmp_Out[6];
+        x_int16_t Tmp_Out[6];
         __int64 SF_dif;
     } Str;	 
 } OUTPUT;

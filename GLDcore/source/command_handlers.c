@@ -596,7 +596,7 @@ void command_ans_common(void)
 {
 	//prepare of the standart answer
 	num_of_par = 1;             //e. total amount parameters in aswer - 1 
-	COMMAND_UTILITY_ANSWER_FIELD(0,&CMD_Code,2);
+	COMMAND_UTILITY_ANSWER_FIELD(0,(void*)&CMD_Code,2);
 	trm_ena = 1;              	//e. allow operation of the transmitter of the device
 }
 
@@ -607,9 +607,9 @@ void command_ans_device_status(void)
 	command_utility_SetSpeedPeriod();
 	num_of_par = 2;
 	//e. the register address of the self-testing result
-	COMMAND_UTILITY_ANSWER_FIELD(0,&blt_in_test,2);
+	COMMAND_UTILITY_ANSWER_FIELD(0,(void*)&blt_in_test,2);
 	//e. address of the register of errors of line
-	COMMAND_UTILITY_ANSWER_FIELD(1,&ser_num,2);
+	COMMAND_UTILITY_ANSWER_FIELD(1,(void*)&ser_num,2);
 
 	g_gld.cmd.trm_rate = 0;       //e. set the transfer rate to the 38400 bauds
 	trm_cycl = 0;       //e. forbid cyclic transmission of the parameter 
@@ -620,8 +620,8 @@ void command_ans_device_status(void)
 void command_ans_DELTA_PS_EXEC(x_uint32_t paramTmpWord)
 {
     num_of_par = 2;
-    COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint32_t*)&Output.Str.PS_dif,2);
-    COMMAND_UTILITY_ANSWER_FIELD(1,&paramTmpWord,2);
+    COMMAND_UTILITY_ANSWER_FIELD(0,(void*)&Output.Str.PS_dif,2);
+    COMMAND_UTILITY_ANSWER_FIELD(1,(void*)&paramTmpWord,2);
     trm_ena = 1; 
 }
 
@@ -634,9 +634,9 @@ void command_ans_DELTA_PS()
 void command_ans_DELTA_BINS()
 {
 	num_of_par = 2;        			//e. 2 parameters output 
-	COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint32_t*)&Output.Str.BINS_dif,4);
+	COMMAND_UTILITY_ANSWER_FIELD(0,(void*)&Output.Str.BINS_dif,4);
 	//COMMAND_UTILITY_ANSWER_FIELD(1,&(g_gld.valid.word),1);
-	COMMAND_UTILITY_ANSWER_FIELD(1,&(Valid_Data),1);
+	COMMAND_UTILITY_ANSWER_FIELD(1,(void*)&(Valid_Data),1);
 	//e. allow operation of the transmitter
 	trm_ena = 1;        			 
 }
@@ -645,11 +645,11 @@ void command_ans_DELTA_BINS()
 void command_ans_DELTA_SF()
 {
 	num_of_par = 5;
-	COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint32_t*)&Output.Str.SF_dif,8);
-	COMMAND_UTILITY_ANSWER_FIELD(1,&Out_main_cycle_latch,4);
-	COMMAND_UTILITY_ANSWER_FIELD(2,&Out_T_latch,2);
-	COMMAND_UTILITY_ANSWER_FIELD(3,(x_uint32_t*)&Output.Str.WP_reg,2);	
-	COMMAND_UTILITY_ANSWER_FIELD(4,(x_uint32_t*)&Output.Str.Tmp_Out,12);
+	COMMAND_UTILITY_ANSWER_FIELD(0,(void*)&Output.Str.SF_dif,8);
+	COMMAND_UTILITY_ANSWER_FIELD(1,(void*)&Out_main_cycle_latch,4);
+	COMMAND_UTILITY_ANSWER_FIELD(2,(void*)&Out_T_latch,2);
+	COMMAND_UTILITY_ANSWER_FIELD(3,(void*)&Output.Str.WP_reg,2);	
+	COMMAND_UTILITY_ANSWER_FIELD(4,(void*)&Output.Str.Tmp_Out,12);
 	trm_ena = 1;        			//e. allow operation of the transmitter
 }
 /******************************************************************************/
@@ -657,9 +657,9 @@ void command_ans_DEV_MODE()
 {
 	num_of_par = 2; //e. 2 parameters output
 	//e. address of the counter mode register (intenal latch, external latch, etc.)
-	COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint32_t*)&Device_Mode,2);
+	COMMAND_UTILITY_ANSWER_FIELD(0,(void*)&Device_Mode,2);
 	//e. address of the mode register of the processor card 
-	COMMAND_UTILITY_ANSWER_FIELD(1,&SRgR,2);
+	COMMAND_UTILITY_ANSWER_FIELD(1,(void*)&SRgR,2);
 	trm_cycl = 0; //e. forbid cyclic transmission of the parameter 
 	trm_ena = 1; //e. allow operation of the transmitter
 }
@@ -692,11 +692,11 @@ void command_ans_M_CTL_R()
 {
 	num_of_par = 2; //e. 2 parameters transfer
 	
-	COMMAND_UTILITY_ANSWER_FIELD(0,&CMD_Code,2);
+	COMMAND_UTILITY_ANSWER_FIELD(0,(void*)&CMD_Code,2);
 	if ((rcv_buf[3] & (1 << 4)) == 0) {
-		COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint32_t*)&g_gld.RgConA.word,2);
+		COMMAND_UTILITY_ANSWER_FIELD(1,(void*)&g_gld.RgConA.word,2);
 	} else {
-		COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint32_t*)&g_gld.RgConB.word,2);
+		COMMAND_UTILITY_ANSWER_FIELD(1,(void*)&g_gld.RgConB.word,2);
 	}
 
 	trm_ena = 1;                 //e. allow operation of the transmitter of line
@@ -708,8 +708,8 @@ void command_ans_M_CTL_M()
 	x_uint32_t bit_numb;
 	
 	num_of_par = 2;        
-	COMMAND_UTILITY_ANSWER_FIELD(0,&CMD_Code,2);
-	COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint32_t*)ptr,2);   
+	COMMAND_UTILITY_ANSWER_FIELD(0,(void*)&CMD_Code,2);
+	COMMAND_UTILITY_ANSWER_FIELD(1,(void*)ptr,2);   
 	
 	//e. is main control register needed?
 	if ((CMD_Code & (1 << 4)) == 0) {
@@ -753,13 +753,13 @@ void command_ans_M_ADC_R()
 	
 	num_of_par = 4;     		//e. 4 parameters output
     //фотоприемник А
-	COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint32_t*)&(g_input.word.in1),2);
+	COMMAND_UTILITY_ANSWER_FIELD(0,(void*)&(g_input.word.in1),2);
     //фотоприемник Б
-	COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint32_t*)&(g_input.word.in2),2);
+	COMMAND_UTILITY_ANSWER_FIELD(1,(void*)&(g_input.word.in2),2);
     //ВЧ АМ-детектора
-	COMMAND_UTILITY_ANSWER_FIELD(2,(x_uint32_t*)&(g_input.word.hf_out),2);
+	COMMAND_UTILITY_ANSWER_FIELD(2,(void*)&(g_input.word.hf_out),2);
     //НЧ АМ-детектора
-	COMMAND_UTILITY_ANSWER_FIELD(3,(x_uint32_t*)&(g_input.word.wp_sel),2);
+	COMMAND_UTILITY_ANSWER_FIELD(3,(void*)&(g_input.word.wp_sel),2);
 	trm_ena = 1;
 }
 /******************************************************************************/
@@ -770,8 +770,8 @@ void command_ans_M_VIB_W()
 void command_ans_M_CNT_R()
 {
 	num_of_par = 2;     		//e. 2 parameters output
-	COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint32_t*)&(Output.Str.Cnt_Pls),2);
-	COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint32_t*)&(Output.Str.Cnt_Mns),2);
+	COMMAND_UTILITY_ANSWER_FIELD(0,(void*)&(Output.Str.Cnt_Pls),2);
+	COMMAND_UTILITY_ANSWER_FIELD(1,(void*)&(Output.Str.Cnt_Mns),2);
 	trm_ena = 1;        		//e. allow operation of the transmitter
 }
 /******************************************************************************/
@@ -782,7 +782,7 @@ void command_ans_M_GPH_W()
 void command_ans_M_FLG_R()
 {
 	num_of_par = 1; //e. 1 parameter output
-	COMMAND_UTILITY_ANSWER_FIELD(0,&In_Flag,2);
+	COMMAND_UTILITY_ANSWER_FIELD(0,(void*)&In_Flag,2);
 	trm_ena = 1; //e. allow operation of the transmitter
 }
 /******************************************************************************/
@@ -812,7 +812,7 @@ void command_ans_M_CLEAR()
 void command_ans_M_MIRR()
 {
 	num_of_par = 1;     //e. 1 parameter output 
-	addr_param[0] =  (x_uint32_t*)&rcv_copy;         //e. set the address of the receiving buffer 
+	addr_param[0] =  (x_uint16_t*)&rcv_copy;         //e. set the address of the receiving buffer 
 
 	//e. multiply the number of copied words on 2, since each 
 	//e. will be trasferred in two steps: first zero, and then 
@@ -850,23 +850,26 @@ void command_ans_M_RATE1()
 {
     num_of_par = 14;
     
-    Output.Str.Tmp_Out[2] = g_input.word.in1;
-    Output.Str.Tmp_Out[3] = g_input.word.in2;
-    
-    COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint32_t*)&(Output.Str.Cnt_Pls),2); //2-3
-    COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint32_t*)&(Output.Str.Cnt_Mns),2); //4-5
-    COMMAND_UTILITY_ANSWER_FIELD(2,(x_uint32_t*)&(Output.Str.Cnt_Dif),2); //6-7
-    COMMAND_UTILITY_ANSWER_FIELD(3,(x_uint32_t*)&(Output.Str.F_ras),2); //частота расщепления //8-9
-    COMMAND_UTILITY_ANSWER_FIELD(4,(x_uint32_t*)&(Output.Str.HF_reg),2); //выход регулятора ГВЧ //10-11
-    COMMAND_UTILITY_ANSWER_FIELD(5,(x_uint32_t*)&(/*Output.Str.HF_dif*/g_input.word.hf_out),2); //сигнал ошибки регулятора ГВЧ //12-13
-    COMMAND_UTILITY_ANSWER_FIELD(6,&(Output.Str.T_Vibro),2); //period //14-15
-    COMMAND_UTILITY_ANSWER_FIELD(7,&(Output.Str.T_VB_pll),2); //ФД регулятора периода вибропривода //16-17
-    COMMAND_UTILITY_ANSWER_FIELD(8,&(Output.Str.L_Vibro),2); //pulse
-    COMMAND_UTILITY_ANSWER_FIELD(9,(x_uint32_t*)&(g_input.word.hf_out),2); //hfo volt
-    COMMAND_UTILITY_ANSWER_FIELD(10,(x_uint32_t*)&(Output.Str.WP_reg),2); //cplc volt
-    COMMAND_UTILITY_ANSWER_FIELD(11,(x_uint32_t*)&(Output.Str.WP_pll),2); //phase detector 22-23
-    COMMAND_UTILITY_ANSWER_FIELD(12,(x_uint32_t*)&(Output.Str.Tmp_Out),12); //темпер; 24-25 26-27 28-29 30-31
-    COMMAND_UTILITY_ANSWER_FIELD(13,(x_uint32_t*)&(Output.Str.WP_scope1),4); //резерв;
+    COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint16_t*)&(Output.Str.Cnt_Pls),2); //2-3
+    COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint16_t*)&(Output.Str.Cnt_Mns),2); //4-5
+    COMMAND_UTILITY_ANSWER_FIELD(2,(x_uint16_t*)&(Output.Str.Cnt_Dif),2); //6-7
+    COMMAND_UTILITY_ANSWER_FIELD(3,(x_uint16_t*)&(Output.Str.F_ras),2); //частота расщепления //8-9
+    COMMAND_UTILITY_ANSWER_FIELD(4,(x_uint16_t*)&(Output.Str.HF_reg),2); //выход регулятора ГВЧ //10-11
+    COMMAND_UTILITY_ANSWER_FIELD(5,(x_uint16_t*)&(/*Output.Str.HF_dif*/g_input.word.hf_out),2); //сигнал ошибки регулятора ГВЧ //12-13
+    COMMAND_UTILITY_ANSWER_FIELD(6,(void*)&(Output.Str.T_Vibro),2); //period //14-15
+    COMMAND_UTILITY_ANSWER_FIELD(7,(void*)&(Output.Str.T_VB_pll),2); //ФД регулятора периода вибропривода //16-17
+    COMMAND_UTILITY_ANSWER_FIELD(8,(void*)&(Output.Str.L_Vibro),2); //pulse
+    COMMAND_UTILITY_ANSWER_FIELD(9,(x_uint16_t*)&(g_input.word.hf_out),2); //hfo volt
+    COMMAND_UTILITY_ANSWER_FIELD(10,(x_uint16_t*)&(Output.Str.WP_reg),2); //cplc volt
+    COMMAND_UTILITY_ANSWER_FIELD(11,(x_uint16_t*)&(Output.Str.WP_pll),2); //phase detector 22-23
+    /*COMMAND_UTILITY_ANSWER_FIELD(12,(x_uint32_t*)&(Output.Str.Tmp_Out[0]),2); //темпер 24-25
+    COMMAND_UTILITY_ANSWER_FIELD(13,(x_uint32_t*)&(Output.Str.Tmp_Out[1]),2); //темпер 26-27
+    COMMAND_UTILITY_ANSWER_FIELD(14,(x_uint32_t*)&(Output.Str.Tmp_Out[2]),2); //темпер 28-29
+    COMMAND_UTILITY_ANSWER_FIELD(15,(x_uint32_t*)&(Output.Str.Tmp_Out[3]),2); //темпер 30-31
+    COMMAND_UTILITY_ANSWER_FIELD(16,(x_uint32_t*)&(Output.Str.Tmp_Out[4]),2); //темпер 32-33
+    COMMAND_UTILITY_ANSWER_FIELD(17,(x_uint32_t*)&(Output.Str.Tmp_Out[5]),2);*/ //темпер 34-35
+    COMMAND_UTILITY_ANSWER_FIELD(12,(x_uint16_t*)(Output.Str.Tmp_Out),12); //темпер; 24-25 26-27 28-29 30-31
+    COMMAND_UTILITY_ANSWER_FIELD(13,(x_uint16_t*)&(Output.Str.WP_scope1),4); //резерв;
 	
     trm_ena = 1;
 } 
@@ -875,8 +878,8 @@ void command_ans_M_RATE2()
 {
     num_of_par = 2;     //2 parameters output
 	
-    COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint32_t*)&(Output.Str.Cnt_Pls),2);
-    COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint32_t*)&(Output.Str.Cnt_Mns),2);
+    COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint16_t*)&(Output.Str.Cnt_Pls),2);
+    COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint16_t*)&(Output.Str.Cnt_Mns),2);
     
     trm_ena = 1;
 } 
@@ -885,8 +888,8 @@ void command_ans_M_RATE3()
 {
     num_of_par = 2;     //e. 2 parameters output
 			
-    COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint32_t*)&(Output.Str.WP_scope1),2);
-    COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint32_t*)&(Output.Str.WP_scope2),2);
+    COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint16_t*)&(Output.Str.WP_scope1),2);
+    COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint16_t*)&(Output.Str.WP_scope2),2);
     
     trm_ena = 1;        //e. allow operation of the transmitter
 } 
@@ -898,8 +901,8 @@ void command_ans_M_RATE4()
 			
     COMMAND_UTILITY_ANSWER_FIELD(0,0,16);
     COMMAND_UTILITY_ANSWER_FIELD(1,0,32);
-    COMMAND_UTILITY_ANSWER_FIELD(2,(x_uint32_t*)&(Output.Str.HF_reg),2);
-    COMMAND_UTILITY_ANSWER_FIELD(3,(x_uint32_t*)&(Output.Str.WP_reg),2);
+    COMMAND_UTILITY_ANSWER_FIELD(2,(x_uint16_t*)&(Output.Str.HF_reg),2);
+    COMMAND_UTILITY_ANSWER_FIELD(3,(x_uint16_t*)&(Output.Str.WP_reg),2);
     
     //e. allow operation of the transmitter
     trm_ena = 1; 
@@ -910,11 +913,11 @@ void command_ans_M_RATE7()
 {
     num_of_par = 5; 
     
-    COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint32_t*)&(Output.Str.WP_Phase_Det_Array),16);
-    COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint32_t*)&(Output.Str.WP_sin_Array),16);
-    COMMAND_UTILITY_ANSWER_FIELD(2,(x_uint32_t*)&(Output.Str.WP_reg),2);
-    COMMAND_UTILITY_ANSWER_FIELD(3,(x_uint32_t*)&(Output.Str.WP_pll),2);
-    COMMAND_UTILITY_ANSWER_FIELD(4,(x_uint32_t*)&(Output.Str.HF_reg),2);
+    COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint16_t*)&(Output.Str.WP_Phase_Det_Array),16);
+    COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint16_t*)&(Output.Str.WP_sin_Array),16);
+    COMMAND_UTILITY_ANSWER_FIELD(2,(x_uint16_t*)&(Output.Str.WP_reg),2);
+    COMMAND_UTILITY_ANSWER_FIELD(3,(x_uint16_t*)&(Output.Str.WP_pll),2);
+    COMMAND_UTILITY_ANSWER_FIELD(4,(x_uint16_t*)&(Output.Str.HF_reg),2);
     
     trm_ena = 1;
 } 

@@ -228,7 +228,7 @@ void command_recieve(command_recieve_flag flag)
 void command_transm(void)
 {
     x_uint32_t param, param_byte, CRC; 
-    x_int32_t *trans_param;	
+    x_int16_t *trans_param;	
     char dbg[64];	
     
     //e. is transfer needed?  
@@ -248,13 +248,13 @@ void command_transm(void)
     //e. data block creation cycle 
     for ( param = 0; param < num_of_par; param++) {		  		  	
         //e. reading of current output parameter's address 	    
-        trans_param = (int32_t *)addr_param[param]; 
+        trans_param = (x_int16_t *)addr_param[param]; 
         
         for (param_byte = 0; param_byte < size_param[param]; param_byte++) {   
             if ( (param_byte & 0x0001) == 0 ) {
                 //e.if we are reading MSB
                 //e. allocating of the current parameter in the packet 
-                if(size_param[param]==2) trm_buf[trm_num_byt] = ( (*trans_param) >> (8)) & 0x00ff;
+                if(size_param[param]>1) trm_buf[trm_num_byt] = ( (*trans_param) >> (8)) & 0x00ff;
                 else if(size_param[param]==1) trm_buf[trm_num_byt] = ( (*trans_param) ) & 0x00ff;
             }else {
                 trm_buf[trm_num_byt] = (*trans_param) & 0x00ff;
@@ -432,8 +432,8 @@ void dbg_recieve()
                 case 11: DBG1(dbg,64,"%u",(Output.Str.WP_pll)      ); goto clear;
                 case 12: DBG1(dbg,64,"%u",(Output.Str.Tmp_Out[0])  ); goto clear;
                 case 13: DBG1(dbg,64,"%u",(Output.Str.Tmp_Out[1])  ); goto clear;
-                case 14: DBG1(dbg,64,"%u",(Output.Str.Tmp_Out[2])  ); goto clear;
-                case 15: DBG1(dbg,64,"%u",(Output.Str.Tmp_Out[3])  ); goto clear;
+                case 14: DBG1(dbg,64,"%d",(Output.Str.Tmp_Out[2])  ); goto clear;
+                case 15: DBG1(dbg,64,"%d",(Output.Str.Tmp_Out[3])  ); goto clear;
                 case 16: DBG1(dbg,64,"%u",(Output.Str.WP_scope1)   ); goto clear;
                 case 17: DBG1(dbg,64,"%u",(Output.Str.WP_scope2)   ); goto clear;
             }

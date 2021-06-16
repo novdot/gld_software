@@ -93,7 +93,7 @@ void clc_ThermoSensors(void)
         Output.Str.Tmp_Out[i] = mac_r(Device_blk.Str.Tmp_bias[i] << 16,
 												(g_input.array[1+i] - 0x8000), 
 												Device_blk.Str.Tmp_scal[i]);
-        
+        //save to [4] and [5] 
 		Output.Str.Tmp_Out[i+4] = g_input.array[1+i];																	
 	}
 
