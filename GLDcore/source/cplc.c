@@ -132,6 +132,7 @@ void cplc_init(void)
     //e. max expected delay for phase detector output
 	MaxDelayPLC = Device_blk.Str.PI_b3>>1;
 
+    //init worms arrays
     for (i=0; i<7; i++){
 		Output.Str.WP_Phase_Det_Array[i] = 0;
     }

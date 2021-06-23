@@ -1,65 +1,59 @@
 //#include "CntrlGLD.h"
-#include "core/gld.h"
-#include "lpc17xx.h"
+//#include "lpc17xx.h"
 #include "Parameters.h"
-#include "el_lin.h"
+//#include "el_lin.h"
 
 
 #include "hardware/hardware.h"
 #include "core/global.h"
 #include "core/const.h"
+#include "core/gld.h"
 
 #define INT_ERR_TC		0x00000008
-/******************************************************************************
-** Function name:		LoadFlashParam
-**
-** Descriptions:		Load of the parameters from the flash memory 
-**
-** parameters:			None
-** Returned value:		None
-** 
-******************************************************************************/
-void LoadFlashParam(unsigned source) 
+/******************************************************************************/
+void params_load(unsigned source) 
 {
-  if (source == FromFLASH) 
-  {  
-   	 while (LPC_GPDMACH3->CConfig & (1<<17));      	   //e. wait while DMA channel3 is busy
+    char dbg[64];
+    switch(source){
+        case _params_load_fash:
+            //e. wait while DMA channel3 is busy
+            /*while (LPC_GPDMACH3->CConfig & (1<<17));      	   
 
-     if (LPC_GPDMA->RawIntErrStat & INT_ERR_TC) 
-	 	 	LPC_GPDMA->IntErrClr |= INT_ERR_TC;	 	   //e. an errors found, reset interrupt
-
-     else if (LPC_GPDMA->RawIntTCStat & INT_ERR_TC) 
-	 {  //e. successful loading complete
-	    LPC_GPDMA->IntTCClear |= INT_ERR_TC;
-       if (Device_blk.Str.Header_Word == HEADER_WORD_CONST) //e. flash contain valid data  	       
-	    return;
-	 }
-	 else 
-	 {  					//e. transfer was not started, start it immediatly
-	   FlashDMA_Init();
-	  return;
-	 }
-   init_DefaultParam();		//e. load parameters by default 								 									 
-  }								
-   else  //e. source == ByDefault
-	   init_DefaultParam();		//e. load parameters by default 
-
-  blt_in_test = ((uint32_t)FIRMWARE_VER << 8) | (Device_blk.Str.Device_SerialNumber & 0x00FF);
+            //e. an errors found, reset interrupt
+            if (LPC_GPDMA->RawIntErrStat & INT_ERR_TC){
+                LPC_GPDMA->IntErrClr |= INT_ERR_TC;	 	   
+            }else if (LPC_GPDMA->RawIntTCStat & INT_ERR_TC){
+                //e. successful loading complete
+                LPC_GPDMA->IntTCClear |= INT_ERR_TC;
+                //e. flash contain valid data 
+                if (Device_blk.Str.Header_Word == HEADER_WORD_CONST)  	       
+                    return;
+            } else {
+                //e. transfer was not started, start it immediatly
+                params_FlashDMA_Init();
+                return;
+            }*/
+            params_load_flash();
+            if (Device_blk.Str.Header_Word == HEADER_WORD_CONST) {	       
+                return;
+            }else{
+                DBG1(dbg,64,"Header_Word error %u",Device_blk.Str.Header_Word);
+                params_load_default();
+            }
+            break;
+            
+        default:
+            params_load_default();	
+            break;
+    }
+    blt_in_test = ((uint32_t)FIRMWARE_VER << 8) | (Device_blk.Str.Device_SerialNumber & 0x00FF);
 }
-/******************************************************************************
-** Function name:		init_DefaultParam
-**
-** Descriptions:		Initialization of variables of computing procedures 
-**
-** parameters:			None
-** Returned value:		None
-** 
-******************************************************************************/
-void init_DefaultParam(void)      
+/******************************************************************************/
+void params_load_default(void)      
 {
 	int i;
 
-    Device_blk.Str.My_Addres = My_Addres_const; 
+    Device_blk.Str.My_Addres = MY_ADDR_CONST; 
 
     Device_blk.Str.HF_ref = HF_REF_CONST;
     Device_blk.Str.HF_scl = HF_SCL_CONST; 
@@ -122,19 +116,11 @@ void init_DefaultParam(void)
     Device_blk.Str.Gain_Ph_A = G_PHOTO_STRA_CONST;
     Device_blk.Str.Gain_Ph_B = G_PHOTO_STRB_CONST;
 
-    Device_blk.Str.Device_SerialNumber = DEVICE_SN;
+    Device_blk.Str.Device_SerialNumber = DEVICE_SN_CONST;
 
 } // init_DefaultParam
-/******************************************************************************
-** Function name:		FlashDMA_Init
-**
-** Descriptions:		Initialisation of DMA channel for flash reading 
-**
-** parameters:			None
-** Returned value:		None
-** 
-******************************************************************************/
-void FlashDMA_Init()
+/******************************************************************************/
+void params_FlashDMA_Init()
 {
     LPC_GPDMACH3->CConfig &= ~DMAChannelEn; 
 
@@ -142,7 +128,8 @@ void FlashDMA_Init()
     LPC_GPDMA->IntErrClr = DMA3_IntTCClear;
 
     /* Ch3 set for M2M transfer from Flash to RAM. */
-    LPC_GPDMACH3->CSrcAddr = 0x40000;	   //e. address of device parameter block in flash memory (22 sec)
+    //0x40000;//e. address of device parameter block in flash memory (22 sec)
+    LPC_GPDMACH3->CSrcAddr = MEMORY_COEF_MEM_START;
     LPC_GPDMACH3->CDestAddr = (uint32_t)&(Device_blk.Array);//e. address of device parameter block in RAM
 
     LPC_GPDMACH3->CControl = ((sizeof(Device_blk.Array))>>2)|SrcBSize_1 |DstBSize_1 
@@ -153,3 +140,26 @@ void FlashDMA_Init()
     return;
 }
 /******************************************************************************/
+void params_save2flash()
+{
+    //stop GLD
+    gld_stop();
+    /*NVIC_DisableIRQ(EINT3_IRQn);
+    NVIC_DisableIRQ(TIMER0_IRQn);
+    NVIC_DisableIRQ(TIMER3_IRQn);
+    NVIC_DisableIRQ(PWM1_IRQn);
+    LPC_PWM1->TCR = 0;*/
+    Device_blk.Str.Header_Word = HEADER_WORD_CONST;
+    //write to flash
+    memory_write(
+        MEMORY_COEF_SEC_START
+        ,MEMORY_COEF_SEC_END
+        ,Device_blk.Array
+        ,VARIABLE_COUNT
+        );
+}
+/******************************************************************************/
+void params_load_flash()
+{
+    memory_read(MEMORY_COEF_MEM_START,Device_blk.Array,VARIABLE_COUNT);
+}

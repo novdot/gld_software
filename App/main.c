@@ -76,7 +76,7 @@ void init()
     
     DMA_Init();
     //e. start loading of parameters from flash
-    FlashDMA_Init(); 
+    //params_FlashDMA_Init(); 
     
     //e. to calculate SystemCoreClock  for UART particularly
     SystemCoreClockUpdate();
@@ -94,30 +94,24 @@ void init()
     ExtLatch_Init();
     
     //e.to load device's constants
-    LoadFlashParam(FromFLASH);
+    params_load(_params_load_fash);//_params_load_fash _params_load_default
     
     //e. initialize DMA channel for UART
     uart_dma_init(trm_buf);
     
     //e. initialize channel for setting of photodetector gain
-    //G_Photo_Init();
     hardware_photo_init();
-    
     hardware_photo_set(Device_blk.Str.Gain_Ph_A, Device_blk.Str.Gain_Ph_B);
     
     open_all_loops();
     
-    Output.Str.HF_reg = Device_blk.Str.HF_min;
+    Output.Str.HF_reg = Device_blk.Str.HF_ref;
     cplc_init();
     init_Dither_reg();
     g_gld.RgConB.word = RATE_VIBRO_1;
     
     //program variables
-    //ringbuffer_init(&g_gld.ringBuf,32);
     x_ring_init(&g_gld.cmd.ring_in,g_gld.cmd.buf_in,GLD_RINGBUFFER_SIZE);
-    
-    //DBG2(dbg,64,"Build in %s %s",__DATE__,__TIME__);
-    //DBG0(dbg,64,"Init done!");
 }
 /******************************************************************************/
 void loop_echo()

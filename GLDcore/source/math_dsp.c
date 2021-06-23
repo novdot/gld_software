@@ -161,7 +161,8 @@ void init_BandPass(double CenterFreq, double BandWidth, BAND_PASS_TYPE FiltType)
         bPLC[0] = 0;
         bPLC[1] = (int)((R * Cos_x_2)*HALFINT);
         bPLC[2] = (int)((- R_x_R)*HALFINT);
-        break;
+        break
+            ;
     case DUP:
         aDUP[0] = (int)((1.0 - K)*HALFINT);
         aDUP[1] = (int)(((K - R) * Cos_x_2)*HALFINT);
@@ -172,6 +173,7 @@ void init_BandPass(double CenterFreq, double BandWidth, BAND_PASS_TYPE FiltType)
         break;
     }
 }
+
 /******************************************************************************/
 int HFO_MovAverFilt (int Input)
 {   

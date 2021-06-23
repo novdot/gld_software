@@ -200,7 +200,7 @@ void hardware_photo_set(x_uint32_t Ph_A, x_uint32_t Ph_B)
 }
 
 /******************************************************************************/
-void hardware_flash_read(x_uint32_t a_sector,x_uint8_t* a_pmemory)
+void hardware_flash_read(x_uint32_t a_sector,x_uint32_t* a_pmemory, x_uint32_t a_cnt)
 {
     int start,end = 0;
     
@@ -220,7 +220,7 @@ void hardware_flash_read(x_uint32_t a_sector,x_uint8_t* a_pmemory)
         default:
             break;
     }
-    memory_read(start,a_pmemory);
+    memory_read(start,a_pmemory,a_cnt);
 }
 /******************************************************************************/
 void hardware_flash_write(x_uint32_t a_sector,x_uint8_t* a_pmemory)
@@ -249,7 +249,7 @@ void hardware_flash_write(x_uint32_t a_sector,x_uint8_t* a_pmemory)
         default:
             break;
     }
-    memory_write(start,end,addr,a_pmemory,size);
+    memory_write(start,end,a_pmemory,size);
 }
 /******************************************************************************/
 void hardware_flash_erase(x_uint32_t a_sector)

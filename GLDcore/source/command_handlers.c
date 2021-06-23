@@ -478,7 +478,7 @@ void command_subcmd_M_MIRR()
 void command_subcmd_M_LDPAR_F()
 {
 	//e. load the GLD parameters from the flash-memory
-	LoadFlashParam(FromFLASH);
+	params_load(_params_load_fash);
 	blt_in_test = ((uint32_t)FIRMWARE_VER << 8) | (Device_blk.Str.Device_SerialNumber & 0x00FF);
 	//Init_software();
 	trm_cycl = 0; //e. periodic data transmission is not needed 
@@ -489,7 +489,7 @@ void command_subcmd_M_LDPAR_F()
 /******************************************************************************/
 void command_subcmd_M_LDPAR_D()
 {
-	LoadFlashParam(ByDefault);
+	params_load(_params_load_default);
 	//Init_software();
 	trm_cycl = 0;
 
@@ -862,12 +862,6 @@ void command_ans_M_RATE1()
     COMMAND_UTILITY_ANSWER_FIELD(9,(x_uint16_t*)&(g_input.word.hf_out),2); //hfo volt
     COMMAND_UTILITY_ANSWER_FIELD(10,(x_uint16_t*)&(Output.Str.WP_reg),2); //cplc volt
     COMMAND_UTILITY_ANSWER_FIELD(11,(x_uint16_t*)&(Output.Str.WP_pll),2); //phase detector 22-23
-    /*COMMAND_UTILITY_ANSWER_FIELD(12,(x_uint32_t*)&(Output.Str.Tmp_Out[0]),2); //темпер 24-25
-    COMMAND_UTILITY_ANSWER_FIELD(13,(x_uint32_t*)&(Output.Str.Tmp_Out[1]),2); //темпер 26-27
-    COMMAND_UTILITY_ANSWER_FIELD(14,(x_uint32_t*)&(Output.Str.Tmp_Out[2]),2); //темпер 28-29
-    COMMAND_UTILITY_ANSWER_FIELD(15,(x_uint32_t*)&(Output.Str.Tmp_Out[3]),2); //темпер 30-31
-    COMMAND_UTILITY_ANSWER_FIELD(16,(x_uint32_t*)&(Output.Str.Tmp_Out[4]),2); //темпер 32-33
-    COMMAND_UTILITY_ANSWER_FIELD(17,(x_uint32_t*)&(Output.Str.Tmp_Out[5]),2);*/ //темпер 34-35
     COMMAND_UTILITY_ANSWER_FIELD(12,(x_uint16_t*)(Output.Str.Tmp_Out),12); //темпер; 24-25 26-27 28-29 30-31
     COMMAND_UTILITY_ANSWER_FIELD(13,(x_uint16_t*)&(Output.Str.WP_scope1),4); //резерв;
 	

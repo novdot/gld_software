@@ -56,7 +56,7 @@ void hardware_photo_set(x_uint32_t Ph_A, x_uint32_t Ph_B);
     @brief управление памятью
     @attention перед вызовом остановить все прерывания
 */
-void hardware_flash_read(x_uint32_t a_sector,x_uint8_t* a_pmemory);
+void hardware_flash_read(x_uint32_t a_sector,x_uint32_t* a_pmemory, x_uint32_t a_cnt);
 void hardware_flash_write(x_uint32_t a_sector,x_uint8_t* a_pmemory);
 void hardware_flash_erase(x_uint32_t a_sector);
 void hardware_flash_load_main();

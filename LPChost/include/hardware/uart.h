@@ -207,7 +207,7 @@ typedef enum uart_baudrate_speedDef{
 ******************************************************************************/
 void UART_Init(x_uint32_t baudrate);
 
-#define DBG_PREPARE(buf,size) memset(buf,' ',size);
+#define DBG_PREPARE(buf,size) memset(buf,' ',strlen(buf));
 
 #if defined(UART0DBG)
 #define UART_DBG_SEND(buf,size) UART0_SendString(buf,size);

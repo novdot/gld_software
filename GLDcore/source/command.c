@@ -398,48 +398,64 @@ void dbg_recieve()
                 "01xx - ADC\n"
                 "02xx - DAC\n"
                 "03xx - rate\n"
+                "0F00 - save2flash\n"
+                "0F01 - load flash\n"
                 ,__DATE__,__TIME__);
-        goto clear;
+            goto clear;
         
         case 0x1:
             data = x_ring_pop(&g_gld.cmd.ring_in);
             if(data>=6) goto clear;
             DBG1(dbg,64,"%u"
             ,g_gld.nADCData[data]);
-        goto clear;
+            goto clear;
         
         case 0x2:
             data = x_ring_pop(&g_gld.cmd.ring_in);
             if(data>=2) goto clear;
             DBG1(dbg,64,"%u"
             ,g_gld.nDACData[data]);
-        goto clear;
+            goto clear;
         
         case 0x3:
             data = x_ring_pop(&g_gld.cmd.ring_in);
             switch(data){
-                case 0 : DBG1(dbg,64,"%u",(Output.Str.Cnt_Pls)     ); goto clear;
-                case 1 : DBG1(dbg,64,"%u",(Output.Str.Cnt_Mns)     ); goto clear;
-                case 2 : DBG1(dbg,64,"%u",(Output.Str.Cnt_Dif)     ); goto clear;
-                case 3 : DBG1(dbg,64,"%u",(Output.Str.F_ras)       ); goto clear;
-                case 4 : DBG1(dbg,64,"%u",(Output.Str.HF_reg)      ); goto clear;
-                case 5 : DBG1(dbg,64,"%u",(g_input.word.hf_out)    ); goto clear;
-                case 6 : DBG1(dbg,64,"%u",(Output.Str.T_Vibro)     ); goto clear;
-                case 7 : DBG1(dbg,64,"%u",(Output.Str.T_VB_pll)    ); goto clear;
-                case 8 : DBG1(dbg,64,"%u",(Output.Str.L_Vibro)     ); goto clear;
-                case 9 : DBG1(dbg,64,"%u",(g_input.word.hf_out)    ); goto clear;
-                case 10: DBG1(dbg,64,"%u",(Output.Str.WP_reg)      ); goto clear;
-                case 11: DBG1(dbg,64,"%u",(Output.Str.WP_pll)      ); goto clear;
-                case 12: DBG1(dbg,64,"%u",(Output.Str.Tmp_Out[0])  ); goto clear;
-                case 13: DBG1(dbg,64,"%u",(Output.Str.Tmp_Out[1])  ); goto clear;
+                case 0 : DBG1(dbg,64,"%d",(Output.Str.Cnt_Pls)     ); goto clear;
+                case 1 : DBG1(dbg,64,"%d",(Output.Str.Cnt_Mns)     ); goto clear;
+                case 2 : DBG1(dbg,64,"%d",(Output.Str.Cnt_Dif)     ); goto clear;
+                case 3 : DBG1(dbg,64,"%d",(Output.Str.F_ras)       ); goto clear;
+                case 4 : DBG1(dbg,64,"%d",(Output.Str.HF_reg)      ); goto clear;
+                case 5 : DBG1(dbg,64,"%d",(g_input.word.hf_out)    ); goto clear;
+                case 6 : DBG1(dbg,64,"%d",(Output.Str.T_Vibro)     ); goto clear;
+                case 7 : DBG1(dbg,64,"%d",(Output.Str.T_VB_pll)    ); goto clear;
+                case 8 : DBG1(dbg,64,"%d",(Output.Str.L_Vibro)     ); goto clear;
+                case 9 : DBG1(dbg,64,"%d",(g_input.word.hf_out)    ); goto clear;
+                case 10: DBG1(dbg,64,"%d",(Output.Str.WP_reg)      ); goto clear;
+                case 11: DBG1(dbg,64,"%d",(Output.Str.WP_pll)      ); goto clear;
+                case 12: DBG1(dbg,64,"%d",(Output.Str.Tmp_Out[0])  ); goto clear;
+                case 13: DBG1(dbg,64,"%d",(Output.Str.Tmp_Out[1])  ); goto clear;
                 case 14: DBG1(dbg,64,"%d",(Output.Str.Tmp_Out[2])  ); goto clear;
                 case 15: DBG1(dbg,64,"%d",(Output.Str.Tmp_Out[3])  ); goto clear;
-                case 16: DBG1(dbg,64,"%u",(Output.Str.WP_scope1)   ); goto clear;
-                case 17: DBG1(dbg,64,"%u",(Output.Str.WP_scope2)   ); goto clear;
+                case 16: DBG1(dbg,64,"%d",(Output.Str.WP_scope1)   ); goto clear;
+                case 17: DBG1(dbg,64,"%d",(Output.Str.WP_scope2)   ); goto clear;
             }
-        goto clear;
+            goto clear;
         
-        
+        case 0x0F:
+            data = x_ring_pop(&g_gld.cmd.ring_in);
+            switch(data){
+                case 0:
+                    DBG0(dbg,64,"save to flash");
+                    params_save2flash();
+                    break;
+                
+                case 1:
+                    DBG0(dbg,64,"load from flash");
+                    params_load_flash();
+                    break;
+            }
+            goto clear;
+            
         default:
             DBG0(dbg,64,"fail cmd");
             goto clear;

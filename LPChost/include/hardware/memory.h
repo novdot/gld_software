@@ -107,33 +107,42 @@
 #define MEMORY_FPGA_MEM_START (FLASH_SECTOR_18)
 #define MEMORY_FPGA_MEM_SIZE (0)
                     
-#define MEMORY_COEF_SEC_START (18)
-#define MEMORY_COEF_SEC_END (20)
-#define MEMORY_COEF_MEM_START (FLASH_SECTOR_18)
+#define MEMORY_COEF_SEC_START (22)
+#define MEMORY_COEF_SEC_END (29)
+#define MEMORY_COEF_MEM_START (FLASH_SECTOR_22)
 #define MEMORY_COEF_MEM_SIZE (0x10000)
 
 /**
-    @brief чтение из памяти
+    @brief чтение из памяти ПЗУ по адресу (копирпование из ПЗУ в ОЗУ)
+    @param a_addr адрес в памяти ПЗУ
+    @param a_pdata указатель на начало данных куда необходимо скопировать данные из ПЗУ
+    @param a_u32_cnt кол-во 32х разрядных слов
 */
-void memory_read(x_uint32_t a_addr, void* a_pdata);
+void memory_read(x_uint32_t a_addr, x_uint32_t* a_pdata, x_uint32_t a_u32_cnt);
 
 /**
-    @brief запись из памяти
+    @brief запись в память ПЗУ из ОЗУ
+    @param a_sec_begin начальный сектор в памяти ПЗУ
+    @param a_sec_end конечный сектор в памяти ПЗУ
+    @param a_pdata указатель на начало данных откуда необходимо скопировать данные в ПЗУ
+    @param a_u32_cnt кол-во 32х разрядных слов
 */
 void memory_write(
     x_uint32_t a_sec_begin
     , x_uint32_t a_sec_end
-    , x_uint32_t a_addr
     , void* a_pdata
-    , x_uint16_t a_size);
+    , x_uint16_t a_u32_cnt);
 
 /**
-    @brief очистка памяти
+    @brief очистка памяти ПЗУ
+    @param a_sec_begin начальный сектор в памяти ПЗУ
+    @param a_sec_end конечный сектор в памяти ПЗУ
 */
 void memory_erase(x_uint32_t a_sec_begin, x_uint16_t a_sec_end);
 
 /**
-    @brief загружаем из памяти программу
+    @brief загружаем из памяти ПЗУ программу
+    @param a_addr адрес в памяти ПЗУ
 */
 void memory_load(x_uint32_t a_addr);
 

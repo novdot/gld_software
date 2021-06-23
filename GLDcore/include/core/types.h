@@ -54,8 +54,10 @@ typedef enum _WATCH_MODE
     @brief the BLOCK of VARIABLES, LOADED from FLASH-memory
     Address (parameter number in the block = 0..255 )
 */
+#define VARIABLE_COUNT (171)
+//#define VARIABLE_SIZE (VARIABLE_COUNT*sizeof(int))
 typedef union {
-    int Array[171];
+    int Array[VARIABLE_COUNT];
     struct {   					
         int My_Addres;      //e. 0 - device own address 
  
@@ -130,13 +132,13 @@ typedef union {
         
         unsigned int Device_SerialNumber;		//e. 60 - serial number of the device
         int Reserved0;       //e. 61 - not used
-        TERMO_MODE	TermoMode;	//e  62 - device operation mode (with thermocompenstion, without it, debug )
+        int	TermoMode;	//e  62 - device operation mode (with thermocompenstion, without it, debug )
         //e. addition for the piecewise-linear termocorrection 
         int TemperInt[TERMO_FUNC_SIZE];	//e. 63 
-        float TermoFunc[TERMO_FUNC_SIZE];	//e. 77
+        int TermoFunc[TERMO_FUNC_SIZE];	//e. 77
         int WP_reset2;          //e. 91 - voltages of CPLC regulator reset at cooling 	//e. parameters setting termocompensation parameters in dynamics (at heating and cooling)
-        float Reserved1;        //e. 92 - not used
-        float Reserved2;        //e. 93 - not used
+        int Reserved1;        //e. 92 - not used
+        int Reserved2;        //e. 93 - not used
         int K_vb_tu; 			//e. 94 - slope of dependence of the VB_N division factor from temperature (as though Hz/degree, but in relative units ) 
         int TemperNormal; 		//e. 95 -temperature for which the VB_N division factor of the dither drive is set 
         int K_WP_rst_heating; 	//r. 96 - 
@@ -145,10 +147,10 @@ typedef union {
         int Reserved3;          //e. 99 -not used
         int HF_scl_2;           //e. 100 -
         int TemperIntDyn[TERMO_FUNC_SIZE]; //e. 114 - 
-        float ThermoHeatDelta[TERMO_FUNC_SIZE]; //e. 128 - 
+        int ThermoHeatDelta[TERMO_FUNC_SIZE]; //e. 128 - 
         int DeltaTempRecalc;    //e. temperature delta for dynamic thermocompensation recalculation(in relative units)
         int TemperCoolIntDyn[TERMO_FUNC_SIZE]; // e. 143 - 
-        float ThermoCoolDelta[TERMO_FUNC_SIZE];  //e. 157 - 
+        int ThermoCoolDelta[TERMO_FUNC_SIZE];  //e. 157 - 
     } Str;
 } TDEVICE_BLK;
 
