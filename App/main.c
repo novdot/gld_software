@@ -61,9 +61,8 @@ void init1()
 /******************************************************************************/
 void init()
 {
-    char dbg[64];
+    //char dbg[64];
     
-    int i;
     //e. clocking control initialization
     SystemInit();
     

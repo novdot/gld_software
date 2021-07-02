@@ -14,8 +14,6 @@
 #define DIV_CONST	(768)
 #define DIV_CONST2	(384)
 
-#define BUF_SIZE (64)
-
 #define	HALFINT	(16384) //???
 
 int highPls = 0;
@@ -175,7 +173,8 @@ void init_BandPass(double CenterFreq, double BandWidth, BAND_PASS_TYPE FiltType)
 }
 
 /******************************************************************************/
-int HFO_MovAverFilt (int Input)
+#define BUF_SIZE (64)
+int HFO_MovAverFilt(int Input)
 {   
     static __int64 smooth_HF = 0;
     static  int buffer_HF[BUF_SIZE] = {
@@ -194,7 +193,7 @@ int HFO_MovAverFilt (int Input)
     i_HF &= (BUF_SIZE-1);
 
     //shift on additional 6 bits for smoothing 2^6 = 64
-    return smooth_HF;//(smooth_HF>>22);	 
+    return smooth_HF>>6;
 }
 
 

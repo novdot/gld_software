@@ -41,7 +41,7 @@ void exchange_regul_data_write()
 /******************************************************************************/
 void exchange_regul_data_read()
 { 
-    static const int hf_out_max = 33500;
+    static const int hf_out_max = 32767; //16bit adc
     
     hardware_regul_data_read((int*)g_gld.nADCData,5,&ExchangeErr);
     /**
@@ -52,10 +52,13 @@ void exchange_regul_data_read()
     g_input.word.in1 = ((g_gld.nADCData[4]));//-40092)*38)/100;;
     g_input.word.temp1 = g_gld.nADCData[5];
     /**/
-    if(g_gld.nADCData[0] > hf_out_max)
+    if(g_gld.nADCData[0] > hf_out_max){
         g_input.word.hf_out = 0;
-    else
-        g_input.word.hf_out = (hf_out_max - g_gld.nADCData[0])*1/5;
+    }else{
+        g_input.word.hf_out = (hf_out_max - g_gld.nADCData[0])*6/5;
+    }
+    if(g_input.word.hf_out>0x7FFF) g_input.word.hf_out = 0x7FFF;
+    
     g_input.word.wp_sel = g_gld.nADCData[1];
     g_input.word.in2 = -16495 + g_gld.nADCData[2]*423/1000;
     g_input.word.in1 = -16495 + g_gld.nADCData[3]*423/1000;

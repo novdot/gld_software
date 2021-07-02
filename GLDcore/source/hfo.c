@@ -15,10 +15,10 @@ void clc_HFO()
 {
 	static int  hf_reg = 0; //e. the value of the integrator in the HFO regulator 
 
-    g_input.word.hf_out = g_input.word.hf_out*7;//<< HFO_SHIFT;
+    //g_input.word.hf_out = g_input.word.hf_out*7;//<< HFO_SHIFT;
     
 	//e. filtration of an output of the amplitude detector before transfer to the HFO regulator
-   // g_input.word.hf_out = HFO_MovAverFilt(g_input.word.hf_out);
+    g_input.word.hf_out = HFO_MovAverFilt(g_input.word.hf_out);
     
     //signal amplitude
     // HF_dif	= HF_out - Device_blk.Str.HF_ref;
