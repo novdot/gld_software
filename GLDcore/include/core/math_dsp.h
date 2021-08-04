@@ -24,7 +24,7 @@ typedef enum BAND_PASS_TYPE_{
 * @brief HFO_MovAverFilt 
     Moving average filter for ammplitude signal filtration 
 */
-int HFO_MovAverFilt (int );
+int dsp_MovAverFilt (int );
 
 /**
 * @brief VibroReduce

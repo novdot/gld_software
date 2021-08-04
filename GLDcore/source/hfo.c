@@ -4,8 +4,8 @@
 #include "core/global.h"
 
 #define HFO_NEG_MIN (8738) // -4.5 V
-#define HFO_NEG_MAX (25122) // -10.5 V
-#define HFO_POZ_MIN (-32221) // +10.5 V
+#define HFO_NEG_MAX (HF_MAX_CONST) // -10.5 V
+#define HFO_POZ_MIN (HF_MIN_CONST) // +10.5 V
 #define HFO_POZ_MAX (-15837) // +4.5 V
 
 #define	HFO_SHIFT (16) //e. number of digits of fractional part in 32-bit variable of the hf_reg32 varaible 
@@ -15,14 +15,14 @@ void clc_HFO()
 {
 	static int  hf_reg = 0; //e. the value of the integrator in the HFO regulator 
 
-    //g_input.word.hf_out = g_input.word.hf_out*7;//<< HFO_SHIFT;
     
 	//e. filtration of an output of the amplitude detector before transfer to the HFO regulator
-    g_input.word.hf_out = HFO_MovAverFilt(g_input.word.hf_out);
+    g_input.word.hf_out = dsp_MovAverFilt(g_input.word.hf_out);
     
     //signal amplitude
     // HF_dif	= HF_out - Device_blk.Str.HF_ref;
 	Output.Str.HF_dif = L_sub(Device_blk.Str.HF_ref, g_input.word.hf_out); 
+    
     /* #NDA comment temporarly
     //e. the regulator loop is closed 
 	if ( loop_is_closed(HF_REG_ON) ){

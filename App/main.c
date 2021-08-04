@@ -16,7 +16,7 @@
 //#include "el_lin.h"
 #include "CyclesSync.h"
 #include "Parameters.h"							  
-#include "Dither_Reg.h"
+//#include "Dither_Reg.h"
 //#include "commandset.h"
 //#include "CntrlGLD.h"
 
@@ -106,7 +106,7 @@ void init()
     
     Output.Str.HF_reg = Device_blk.Str.HF_ref;
     cplc_init();
-    init_Dither_reg();
+    dither_init();
     g_gld.RgConB.word = RATE_VIBRO_1;
     
     //program variables

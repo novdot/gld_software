@@ -44,10 +44,10 @@ int32_t PhaseShift;
 int32_t temp2;
 int32_t temp3;
 /******************************************************************************/
-void init_Dither_reg()
+void dither_init()
 {
   init_VibroReduce();
-  Device_blk.Str.VB_N = 29538;
+  //Device_blk.Str.VB_N = 29538;
   VibroDither_Init();
   VibroDither_SwitchOn();
   init_BandPass(1.0/(float)g_gld.Vibro_Filter_Aperture, 100.0/(float)DEVICE_SAMPLE_RATE_HZ, DUP);	
@@ -69,7 +69,7 @@ void VibroDither_Init()
     return;
 }
 /******************************************************************************/
-void clc_Noise_regulator(void)
+void dither_noise_regulator(void)
 {
     int temp;
 	static x_uint32_t Flag = 0;
@@ -149,8 +149,10 @@ void clc_OutFreq_regulator(void)
             Valid_Data &= ~OUT_FREQ_ERROR;
         } 
     }
-
-    clc_Noise_regulator();
+    //noise
+    if (loop_is_closed(VB_TAU_ON)) {
+        dither_noise_regulator();
+    }
 
     //e.  is stabilization regulator switched on?  
     if ( loop_is_closed(VB_TAU_ON) ) {

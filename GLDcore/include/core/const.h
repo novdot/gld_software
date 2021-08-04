@@ -34,10 +34,10 @@
 #define	MY_ADDR_CONST		0	      //e.    - device own address
 ////////////////////////////////////////////////
 //e. =============== parameters of HF regulator     
-#define	HF_REF_CONST	-9264	//e. 1 - value of the reference 
-#define	HF_SCL_CONST	1	    // 0x64 //e. 2 - the gain factor (1.15)         
-#define	HF_MIN_CONST	-32668  //e. 3 - minimum of the output value on the regulator DAC (appropriate to maximal voltage on the HFO) 
-#define	HF_MAX_CONST    32480	//e. 4 - maximum of the output value on the regulator DAC (appropriate to minimal voltage on the HFO) 
+#define	HF_REF_CONST	(-9264)	//e. 1 - value of the reference 
+#define	HF_SCL_CONST	(1)	    // 0x64 //e. 2 - the gain factor (1.15)         
+#define	HF_MIN_CONST	(-32668)  //e. 3 - minimum of the output value on the regulator DAC (appropriate to maximal voltage on the HFO) 
+#define	HF_MAX_CONST    (32480)	//e. 4 - maximum of the output value on the regulator DAC (appropriate to minimal voltage on the HFO) 
 
 //e. =============== parameters of the CPLC regulator
 #define	WP_REF_CONST	5       //e. 7 -  value of the reference                                              
@@ -60,7 +60,7 @@
 #define	VB_FSC_CONST	-2000	//e. 19 - the gain factor of the output frequency regulator 
 #define	VB_TMIN_CONST	100	//e. 20 - minimum of the output value of the Tau regulator 
 #define	VB_TMAX_CONST	10022	//e. 21 - maximum of the output value of the Tau regulator 
-#define	L_VIB_START      5120	//e. 22 - pulse width of the dither drive (before noiseness)
+#define	L_VIB_START     5120	//e. 22 - pulse width of the dither drive (before noiseness)
                          //e. _VB_tau - initial pulse width of the dither drive   
 
 #define	VBN_TZD_CONST	(500)   //e. 23 - adjusted noise[??] period (user`s constant) 
@@ -70,7 +70,6 @@
 //e. =============== parameters of DS power regulator
 #define	RI_REF_CONST	(25600)	//e. 5 - value of the reference                                             
 #define	RI_SCL_CONST	(0)	    //e. 6 - the gain factor (1.15) 
-
        
 //e. =============== parameters of processing of accurate data
 #define	PI_FSC_CONST	(128)	    //e.  26 - the S_ds scale parameter 

@@ -21,7 +21,7 @@
     @brief Initialization of dither regulator.
     @return
 */
-void init_Dither_reg();
+void dither_init();
 
 /**
     @brief VibroDither initialization.
@@ -33,7 +33,7 @@ void VibroDither_Init();
     @brief noise regulator
     @return
 */
-void clc_Noise_regulator(void);
+void dither_noise_regulator(void);
 
 /**
     @brief Routine for output frequency controller

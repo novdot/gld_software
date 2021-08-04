@@ -174,14 +174,14 @@ void init_BandPass(double CenterFreq, double BandWidth, BAND_PASS_TYPE FiltType)
 
 /******************************************************************************/
 #define BUF_SIZE (64)
-int HFO_MovAverFilt(int Input)
+int dsp_MovAverFilt(int Input)
 {   
     static __int64 smooth_HF = 0;
     static  int buffer_HF[BUF_SIZE] = {
-    0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-    ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-    ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-    ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+        0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+        ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+        ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+        ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
     };
     static unsigned i_HF = 0;
 
@@ -192,7 +192,7 @@ int HFO_MovAverFilt(int Input)
     i_HF++;
     i_HF &= (BUF_SIZE-1);
 
-    //shift on additional 6 bits for smoothing 2^6 = 64
+    //shift on additional 6 bits for smoothing 2^6 = 64 (BUF_SIZE)
     return smooth_HF>>6;
 }
 

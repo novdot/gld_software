@@ -373,7 +373,7 @@ void command_echo(void)
 /******************************************************************************/
 void dbg_recieve()
 {
-    static char dbg[64];
+    char dbg[64];
     x_uint8_t _rcv_buf[128];
     int _rcv_num_byt = 0;
     x_uint8_t data = 0;
@@ -398,58 +398,95 @@ void dbg_recieve()
                 "01xx - ADC\n"
                 "02xx - DAC\n"
                 "03xx - rate\n"
-                "0F00 - save2flash\n"
-                "0F01 - load flash\n"
+                "0F00 - flash\n"
                 ,__DATE__,__TIME__);
             goto clear;
         
         case 0x1:
             data = x_ring_pop(&g_gld.cmd.ring_in);
-            if(data>=6) goto clear;
+            if(data>6) goto clear;
+            if(data== 0x0){
+                DBG0(dbg,64,"ADC\n"
+                    "01 - 06 ADC\n");
+                goto clear;
+            }
             DBG1(dbg,64,"%u"
-            ,g_gld.nADCData[data]);
+            ,g_gld.nADCData[data-1]);
             goto clear;
         
         case 0x2:
             data = x_ring_pop(&g_gld.cmd.ring_in);
-            if(data>=2) goto clear;
+            if(data>2) goto clear;
+            if(data== 0x0){
+                DBG0(dbg,64,"DAC\n"
+                    "01 - 02 DAC\n");
+                goto clear;
+            }
             DBG1(dbg,64,"%u"
-            ,g_gld.nDACData[data]);
+            ,g_gld.nDACData[data-1]);
             goto clear;
         
         case 0x3:
             data = x_ring_pop(&g_gld.cmd.ring_in);
             switch(data){
-                case 0 : DBG1(dbg,64,"%d",(Output.Str.Cnt_Pls)     ); goto clear;
-                case 1 : DBG1(dbg,64,"%d",(Output.Str.Cnt_Mns)     ); goto clear;
-                case 2 : DBG1(dbg,64,"%d",(Output.Str.Cnt_Dif)     ); goto clear;
-                case 3 : DBG1(dbg,64,"%d",(Output.Str.F_ras)       ); goto clear;
-                case 4 : DBG1(dbg,64,"%d",(Output.Str.HF_reg)      ); goto clear;
-                case 5 : DBG1(dbg,64,"%d",(g_input.word.hf_out)    ); goto clear;
-                case 6 : DBG1(dbg,64,"%d",(Output.Str.T_Vibro)     ); goto clear;
-                case 7 : DBG1(dbg,64,"%d",(Output.Str.T_VB_pll)    ); goto clear;
-                case 8 : DBG1(dbg,64,"%d",(Output.Str.L_Vibro)     ); goto clear;
-                case 9 : DBG1(dbg,64,"%d",(g_input.word.hf_out)    ); goto clear;
-                case 10: DBG1(dbg,64,"%d",(Output.Str.WP_reg)      ); goto clear;
-                case 11: DBG1(dbg,64,"%d",(Output.Str.WP_pll)      ); goto clear;
-                case 12: DBG1(dbg,64,"%d",(Output.Str.Tmp_Out[0])  ); goto clear;
-                case 13: DBG1(dbg,64,"%d",(Output.Str.Tmp_Out[1])  ); goto clear;
-                case 14: DBG1(dbg,64,"%d",(Output.Str.Tmp_Out[2])  ); goto clear;
-                case 15: DBG1(dbg,64,"%d",(Output.Str.Tmp_Out[3])  ); goto clear;
-                case 16: DBG1(dbg,64,"%d",(Output.Str.WP_scope1)   ); goto clear;
-                case 17: DBG1(dbg,64,"%d",(Output.Str.WP_scope2)   ); goto clear;
+                case 0 :
+                    DBG0(dbg,64,"rate\n"
+                        "01 Cnt_Pls\n"
+                        "02 Cnt_Mns\n"
+                        "03 Cnt_Dif\n"
+                        "04 F_ras\n"
+                        "05 HF_reg\n"
+                        "06 hf_out\n"
+                        "07 T_Vibro\n"
+                        "08 T_VB_pll\n"
+                        "09 L_Vibro\n"
+                        "0A hf_out\n"
+                        "0B WP_reg\n"
+                        "0C WP_pll\n"
+                        "0D Tmp_Out\n"
+                        "0E Tmp_Out\n"
+                        "0F Tmp_Out\n"
+                        "10 Tmp_Out\n"
+                        "11 WP_scope1\n"
+                        "12 WP_scope2\n"
+                    );
+                    goto clear;
+                case 1 : DBG1(dbg,64,"%d",(Output.Str.Cnt_Pls)     ); goto clear;
+                case 2 : DBG1(dbg,64,"%d",(Output.Str.Cnt_Mns)     ); goto clear;
+                case 3 : DBG1(dbg,64,"%d",(Output.Str.Cnt_Dif)     ); goto clear;
+                case 4 : DBG1(dbg,64,"%d",(Output.Str.F_ras)       ); goto clear;
+                case 5 : DBG1(dbg,64,"%d",(Output.Str.HF_reg)      ); goto clear;
+                case 6 : DBG1(dbg,64,"%d",(g_input.word.hf_out)    ); goto clear;
+                case 7 : DBG1(dbg,64,"%d",(Output.Str.T_Vibro)     ); goto clear;
+                case 8 : DBG1(dbg,64,"%d",(Output.Str.T_VB_pll)    ); goto clear;
+                case 9 : DBG1(dbg,64,"%d",(Output.Str.L_Vibro)     ); goto clear;
+                case 10 : DBG1(dbg,64,"%d",(g_input.word.hf_out)    ); goto clear;
+                case 11: DBG1(dbg,64,"%d",(Output.Str.WP_reg)      ); goto clear;
+                case 12: DBG1(dbg,64,"%d",(Output.Str.WP_pll)      ); goto clear;
+                case 13: DBG1(dbg,64,"%d",(Output.Str.Tmp_Out[0])  ); goto clear;
+                case 14: DBG1(dbg,64,"%d",(Output.Str.Tmp_Out[1])  ); goto clear;
+                case 15: DBG1(dbg,64,"%d",(Output.Str.Tmp_Out[2])  ); goto clear;
+                case 16: DBG1(dbg,64,"%d",(Output.Str.Tmp_Out[3])  ); goto clear;
+                case 17: DBG1(dbg,64,"%d",(Output.Str.WP_scope1)   ); goto clear;
+                case 18: DBG1(dbg,64,"%d",(Output.Str.WP_scope2)   ); goto clear;
             }
             goto clear;
         
         case 0x0F:
             data = x_ring_pop(&g_gld.cmd.ring_in);
             switch(data){
-                case 0:
+                case 0 :
+                    DBG0(dbg,64,"flash\n"
+                        "01 write to flash\n"
+                        "02 read from flash\n"
+                    );
+                    goto clear;
+                case 1:
                     DBG0(dbg,64,"save to flash");
                     params_save2flash();
                     break;
                 
-                case 1:
+                case 2:
                     DBG0(dbg,64,"load from flash");
                     params_load_flash();
                     break;

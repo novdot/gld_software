@@ -146,6 +146,7 @@ void cplc_init(void)
 
 
 /******************************************************************************/
+//процедура предварительной обработки для контура СРП
 void cplc_regulator(void)
 {
     static int is_zeroing = 0;
@@ -157,11 +158,12 @@ void cplc_regulator(void)
     int WP_Phase_Det = 0; 
     int i =0;
     
+    //линейный переход
     //e. state of linear transition at reset of the CPLC regulator
 	static enum {
         FINISHED, 		//e. linear transition is completed
-        TRANS_HEATING,  //e. transition is perfromed at heating
-        TRANS_COOLING	//e. transition is perfromed at cooling 
+        TRANS_HEATING,  //e. linear transition is perfromed at heating
+        TRANS_COOLING	//e. linear transition is perfromed at cooling 
     } plc_transiton = FINISHED; 
     
 	if (Output.Str.WP_sin >= 32768) {
@@ -179,6 +181,7 @@ void cplc_regulator(void)
   		phase_Digital = -1;
 	}
     
+    //worms arrays
     //if (Device_blk.TermoMode ==0)
     for (i=0; i<7; i++){
 		Output.Str.WP_Phase_Det_Array[i] = Output.Str.WP_Phase_Det_Array[i+1];
