@@ -29,11 +29,19 @@ typedef struct gld_cmdDef{
     x_uint32_t trm_rate; //rate from cmd
     x_uint32_t trm_rate_prev; //set rate to uart
     
-    x_ring_buffer_t ring_in;
-    x_ring_buffer_t ring_out;
-    
-    uint8_t buf_in[GLD_RINGBUFFER_SIZE];
-    uint8_t buf_out[GLD_RINGBUFFER_SIZE];
+    struct{
+        x_ring_buffer_t ring_in;
+        x_ring_buffer_t ring_out;
+        uint8_t buf_in[GLD_RINGBUFFER_SIZE];
+        uint8_t buf_out[GLD_RINGBUFFER_SIZE];
+    }dbg;
+
+    struct{
+        x_ring_buffer_t ring_in;
+        x_ring_buffer_t ring_out;
+        uint8_t buf_in[GLD_RINGBUFFER_SIZE];
+        uint8_t buf_out[GLD_RINGBUFFER_SIZE];
+    }ask;
 }gld_cmd;
 
 typedef struct gld_pulsesDef{
@@ -57,7 +65,6 @@ typedef struct gld_globalDef{
     //dac and adc holders
     x_uint32_t nADCData[6];
     x_uint32_t nDACData[2];
-    
     
     gld_thermo thermo;
     gld_cplc cplc;

@@ -18,6 +18,7 @@ typedef enum{
     x_ring_error_ok = 0
 }x_ring_error_t;
 
+void x_ring_put_str(uint8_t* a_symbol, x_ring_buffer_t* a_pbuf);
 void x_ring_put(uint8_t a_symbol, x_ring_buffer_t* a_pbuf);
 uint8_t x_ring_pop(x_ring_buffer_t *a_pbuf);
 uint16_t x_ring_get_count(x_ring_buffer_t *a_pbuf);

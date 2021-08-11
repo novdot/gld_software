@@ -32,6 +32,7 @@ x_bool_t command_check_lcc(x_uint8_t* a_pBuffer,x_uint32_t a_uCount)
 	int CRC_real = 0;
     char dbg[64];
     char dbg_word[64];
+    int i = 0;
     
     sprintf(dbg_word,"");
 
@@ -45,7 +46,7 @@ x_bool_t command_check_lcc(x_uint8_t* a_pBuffer,x_uint32_t a_uCount)
     } else {
         for (iCRC_calc = 0; iCRC_calc < (a_uCount); iCRC_calc++)
             sprintf(dbg_word,"%s%x",dbg_word,a_pBuffer[iCRC_calc]);
-        DBG2(dbg,64,"command_check_lcc FAILED! word:%s, cnt:%d",dbg_word,a_uCount);
+        DBG2(&g_gld.cmd.dbg.ring_out,dbg,64,"command_check_lcc FAILED! word:%s, cnt:%d",dbg_word,a_uCount);
         return _x_false;
     }
 }
@@ -58,13 +59,14 @@ void command_recieve_gld()
     int ibyte_head = 0;
     char dbg[64];
     char dbg_word[64];
+    int i = 0;
     
     //e. end part of packet is absent
 	if (( ToWaitEnd > 25000)) {
         sprintf(dbg_word,"");
         for (iCRC_calc = 0; iCRC_calc < (rcv_num_byt); iCRC_calc++)
             sprintf(dbg_word,"%s%x",dbg_word,rcv_buf[iCRC_calc]);
-        DBG2(dbg,64,"end part of packet is absent %s, cnt:%d",dbg_word,rcv_num_byt);
+        DBG2(&g_gld.cmd.dbg.ring_out,dbg,64,"end part of packet is absent %s, cnt:%d",dbg_word,rcv_num_byt);
         
         do rcv_buf[--rcv_num_byt] = 0;
         while(rcv_num_byt);
@@ -373,7 +375,8 @@ void command_echo(void)
 /******************************************************************************/
 void dbg_recieve()
 {
-    char dbg[64];
+    char dbg[256];
+    int i =0;
     x_uint8_t _rcv_buf[128];
     int _rcv_num_byt = 0;
     x_uint8_t data = 0;
@@ -386,22 +389,61 @@ void dbg_recieve()
     for(idata=0;idata<_rcv_num_byt;idata++){
     //while(_rcv_num_byt>0){
         //_rcv_num_byt--;
-        x_ring_put(_rcv_buf[idata],&g_gld.cmd.ring_in);
+        x_ring_put(_rcv_buf[idata],&g_gld.cmd.dbg.ring_in);
     }
     
-    if (x_ring_get_count(&g_gld.cmd.ring_in) < 2)
-        return;
+    //if (x_ring_get_count(&g_gld.cmd.ring_in) < 2)
+    //    return;
     
-    switch(x_ring_pop(&g_gld.cmd.ring_in)){
-        case 0x0:
-            DBG2(dbg,64,"Build in %s %s\n"
-                "01xx - ADC\n"
-                "02xx - DAC\n"
-                "03xx - rate\n"
-                "0F00 - flash\n"
+    switch(x_ring_pop(&g_gld.cmd.dbg.ring_in)){
+        case 'h':
+            DBG2(&g_gld.cmd.dbg.ring_out,dbg,256,"Build in %s %s\n\r"
+                "ASCII code\n\r"
+                "1..4 - ADC0..3\n\r"
+                "5..6 - DAC0..2\n\r"
+                "w - write flash\n\r"
+                "r - read from flash\n\r"
                 ,__DATE__,__TIME__);
-            goto clear;
+            break;
         
+        case '1':
+            DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%u",g_gld.nADCData[0]);
+            break;
+        
+        case '2':
+            DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%u",g_gld.nADCData[1]);
+            break;
+            
+        case '3':
+            DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%u",g_gld.nADCData[2]);
+            break;
+            
+        case '4':
+            DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%u",g_gld.nADCData[3]);
+            break;
+            
+        case '5':
+            DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%u",g_gld.nDACData[0]);
+            break;
+            
+        case '6':
+            DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%u",g_gld.nDACData[1]);
+            break;
+            
+        case 'w':
+            DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"save to flash");
+            params_save2flash();
+            break;
+        
+        case 'r':
+            DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"load from flash");
+            params_load_flash();
+            break;
+        
+        default:
+            DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"fail cmd");
+            goto clear;
+        /*
         case 0x1:
             data = x_ring_pop(&g_gld.cmd.ring_in);
             if(data>6) goto clear;
@@ -495,12 +537,12 @@ void dbg_recieve()
             
         default:
             DBG0(dbg,64,"fail cmd");
-            goto clear;
+            goto clear;*/
     }
     
     return;
 clear:
-    x_ring_clear(&g_gld.cmd.ring_in);
+    //x_ring_clear(&g_gld.cmd.ring_in);
     _rcv_num_byt = 0;    
 }
 /******************************************************************************/

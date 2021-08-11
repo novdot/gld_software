@@ -14,6 +14,7 @@
 void params_load(unsigned source) 
 {
     char dbg[64];
+    int i = 0;
     switch(source){
         case _params_load_fash:
             //e. wait while DMA channel3 is busy
@@ -37,7 +38,7 @@ void params_load(unsigned source)
             if (Device_blk.Str.Header_Word == HEADER_WORD_CONST) {	       
                 return;
             }else{
-                DBG1(dbg,64,"Header_Word error %u",Device_blk.Str.Header_Word);
+                DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"Header_Word error %u",Device_blk.Str.Header_Word);
                 params_load_default();
             }
             break;

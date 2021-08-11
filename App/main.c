@@ -110,7 +110,8 @@ void init()
     g_gld.RgConB.word = RATE_VIBRO_1;
     
     //program variables
-    x_ring_init(&g_gld.cmd.ring_in,g_gld.cmd.buf_in,GLD_RINGBUFFER_SIZE);
+    x_ring_init(&g_gld.cmd.dbg.ring_in,g_gld.cmd.dbg.buf_in,GLD_RINGBUFFER_SIZE);
+    x_ring_init(&g_gld.cmd.dbg.ring_out,g_gld.cmd.dbg.buf_out,GLD_RINGBUFFER_SIZE);
 }
 /******************************************************************************/
 void loop_echo()
@@ -120,6 +121,8 @@ void loop_echo()
 void loop()
 {
     static int nSwitch = 0;
+    
+    UART_DBG_SEND(&g_gld.cmd.dbg.ring_out);
     
     if (! (LPC_PWM1->IR & 0x0001) ) return;
     //delay();

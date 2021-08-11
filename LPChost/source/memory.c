@@ -3,6 +3,8 @@
 #include "hardware/IAP.h"
 #include "hardware/uart.h"
 
+#include "core/global.h"
+
 /******************************************************************************/
 void memory_read(x_uint32_t a_addr, x_uint32_t* a_pdata, x_uint32_t a_u32_cnt)
 {
@@ -19,24 +21,25 @@ void memory_write(x_uint32_t a_sec_begin,x_uint32_t a_sec_end, void* a_pdata, x_
 {
     uint32_t error = 0;
     char dbg[64];
+    int i = 0;
     int ipage = 0;
     x_uint32_t a_addr = 0;
     
     error = u32IAP_PrepareSectors(a_sec_begin,a_sec_end);
     if(error!= IAP_STA_CMD_SUCCESS) {
-        DBG1(dbg,64,"PrepareSectors error %u",error);
+        DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"PrepareSectors error %u",error);
         goto fail;
     }
     
     error = u32IAP_EraseSectors(a_sec_begin,a_sec_end);
     if(error!= IAP_STA_CMD_SUCCESS) {
-        DBG1(dbg,64,"EraseSectors error %u",error);
+        DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"EraseSectors error %u",error);
         goto fail;
     }
     
     error = u32IAP_PrepareSectors(a_sec_begin,a_sec_end);
     if(error!= IAP_STA_CMD_SUCCESS) {
-        DBG1(dbg,64,"PrepareSectors error %u",error);
+        DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"PrepareSectors error %u",error);
         goto fail;
     }
     
@@ -173,7 +176,7 @@ void memory_write(x_uint32_t a_sec_begin,x_uint32_t a_sec_end, void* a_pdata, x_
     
     error = u32IAP_CopyRAMToFlash(a_addr,  (uint32_t)(a_pdata) , IAP_FLASH_PAGE_SIZE_BYTES*(ipage));
     if(error!= IAP_STA_CMD_SUCCESS)  {
-        DBG1(dbg,64,"CopyRAMToFlash error %u",error);
+        DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"CopyRAMToFlash error %u",error);
         goto fail;
     }
     

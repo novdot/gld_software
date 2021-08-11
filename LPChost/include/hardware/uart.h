@@ -2,6 +2,7 @@
 #define __UART_H_INCLUDED
 
 #include "xlib/types.h"
+#include "xlib/ring_buffer.h"
 
 #define IER_RBR		0x01
 #define IER_THRE	0x02
@@ -207,58 +208,59 @@ typedef enum uart_baudrate_speedDef{
 ******************************************************************************/
 void UART_Init(x_uint32_t baudrate);
 
-#define DBG_PREPARE(buf,size) memset(buf,' ',strlen(buf));
+#define DBG_PREPARE(buf,size) memset(buf,' ',size);
 
 #if defined(UART0DBG)
-#define UART_DBG_SEND(buf,size) UART0_SendString(buf,size);
+#define UART_DBG_SEND(buf) ; if(x_ring_get_count(buf)>0) uart_send_unblocked(0,buf);
 #else 
-#define UART_DBG_SEND(buf,size) ;
+#define UART_DBG_SEND(buf) ;
 #endif
+/**/
+//buff to ring
+#define DBG_SEND(ring,buf,size) \
+    for(i=0;i<size;i++){x_ring_put(buf[i],ring);}\
+    UART_DBG_SEND(ring);
 
-#define DBG_SEND(buf,size) \
-    buf[size-2] = '\n';\
-    buf[size-1] = '\r';\
-    UART_DBG_SEND(buf,size);
-
-#define DBG0(buf,size,text)\
+#define DBG0(ring,buf,size,text)\
     DBG_PREPARE(buf,size)\
     sprintf(buf,text);\
-    DBG_SEND(buf,strlen(buf)+2);
+    DBG_SEND(ring,buf,strlen(buf));
     
-#define DBG1(buf,size,text,par1)\
+#define DBG1(ring,buf,size,text,par1)\
     DBG_PREPARE(buf,size)\
     sprintf(buf,text,par1);\
-    DBG_SEND(buf,strlen(buf)+2);
+    DBG_SEND(ring,buf,strlen(buf));
     
-#define DBG2(buf,size,text,par1,par2)\
+#define DBG2(ring,buf,size,text,par1,par2)\
     DBG_PREPARE(buf,size)\
     sprintf(buf,text,par1,par2);\
-    DBG_SEND(buf,strlen(buf)+2);
+    DBG_SEND(ring,buf,strlen(buf));
     
-#define DBG3(buf,size,text,par1,par2,par3)\
+#define DBG3(ring,buf,size,text,par1,par2,par3)\
     DBG_PREPARE(buf,size)\
     sprintf(buf,text,par1,par2,par3);\
-    DBG_SEND(buf,strlen(buf)+2);
+    DBG_SEND(ring,buf,strlen(buf));
     
-#define DBG4(buf,size,text,par1,par2,par3,par4)\
+#define DBG4(ring,buf,size,text,par1,par2,par3,par4)\
     DBG_PREPARE(buf,size)\
     sprintf(buf,text,par1,par2,par3,par4);\
-    DBG_SEND(buf,strlen(buf)+2);
+    DBG_SEND(ring,buf,strlen(buf));
     
-#define DBG5(buf,size,text,par1,par2,par3,par4,par5)\
+#define DBG5(ring,buf,size,text,par1,par2,par3,par4,par5)\
     DBG_PREPARE(buf,size)\
     sprintf(buf,text,par1,par2,par3,par4,par5);\
-    DBG_SEND(buf,strlen(buf)+2);
+    DBG_SEND(ring,buf,strlen(buf));
     
-#define DBG6(buf,size,text,par1,par2,par3,par4,par5,par6)\
+#define DBG6(ring,buf,size,text,par1,par2,par3,par4,par5,par6)\
     DBG_PREPARE(buf,size)\
     sprintf(buf,text,par1,par2,par3,par4,par5,par6);\
-    DBG_SEND(buf,strlen(buf)+2);
-    
+    DBG_SEND(ring,buf,strlen(buf));
+/**/
 void UART_DBG_SendString(char* ucData,int size);
 void UART_SendString(char* ucData,int size);
 int UART_SendByte(char ucData);
 
+void uart_send_unblocked(int ch, x_ring_buffer_t*a_pbuf);
 /******************************************************************************
 ** Function name:		uart_recieve
 **

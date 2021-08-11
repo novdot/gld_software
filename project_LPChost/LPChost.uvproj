@@ -523,11 +523,6 @@
               <FilePath>..\GLDcore\source\ignit.c</FilePath>
             </File>
             <File>
-              <FileName>ring_buffer.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\GLDcore\source\ring_buffer.c</FilePath>
-            </File>
-            <File>
               <FileName>sip.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\GLDcore\source\sip.c</FilePath>
