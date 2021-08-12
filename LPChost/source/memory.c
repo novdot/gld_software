@@ -6,13 +6,13 @@
 #include "core/global.h"
 
 /******************************************************************************/
-void memory_read(x_uint32_t a_addr, x_uint32_t* a_pdata, x_uint32_t a_u32_cnt)
+void memory_read(x_uint32_t a_addr, x_int32_t* a_pdata, x_uint32_t a_u32_cnt)
 {
     int i = 0;
-    int *p = (int *)MEMORY_COEF_MEM_START;
+    x_int16_t *p = (x_int16_t *)MEMORY_COEF_MEM_START;
     
     for(i=0;i<a_u32_cnt;i++){
-        a_pdata[i] = p[i];
+        a_pdata[i] = (x_int16_t)p[i];
     }
     return;
 }

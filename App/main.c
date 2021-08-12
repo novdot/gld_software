@@ -122,6 +122,7 @@ void loop()
 {
     static int nSwitch = 0;
     
+    uart_recieve_unblocked(0,&g_gld.cmd.dbg.ring_in);
     UART_DBG_SEND(&g_gld.cmd.dbg.ring_out);
     
     if (! (LPC_PWM1->IR & 0x0001) ) return;

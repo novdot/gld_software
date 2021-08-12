@@ -145,11 +145,11 @@ void params_save2flash()
 {
     //stop GLD
     gld_stop();
-    /*NVIC_DisableIRQ(EINT3_IRQn);
+    NVIC_DisableIRQ(EINT3_IRQn);
     NVIC_DisableIRQ(TIMER0_IRQn);
     NVIC_DisableIRQ(TIMER3_IRQn);
     NVIC_DisableIRQ(PWM1_IRQn);
-    LPC_PWM1->TCR = 0;*/
+    LPC_PWM1->TCR = 0;
     Device_blk.Str.Header_Word = HEADER_WORD_CONST;
     //write to flash
     memory_write(

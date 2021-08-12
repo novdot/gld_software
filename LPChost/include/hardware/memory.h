@@ -118,7 +118,7 @@
     @param a_pdata указатель на начало данных куда необходимо скопировать данные из ПЗУ
     @param a_u32_cnt кол-во 32х разрядных слов
 */
-void memory_read(x_uint32_t a_addr, x_uint32_t* a_pdata, x_uint32_t a_u32_cnt);
+void memory_read(x_uint32_t a_addr, x_int32_t* a_pdata, x_uint32_t a_u32_cnt);
 
 /**
     @brief запись в память ПЗУ из ОЗУ

@@ -28,7 +28,8 @@ uint8_t x_ring_pop(x_ring_buffer_t *a_pbuf)
 uint16_t x_ring_get_count(x_ring_buffer_t *a_pbuf)
 {
     uint16_t retval = 0;
-    if (a_pbuf->idxIn < a_pbuf->idxOut) retval = a_pbuf->size + a_pbuf->idxIn - a_pbuf->idxOut;
+    if (a_pbuf->idxIn < a_pbuf->idxOut) 
+        retval = a_pbuf->size + a_pbuf->idxIn - a_pbuf->idxOut;
     else retval = a_pbuf->idxIn - a_pbuf->idxOut;
     return retval;
 }

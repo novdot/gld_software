@@ -377,12 +377,12 @@ void dbg_recieve()
 {
     char dbg[256];
     int i =0;
-    x_uint8_t _rcv_buf[128];
-    int _rcv_num_byt = 0;
+    //x_uint8_t _rcv_buf[128];
+    //int _rcv_num_byt = 0;
     x_uint8_t data = 0;
     x_uint8_t idata = 0;
     
-    uart_recieve_n(0,_rcv_buf,&_rcv_num_byt);
+    /*uart_recieve_n(0,_rcv_buf,&_rcv_num_byt);
     if (_rcv_num_byt == 0)
         return;
     
@@ -394,6 +394,8 @@ void dbg_recieve()
     
     //if (x_ring_get_count(&g_gld.cmd.ring_in) < 2)
     //    return;
+    */
+    if(x_ring_get_count(&g_gld.cmd.dbg.ring_in)==0) return;
     
     switch(x_ring_pop(&g_gld.cmd.dbg.ring_in)){
         case 'h':
@@ -439,6 +441,11 @@ void dbg_recieve()
             DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"load from flash");
             params_load_flash();
             break;
+        
+        case '7':
+            DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%d",Output.Str.HF_reg);
+            break;
+        
         
         default:
             DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"fail cmd");
@@ -542,7 +549,8 @@ void dbg_recieve()
     
     return;
 clear:
+    return;
     //x_ring_clear(&g_gld.cmd.ring_in);
-    _rcv_num_byt = 0;    
+    //_rcv_num_byt = 0;    
 }
 /******************************************************************************/

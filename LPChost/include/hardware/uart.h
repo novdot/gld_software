@@ -272,6 +272,7 @@ void uart_send_unblocked(int ch, x_ring_buffer_t*a_pbuf);
 ******************************************************************************/
 void uart_recieve(x_uint8_t*a_pBuffer,x_uint32_t*a_uCount);
 void uart_recieve_n(x_uint8_t a_ind, x_uint8_t*a_pBuffer, x_uint32_t*a_uCount);
+void uart_recieve_unblocked(int a_ch, x_ring_buffer_t*a_pbuf);
 /******************************************************************************
 ** Function name:		uart_recieve_reset
 **

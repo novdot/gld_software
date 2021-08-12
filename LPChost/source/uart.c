@@ -539,7 +539,23 @@ void uart_recieve_n(x_uint8_t a_ind, x_uint8_t*a_pBuffer, x_uint32_t*a_uCount)
             break;
     }
 }
-
+/******************************************************************************/
+void uart_recieve_unblocked(int a_ch, x_ring_buffer_t*a_pbuf)
+{
+    x_uint8_t temp = 0;
+    switch(a_ch){
+        case 0:
+            if((LPC_UART0->LSR & RecievBufEmpty) == 0) return;
+            temp = LPC_UART0->RBR;
+            x_ring_put(temp,a_pbuf);
+            break;
+        case 1:
+            if((LPC_UART1->LSR & RecievBufEmpty) == 0) return;
+            temp = LPC_UART1->RBR;
+            x_ring_put(temp,a_pbuf);
+            break;
+    }
+}
 /******************************************************************************/
 void uart_recieve_reset(void)
 {

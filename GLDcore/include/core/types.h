@@ -57,100 +57,100 @@ typedef enum _WATCH_MODE
 #define VARIABLE_COUNT (171)
 //#define VARIABLE_SIZE (VARIABLE_COUNT*sizeof(int))
 typedef union {
-    int Array[VARIABLE_COUNT];
+    x_int32_t Array[VARIABLE_COUNT];
     struct {   					
-        int My_Addres;      //e. 0 - device own address 
+        x_int32_t My_Addres;      //e. 0 - device own address 
  
         //e. parameters of HFO regulator    
-        int HF_ref;    		//e. 1 - value of the reference 
-        int HF_scl;         //e. 2 - the gain factor (1.15)    
-        int HF_min;         //e. 3 - minimum of the output value on the regulator DAC (appropriate to maximal voltage on the HFO)
-        int HF_max;         //e. 4 - maximum of the output value on the regulator DAC (appropriate to minimal voltage on the HFO)
+        x_int32_t HF_ref;    		//e. 1 - value of the reference 
+        x_int32_t HF_scl;         //e. 2 - the gain factor (1.15)    
+        x_int32_t HF_min;         //e. 3 - minimum of the output value on the regulator DAC (appropriate to maximal voltage on the HFO)
+        x_int32_t HF_max;         //e. 4 - maximum of the output value on the regulator DAC (appropriate to minimal voltage on the HFO)
 
         //e. parameters of the regulator of the DS power regulator 
-        int RI_ref;         //e. 5 - value of the reference 
-        int RI_scl;         //e. 6 - the gain factor (1.15) 
+        x_int32_t RI_ref;         //e. 5 - value of the reference 
+        x_int32_t RI_scl;         //e. 6 - the gain factor (1.15) 
 
         //e. parameters of the CPLC regulator 
-        int WP_ref;         //e. 7 -  value of the reference
-        int WP_scl;         //e. 8 - the gain factor (1.15)
-        int WP_mdy;         //e. 9 - value of the reset delay
-        int WP_rup;         //e. 10 - upper value of DAC adjustment (appropriate to minimal voltage on the heater)                                    
-        int WP_rdw;         //e. 11 - lower value of the DAC adjustment (appropriate to maximal voltage on the heater) 
+        x_int32_t WP_ref;         //e. 7 -  value of the reference
+        x_int32_t WP_scl;         //e. 8 - the gain factor (1.15)
+        x_int32_t WP_mdy;         //e. 9 - value of the reset delay
+        x_int32_t WP_rup;         //e. 10 - upper value of DAC adjustment (appropriate to minimal voltage on the heater)                                    
+        x_int32_t WP_rdw;         //e. 11 - lower value of the DAC adjustment (appropriate to maximal voltage on the heater) 
 	
         //e. parameters of the dither drive regulator of the GLD 
-        int VB_phs;             //e. 12 - the phase delay parameter of the dither drive PLL 
-        int VB_scl;             //e. 13 - the gain factor (1.15) of the dither drive PLL  
-        unsigned int VB_N;      //e. 14 - divider for dither drive period (defines dither period) 
-        unsigned int VB_Nmin;   //e. 15 - minimum of the output value of the oscillation period regulator
-        unsigned int VB_Nmax;   //e. 16 - maximum of the output value of the oscillation period regulator
+        x_int32_t VB_phs;             //e. 12 - the phase delay parameter of the dither drive PLL 
+        x_int32_t VB_scl;             //e. 13 - the gain factor (1.15) of the dither drive PLL  
+        x_int32_t VB_N;      //e. 14 - divider for dither drive period (defines dither period) 
+        x_int32_t VB_Nmin;   //e. 15 - minimum of the output value of the oscillation period regulator
+        x_int32_t VB_Nmax;   //e. 16 - maximum of the output value of the oscillation period regulator
 
-        int VB_Fdf_Hi;      //e. 17 - adjusted output frequency (H) 
-        unsigned int VB_Fdf_Lo;      //e. 18 - (L) (double precision)                      
+        x_int32_t VB_Fdf_Hi;      //e. 17 - adjusted output frequency (H) 
+        x_int32_t VB_Fdf_Lo;      //e. 18 - (L) (double precision)                      
 
-        int VB_Fsc;         //e. 19 - the gain factor of the frequency regulator             
-        unsigned int VB_Tmin;        //e. 20 - the gain factor of the frequency regulator 
-        unsigned int VB_Tmax;        //e. 21 - maximum of the output value of the regulator 
-        unsigned int VB_tau;         //e. 22 - pulse width of the dither drive (without noise)
-        int VBN_Tzd;        //e. 23 - adjusted noise period 
-        int VBN_Ran;        //e. 24 - range of the random component of noise                                
-        int VBN_k;          //e. 25 - adjusted noise constant 
+        x_int32_t VB_Fsc;         //e. 19 - the gain factor of the frequency regulator             
+        x_int32_t VB_Tmin;        //e. 20 - the gain factor of the frequency regulator 
+        x_int32_t VB_Tmax;        //e. 21 - maximum of the output value of the regulator 
+        x_int32_t VB_tau;         //e. 22 - pulse width of the dither drive (without noise)
+        x_int32_t VBN_Tzd;        //e. 23 - adjusted noise period 
+        x_int32_t VBN_Ran;        //e. 24 - range of the random component of noise                                
+        x_int32_t VBN_k;          //e. 25 - adjusted noise constant 
         
         //e. parameters of processing of accurate data  
-        int PI_Fsc; //e.  26 - the S_ds scale parameter
-        int PI_Fb0; //e.  27 - the B_ds zero shift of the DS 
-        int PI_scl; //e.  28 - the Scale scale coefficient of the gyro 
-        int PI_bia; //e.  29 - the Bias zero shift of the gyro 
+        x_int32_t PI_Fsc; //e.  26 - the S_ds scale parameter
+        x_int32_t PI_Fb0; //e.  27 - the B_ds zero shift of the DS 
+        x_int32_t PI_scl; //e.  28 - the Scale scale coefficient of the gyro 
+        x_int32_t PI_bia; //e.  29 - the Bias zero shift of the gyro 
 
         //e. coefficients of the temperature correction  
-        int PI_a0; //  30
-        int PI_a1; //  31
-        int PI_a2; //  32
-        int PI_a3; //  33 
-        int PI_a4; //  34 PLC Mod ampl
-        int PI_a5; //  35
-        int PI_a6; //  36
-        int PI_b1; //  37
-        int PI_b2; //  38
-        int PI_b3; //  39 PLC Mod freq
-        int PI_b4; //  40
-        int PI_b5; //  41 gain of HF ADC
-        int PI_b6; //  42
+        x_int32_t PI_a0; //  30
+        x_int32_t PI_a1; //  31
+        x_int32_t PI_a2; //  32
+        x_int32_t PI_a3; //  33 
+        x_int32_t PI_a4; //  34 PLC Mod ampl
+        x_int32_t PI_a5; //  35
+        x_int32_t PI_a6; //  36
+        x_int32_t PI_b1; //  37
+        x_int32_t PI_b2; //  38
+        x_int32_t PI_b3; //  39 PLC Mod freq
+        x_int32_t PI_b4; //  40
+        x_int32_t PI_b5; //  41 gain of HF ADC
+        x_int32_t PI_b6; //  42
 
         //e. parameters of normalization of the temperature sensors 
-        int Tmp_bias[6]; //e. 43 - an array of shifts of the 0..5 temperature sensors 
-        int Tmp_scal[6]; //e. 49 - an array of the scale coefficients of temperature sensors
-        int WP_reset;    //e. 55 - initial position of the CPLC regulator (after reset)
+        x_int32_t Tmp_bias[6]; //e. 43 - an array of shifts of the 0..5 temperature sensors 
+        x_int32_t Tmp_scal[6]; //e. 49 - an array of the scale coefficients of temperature sensors
+        x_int32_t WP_reset;    //e. 55 - initial position of the CPLC regulator (after reset)
 
         //e. gain factor of photodetector channels 
-        unsigned int Gain_Ph_A; //e. 56 - initial gain factor of the A channel of photodetector
-        unsigned int Gain_Ph_B; //e. 57 - initial gain factor of the B channel of photodetector
+        x_int32_t Gain_Ph_A; //e. 56 - initial gain factor of the A channel of photodetector
+        x_int32_t Gain_Ph_B; //e. 57 - initial gain factor of the B channel of photodetector
 
         //e. switch of the source of loading GLD variables block
-        int Header_Word;			//e. 58 - flash sector validity header  	
-        int LoadFlash_enable;		//e. 59 - source loading flag: 1 - load from the flash , 0 - load default parameters (factory)
+        x_int32_t Header_Word;			//e. 58 - flash sector validity header  	
+        x_int32_t LoadFlash_enable;		//e. 59 - source loading flag: 1 - load from the flash , 0 - load default parameters (factory)
         
-        unsigned int Device_SerialNumber;		//e. 60 - serial number of the device
-        int Reserved0;       //e. 61 - not used
-        int	TermoMode;	//e  62 - device operation mode (with thermocompenstion, without it, debug )
+        x_int32_t Device_SerialNumber;		//e. 60 - serial number of the device
+        x_int32_t Reserved0;       //e. 61 - not used
+        x_int32_t	TermoMode;	//e  62 - device operation mode (with thermocompenstion, without it, debug )
         //e. addition for the piecewise-linear termocorrection 
-        int TemperInt[TERMO_FUNC_SIZE];	//e. 63 
-        int TermoFunc[TERMO_FUNC_SIZE];	//e. 77
-        int WP_reset2;          //e. 91 - voltages of CPLC regulator reset at cooling 	//e. parameters setting termocompensation parameters in dynamics (at heating and cooling)
-        int Reserved1;        //e. 92 - not used
-        int Reserved2;        //e. 93 - not used
-        int K_vb_tu; 			//e. 94 - slope of dependence of the VB_N division factor from temperature (as though Hz/degree, but in relative units ) 
-        int TemperNormal; 		//e. 95 -temperature for which the VB_N division factor of the dither drive is set 
-        int K_WP_rst_heating; 	//r. 96 - 
-        int K_WP_rst_cooling; 	//e. 97 - slope of dependence of a reset voltage at cooling from temperature (as though Volt/degree, but in relative units of DAC and temperature sensors)
-        int WP_transition_step; //e. 98 - step of change of a heater voltage at resetting 
-        int Reserved3;          //e. 99 -not used
-        int HF_scl_2;           //e. 100 -
-        int TemperIntDyn[TERMO_FUNC_SIZE]; //e. 114 - 
-        int ThermoHeatDelta[TERMO_FUNC_SIZE]; //e. 128 - 
-        int DeltaTempRecalc;    //e. temperature delta for dynamic thermocompensation recalculation(in relative units)
-        int TemperCoolIntDyn[TERMO_FUNC_SIZE]; // e. 143 - 
-        int ThermoCoolDelta[TERMO_FUNC_SIZE];  //e. 157 - 
+        x_int32_t TemperInt[TERMO_FUNC_SIZE];	//e. 63 
+        x_int32_t TermoFunc[TERMO_FUNC_SIZE];	//e. 77
+        x_int32_t WP_reset2;          //e. 91 - voltages of CPLC regulator reset at cooling 	//e. parameters setting termocompensation parameters in dynamics (at heating and cooling)
+        x_int32_t Reserved1;        //e. 92 - not used
+        x_int32_t Reserved2;        //e. 93 - not used
+        x_int32_t K_vb_tu; 			//e. 94 - slope of dependence of the VB_N division factor from temperature (as though Hz/degree, but in relative units ) 
+        x_int32_t TemperNormal; 		//e. 95 -temperature for which the VB_N division factor of the dither drive is set 
+        x_int32_t K_WP_rst_heating; 	//r. 96 - 
+        x_int32_t K_WP_rst_cooling; 	//e. 97 - slope of dependence of a reset voltage at cooling from temperature (as though Volt/degree, but in relative units of DAC and temperature sensors)
+        x_int32_t WP_transition_step; //e. 98 - step of change of a heater voltage at resetting 
+        x_int32_t Reserved3;          //e. 99 -not used
+        x_int32_t HF_scl_2;           //e. 100 -
+        x_int32_t TemperIntDyn[TERMO_FUNC_SIZE]; //e. 114 - 
+        x_int32_t ThermoHeatDelta[TERMO_FUNC_SIZE]; //e. 128 - 
+        x_int32_t DeltaTempRecalc;    //e. temperature delta for dynamic thermocompensation recalculation(in relative units)
+        x_int32_t TemperCoolIntDyn[TERMO_FUNC_SIZE]; // e. 143 - 
+        x_int32_t ThermoCoolDelta[TERMO_FUNC_SIZE];  //e. 157 - 
     } Str;
 } TDEVICE_BLK;
 
