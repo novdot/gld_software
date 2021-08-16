@@ -52,15 +52,15 @@ void clc_Pulses()
 
     
     //e. accumulated number of pulses
-    g_gld.Dif_Curr_Vib = g_gld.Curr_Cnt_Vib - Old_Cnt_Vib; 			 
+    g_gld.pulses.Dif_Curr_Vib = g_gld.pulses.Curr_Cnt_Vib - Old_Cnt_Vib; 			 
 
-    Cnt_Overload(g_gld.Dif_Curr_Vib, INT32MAX_DIV2, INT32MIN_DIV2);
+    Cnt_Overload(g_gld.pulses.Dif_Curr_Vib, INT32MAX_DIV2, INT32MIN_DIV2);
     
     //e. save current number of pulses
-    Old_Cnt_Vib = g_gld.Curr_Cnt_Vib;	
+    Old_Cnt_Vib = g_gld.pulses.Curr_Cnt_Vib;	
 
     //e. Precision of filtration is 1/(2^18)	
-    Dif_Curr_32 = VibroReduce(g_gld.Dif_Curr_Vib << SHIFT_TO_FRACT); 				
+    Dif_Curr_32 = VibroReduce(g_gld.pulses.Dif_Curr_Vib << SHIFT_TO_FRACT); 				
  
     //e. selecting display mode in the Rate mode
     switch (g_gld.RgConB.word) {
@@ -115,9 +115,9 @@ void clc_Pulses()
   	 case RATE_REPER_OR_REFMEANDR:
          //e. calculate Cnt_Mns or Cnt_Pls
          if (data_Rdy & HALF_PERIOD) {
-            g_gld.Cnt_curr = g_gld.Curr_Cnt_Vib;
-            RefMeand_Cnt_Dif = g_gld.Cnt_curr - Old_Cnt;
-            Old_Cnt = g_gld.Cnt_curr;
+            g_gld.pulses.Cnt_curr = g_gld.pulses.Curr_Cnt_Vib;
+            RefMeand_Cnt_Dif = g_gld.pulses.Cnt_curr - Old_Cnt;
+            Old_Cnt = g_gld.pulses.Cnt_curr;
             Cnt_Overload(RefMeand_Cnt_Dif, INT32MAX_DIV2, INT32MIN_DIV2);
 
             //e. "+" direction 
@@ -169,6 +169,6 @@ void clc_Pulses()
         break;
     }	 
     //e. WP_scope1, WP_scope2 - variables for control in the Rate3 mode 
- 	Output.Str.WP_scope1 = g_gld.Dif_Curr_Vib;  
+ 	Output.Str.WP_scope1 = g_gld.pulses.Dif_Curr_Vib;  
  	Output.Str.WP_scope2 = (Dif_Curr_32 >> (SHIFT_TO_FRACT-2)); 
 } // clc_Pulses

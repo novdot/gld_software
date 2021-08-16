@@ -17,6 +17,9 @@ void gld_global_init(void)
     
     g_gld.cmd.trm_rate = 0;
     g_gld.cmd.trm_rate_prev = 0;
+    
+    
+    g_gld.dbg_buffers.iteration = 999;
 }
 
 /******************************************************************************/

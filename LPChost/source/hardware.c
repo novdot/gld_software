@@ -42,11 +42,11 @@ void hardware_backlight_off()
     LPC_GPIO2->FIOSET  = (1<<12);
 }
 /******************************************************************************/
-void hardware_modulator(x_uint32_t a_data)
+void hardware_modulator(x_int32_t a_data)
 {
     //float v_ampl = 0;
     //float v_ampl_mult = 0;
-    //x_uint32_t delta_ref = 0;
+    x_uint32_t udata = 0;
     //float v_delta_range = 0;
     
     //множитель амплитуды
@@ -55,10 +55,17 @@ void hardware_modulator(x_uint32_t a_data)
     //коэффициент смещения. подобран вручную из-за нелинейной вых хар-ки ЦАП
     //float v_amp_shift = -(v_amp_mult-3.11)/9.84 ;//0.24;
     
-    //приводим к 10 разрядам ЦАП
-    a_data = a_data*0x3FF/0xFFFF;
+    //приводим к 10 разрядам ЦАП 
+    a_data /= 64;
+    //поднимем 0
+    a_data += 512;
+    //приведем к регистру
+    udata = (x_uint32_t)a_data;
     
-    a_data += 30000;
+    //приводим к 10 разрядам ЦАП
+    //udata = udata*0x3FF/0xFFFF;
+    
+    //a_data += 31000;
     /*
     // amplitude = макс диапазон*коэф
     v_ampl = LPC_DAC_SIN_AMP_MAX*v_amp_mult;
@@ -73,7 +80,7 @@ void hardware_modulator(x_uint32_t a_data)
     a_data += delta_ref;
     */
     //запишем значение в ЦАП
-    hardware_dac_send(a_data);
+    hardware_dac_send(udata);
 }
 
 /******************************************************************************/

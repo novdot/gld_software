@@ -121,6 +121,8 @@ void loop_echo()
 void loop()
 {
     static int nSwitch = 0;
+    x_uint8_t dbg[64];
+    int i;
     
     uart_recieve_unblocked(0,&g_gld.cmd.dbg.ring_in);
     UART_DBG_SEND(&g_gld.cmd.dbg.ring_out);
@@ -129,12 +131,18 @@ void loop()
     //delay();
     //WDTFeed();
     
+    if(g_gld.dbg_buffers.iteration<100){
+        DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%d\n\r",Output.Str.WP_Phase_Det_Array[0]);
+        //DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%d\n\r",g_input.word.wp_sel);
+        g_gld.dbg_buffers.iteration++;
+    }
+    
     //prepare ADC for sampling
     hardware_reset_adc(); 
     //state DAC voltage
     hardware_set_dac(); 
     
-    g_gld.Curr_Cnt_Vib = qei_get_position();
+    g_gld.pulses.Curr_Cnt_Vib = qei_get_position();
     				
     Latch_Event();	
     clc_Pulses();

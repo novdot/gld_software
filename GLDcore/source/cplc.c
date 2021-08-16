@@ -63,7 +63,7 @@ int WP_PhaseDetectorRate(int a_nPhaseDetInput, int a_nIntegrateTime)
 	static int WP_PhasDet_integr = 0;//, WP_PhasDetector = 0;
 	
     //проверяем если накопилась секунда - вернем проинтегрированное значение контура
-	if (a_nIntegrateTime == DEVICE_SAMPLE_RATE_uks) {
+	if (a_nIntegrateTime >= DEVICE_SAMPLE_RATE_uks) {
 		SampleAndHoldOut = (int)(WP_PhasDet_integr >> PLC_PHASE_DET_SHIFT);  
 		WP_PhasDet_integr = 0;
 	} else {	
@@ -97,7 +97,7 @@ void calc_sin_func()
         temp = sin((float)i*2.0*PI/(float)Device_blk.Str.PI_b3);
 
         //move up from -1..+1 to 0..+2
-        temp += 1.0;
+        //temp += 1.0;
         
         g_sin_func[i] = ( temp );
         
@@ -166,7 +166,8 @@ void cplc_regulator(void)
         TRANS_COOLING	//e. linear transition is perfromed at cooling 
     } plc_transiton = FINISHED; 
     
-	if (Output.Str.WP_sin >= 32768) {
+    //create meandr
+	if (Output.Str.WP_sin < 0) {
 		poz_sin_flag = 0;
 	} else {
 		poz_sin_flag = 1;
@@ -198,6 +199,7 @@ void cplc_regulator(void)
     }
 	Output.Str.WP_sin_Array[7] = g_gld.cplc.WP_DelaySin_Array[20-Device_blk.Str.WP_ref];
     
+    //определяем задержку
 	// from this WP_Phase_Det - modulated signal like LIM_DIG
 	poz_sin_flag_delayed = PLC_MeanderDelay(poz_sin_flag);
 
@@ -206,7 +208,8 @@ void cplc_regulator(void)
 		phase_Digital = -phase_Digital;
 	}  
 	// from this WP_Phase_Det - demodulated signal like LIDEM_DIG
-		
+	
+    // нагрев для зеркальника	
     //e. it is not time for reset 
 	if (!is_zeroing) 	{
         //e. there is no reset
@@ -305,7 +308,7 @@ int cplc_calc_modulator(void)
     //TODO for test temporarly recalculate sin in main loop
     //calc_sin_func();
     
-    Device_blk.Str.PI_a4 = PI_A4_MAX;
+    Device_blk.Str.PI_a4 = 10000;
     
     //modulator ampl
     if (Device_blk.Str.PI_a4 == 0) {
@@ -321,7 +324,7 @@ int cplc_calc_modulator(void)
 		index = 0;
 
     val = (int)(g_sin_func[index]*Device_blk.Str.PI_a4) 
-        + (PI_A4_MAX - Device_blk.Str.PI_a4);
+        ;//+ (PI_A4_MAX - Device_blk.Str.PI_a4);
     
     //modulator noise
     /*if(0){

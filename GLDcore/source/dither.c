@@ -101,10 +101,10 @@ void clc_OutFreq_regulator(void)
     static int temp = 0;
     static int temp_pure = 0;
 
-    if(g_gld.Dif_Curr_Vib>0)
-        out_freq_sum += g_gld.Dif_Curr_Vib;
+    if(g_gld.pulses.Dif_Curr_Vib>0)
+        out_freq_sum += g_gld.pulses.Dif_Curr_Vib;
     else
-        out_freq_sum -= g_gld.Dif_Curr_Vib;
+        out_freq_sum -= g_gld.pulses.Dif_Curr_Vib;
 
     //e. second has elapsed, fix the output frequency value 
     if (g_gld.time_1_Sec == DEVICE_SAMPLE_RATE_uks) {
@@ -166,7 +166,7 @@ void clc_Dith_regulator(void)
 {	
     static int dith_period = 0;
     
-    RI_diff = DUP_Filt(g_gld.Dif_Curr_Vib<<2);
+    RI_diff = DUP_Filt(g_gld.pulses.Dif_Curr_Vib<<2);
 
 	if (RI_diff >= 0)
         ph_error = 1;	   			

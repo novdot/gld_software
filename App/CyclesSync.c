@@ -84,7 +84,7 @@ void Latch_Event()
  {
    static uint32_t halfQEIPeriod = 0;
 
-	 g_gld.Cnt_curr =  LPC_QEI->POS;		//e. read accumulated value of counter
+	 g_gld.pulses.Cnt_curr =  LPC_QEI->POS;		//e. read accumulated value of counter
 	 if (LPC_QEI->INTSTAT & 0x0008)
 	 {
 //-----------debug-------------------------

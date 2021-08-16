@@ -31,7 +31,7 @@ void hardware_backlight_off(void);
 /**
     @brief управление контурами ГВЧ, СРП посредством ЦАП, АЦП
 */
-void hardware_modulator(x_uint32_t a_data);
+void hardware_modulator(x_int32_t a_data);
 void hardware_regul_data_init();
 void hardware_regul_data_write(x_uint32_t a_ch, int*a_pExchangeErr, int a_reg);
 void hardware_regul_data_read(int*a_pBuffer, int cnt, int*pExchangeErr);

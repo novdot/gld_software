@@ -71,9 +71,7 @@ typedef struct gld_globalDef{
     
     //sip
     //e. current difference output for dithering control in LightUp mode and Dither regulator
-    int32_t	Dif_Curr_Vib;
-    uint32_t Curr_Cnt_Vib;
-    uint32_t Cnt_curr;
+    gld_pulses pulses;
     
     //math dsp
     unsigned int Vibro_Filter_Aperture;
@@ -85,6 +83,11 @@ typedef struct gld_globalDef{
     //cmd
     gld_cmd cmd;
     
+    //dbg
+    struct{
+        int val[24];
+        int iteration;
+    }dbg_buffers;
 }gld_global;
 
 extern gld_global g_gld;
