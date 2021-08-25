@@ -4,6 +4,8 @@
 #include "xlib/types.h"
 #include "xlib/ring_buffer.h"
 
+#include "string.h"
+
 #define IER_RBR		0x01
 #define IER_THRE	0x02
 #define IER_RLS		0x04
@@ -255,6 +257,8 @@ void UART_Init(x_uint32_t baudrate);
     DBG_PREPARE(buf,size)\
     sprintf(buf,text,par1,par2,par3,par4,par5,par6);\
     DBG_SEND(ring,buf,strlen(buf));
+    
+    
 /**/
 void UART_DBG_SendString(char* ucData,int size);
 void UART_SendString(char* ucData,int size);
@@ -295,6 +299,7 @@ void uart_recieve_reset(void);
 ******************************************************************************/
 void uart_transm(x_uint32_t trm_num_byt, int Device_Mode, x_uint8_t*a_pBufferTransm);
 
+x_bool_t uart_is_ready_transm(void);
 /******************************************************************************
 ** Function name:		DMA_Init
 **
@@ -329,5 +334,4 @@ void uart_dma_init(x_uint8_t*a_pBufferTransm);
 void UART_SwitchSpeed(unsigned Speed);
 void uart_disable_transm(void);
 void uart_enable_transm(void);
-
 #endif

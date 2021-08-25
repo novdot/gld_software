@@ -3,6 +3,8 @@
 #include "core/const.h"
 #include "core/math_dsp.h"
 
+#include "hardware/qei.h"
+
 #define	INT32MAX_DIV2   (1073741823)	//e. 0.5*MAX_QEI_CNT
 #define INT32MIN_DIV2   (-1073741823)	//e. -0.5*MAX_QEI_CNT
 #define SHIFT_TO_FRACT  (18) //e. shift for converting integer to float (14.18) format  
@@ -50,6 +52,8 @@ void clc_Pulses()
     
     static int32_t	Dif_Curr_32 = 0;//e. current difference without dithering for dithering control
 
+    //read pulses
+    g_gld.pulses.Curr_Cnt_Vib = qei_get_position();
     
     //e. accumulated number of pulses
     g_gld.pulses.Dif_Curr_Vib = g_gld.pulses.Curr_Cnt_Vib - Old_Cnt_Vib; 			 

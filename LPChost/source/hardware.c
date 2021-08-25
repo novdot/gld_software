@@ -243,7 +243,7 @@ void hardware_flash_write(x_uint32_t a_sector,x_uint8_t* a_pmemory)
             start = MEMORY_MAIN_SEC_START;
             end = MEMORY_MAIN_SEC_END;
             addr = MEMORY_MAIN_MEM_START;
-            size = MEMORY_MAIN_MEM_SIZE;
+            size = (x_uint16_t)MEMORY_MAIN_MEM_SIZE;
             break;
         case 2:
             break;
@@ -251,7 +251,7 @@ void hardware_flash_write(x_uint32_t a_sector,x_uint8_t* a_pmemory)
             start = MEMORY_COEF_SEC_START;
             end = MEMORY_COEF_SEC_END;
             addr = MEMORY_COEF_MEM_START;
-            size = MEMORY_COEF_MEM_SIZE;
+            size = (x_uint16_t)MEMORY_COEF_MEM_SIZE;
             break;
         default:
             break;

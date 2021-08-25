@@ -18,9 +18,13 @@
 #include "core/global.h"
 #include "bootloader/global.h"
 #include "hardware/hardware.h"
+#include "hardware/uart.h"
 #include "xlib/ring_buffer.h"
 //TODO
 #include "CyclesSync.h"
+#include "Parameters.h"
+
+#include <stdio.h>
 
 void command_recieve_gld();
 void command_recieve_bootloader();
@@ -46,7 +50,7 @@ x_bool_t command_check_lcc(x_uint8_t* a_pBuffer,x_uint32_t a_uCount)
     } else {
         for (iCRC_calc = 0; iCRC_calc < (a_uCount); iCRC_calc++)
             sprintf(dbg_word,"%s%x",dbg_word,a_pBuffer[iCRC_calc]);
-        DBG2(&g_gld.cmd.dbg.ring_out,dbg,64,"command_check_lcc FAILED! word:%s, cnt:%d",dbg_word,a_uCount);
+        DBG2(&g_gld.cmd.dbg.ring_out,dbg,64,"command_check_lcc FAILED! word:%s, cnt:%u\n\r",dbg_word,(unsigned int)a_uCount);
         return _x_false;
     }
 }
@@ -66,7 +70,7 @@ void command_recieve_gld()
         sprintf(dbg_word,"");
         for (iCRC_calc = 0; iCRC_calc < (rcv_num_byt); iCRC_calc++)
             sprintf(dbg_word,"%s%x",dbg_word,rcv_buf[iCRC_calc]);
-        DBG2(&g_gld.cmd.dbg.ring_out,dbg,64,"end part of packet is absent %s, cnt:%d",dbg_word,rcv_num_byt);
+        DBG2(&g_gld.cmd.dbg.ring_out,dbg,64,"end part of packet is absent %s, cnt:%u\n\r",dbg_word,(unsigned int)rcv_num_byt);
         
         do rcv_buf[--rcv_num_byt] = 0;
         while(rcv_num_byt);
@@ -356,22 +360,6 @@ void command_utility_SetSpeedPeriod(void)
 } // SetSpeedPeriod
 
 /******************************************************************************/
-void command_echo(void)
-{
-    //int ibyte = 0;
-    //char dbg[3];
-    x_uint32_t num = 0;
-	uart_recieve(rcv_buf,&rcv_num_byt);
-    
-    if (uart_is_ready_transm() == _x_false)										
-        return;
-    
-    //uart_transm( trm_num_byt, Device_Mode, trm_buf);
-    do {
-        UART1_SendByte(rcv_buf[rcv_num_byt]);
-        rcv_buf[--rcv_num_byt] = 0;
-    }while(rcv_num_byt);
-}
 /******************************************************************************/
 void dbg_recieve()
 {
@@ -409,27 +397,27 @@ void dbg_recieve()
             break;
         
         case '1':
-            DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%u\n\r",g_gld.nADCData[0]);
+            DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%u\n\r",(unsigned int)g_gld.nADCData[0]);
             break;
         
         case '2':
-            DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%u",g_gld.nADCData[1]);
+            DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%u\n\r",(unsigned int)g_gld.nADCData[1]);
             break;
             
         case '3':
-            DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%u\n\r",g_gld.nADCData[2]);
+            DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%u\n\r",(unsigned int)g_gld.nADCData[2]);
             break;
             
         case '4':
-            DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%u\n\r",g_gld.nADCData[3]);
+            DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%u\n\r",(unsigned int)g_gld.nADCData[3]);
             break;
             
         case '5':
-            DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%u\n\r",g_gld.nDACData[0]);
+            DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%u\n\r",(unsigned int)g_gld.nDACData[0]);
             break;
             
         case '6':
-            DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%u\n\r",g_gld.nDACData[1]);
+            DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%u\n\r",(unsigned int)g_gld.nDACData[1]);
             break;
             
         case 'w':
@@ -447,6 +435,7 @@ void dbg_recieve()
             break;
         
         case '8': 
+            DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%u\n\r",Output.Str.WP_reg);
             break;
         
         default:

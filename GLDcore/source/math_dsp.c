@@ -3,6 +3,9 @@
 #include "core/const.h"
 #include "core/types.h"
 #include "hardware/pwm.h"
+#include "hardware/hardware.h"
+
+#include "math.h"
 
 #define	X	    0.98 //0.96 //0.86
 #define	A0_HP   ((1 + X)/2) * 0x40000000
@@ -14,7 +17,7 @@
 #define DIV_CONST	(768)
 #define DIV_CONST2	(384)
 
-#define	HALFINT	(16384) //???
+#define	HALFINT	(0x40000000) //for 16 bit 16384
 
 int highPls = 0;
 int lowPls = 0;
@@ -65,7 +68,7 @@ int VibroReduce (int input)
     highPls = (int)(outPls>>32);
     lowPls = (int)outPls;
 
-    BufInMovAverPls_2[kIn] = (int)(outPls-outMns>>32);
+    BufInMovAverPls_2[kIn] = (int)((outPls-outMns)>>32);
     BufInMovAverMns_2[kIn] = -BufInMovAverPls_2[kIn];
     outPls = 0;
     outMns = 0;
@@ -76,7 +79,7 @@ int VibroReduce (int input)
     kIn++;
     if (kIn>(g_gld.Vibro_Filter_Aperture-1)) kIn = 0;
 
-    return  (int)(outPls-outMns>>32);	 
+    return  (int)((outPls-outMns)>>32);	 
 }
 
 /******************************************************************************/
@@ -96,12 +99,12 @@ int DUP_Filt (int input)
     ind = kIn;
     BufInDUP_2[kIn] = 0;
     for (i=0; i<L_DUP; i++){
-        temp += aDUP[i]*BufInDUP_1[ind];
-        temp += bDUP[i]*BufInDUP_2[ind];
+        temp += (__int64)aDUP[i]*(__int64)BufInDUP_1[ind];
+        temp += (__int64)bDUP[i]*(__int64)BufInDUP_2[ind];
         if ((--ind) < 0) ind = L_DUP-1;
     }
     //take into account that filter coefficients are divided on 2
-    BufInDUP_2[kIn] =(int)(temp>>14);	
+    BufInDUP_2[kIn] =(int)(temp>>30); //14	
 
 
     return (BufInDUP_2[kIn++]);
@@ -124,32 +127,34 @@ int PLC_PhaseDetFilt (int input)
     // BufInPLC_2[kIn] = 0;
 
     for (i=0; i<L_PLC; i++){
-        temp += aPLC[i]*BufInPLC_1[ind];
-        temp += bPLC[i]*BufInPLC_2[ind];
+        temp += (__int64)aPLC[i]*(__int64)BufInPLC_1[ind];
+        temp += (__int64)bPLC[i]*(__int64)BufInPLC_2[ind];
         if ((--ind) < 0) ind = L_PLC-1;
     }
-    BufInPLC_2[kIn] =(int)(temp>>14);
+    BufInPLC_2[kIn] =(int)(temp>>30); //14
     //2 section
     //  BufOutPLC[kIn] = 0;
     temp = 0;
     for (i=0; i<L_PLC; i++){
-        temp += aPLC[i]*BufInPLC_2[ind];
-        temp += bPLC[i]*BufOutPLC[ind];
+        temp += (__int64)aPLC[i]*(__int64)BufInPLC_2[ind];
+        temp += (__int64)bPLC[i]*(__int64)BufOutPLC[ind];
         if ((--ind) < 0) ind = L_PLC-1;
     }
-    BufOutPLC[kIn] =(int)(temp>>14);
+    BufOutPLC[kIn] =(int)(temp>>30); //14
 
     return (BufOutPLC[kIn++]);
 }
-
 /******************************************************************************/
 void init_BandPass(double CenterFreq, double BandWidth, BAND_PASS_TYPE FiltType)
 {
-    double K, R, Cos_x_2, R_x_R; 
+    char dbg[256];
+    int i = 0;
+    double K, R, Cos_x_2, R_x_R, cosIn; 
 
     R = 1.0 - 3.0 * BandWidth;
     R_x_R = R * R;
-    Cos_x_2 = cos(2.0 * PI * CenterFreq) * 2.0;
+    cosIn = 2.0 * PI * CenterFreq;
+    Cos_x_2 = cos(cosIn)* 2.0;
     K = (1.0 - R * Cos_x_2 + R_x_R)/(2.0 - Cos_x_2);
     switch (FiltType){
     case PLC:
@@ -170,6 +175,16 @@ void init_BandPass(double CenterFreq, double BandWidth, BAND_PASS_TYPE FiltType)
         bDUP[2] = (int)((- R_x_R)*HALFINT);   
         break;
     }
+    
+    /*DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"K:%f\n\r",K);
+    DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"R:%f\n\r",R);
+    DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"Cos_x_2:%f\n\r",Cos_x_2);
+    DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"R_x_R:%f\n\r",R_x_R);
+    DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"BandWidth:%f\n\r",BandWidth);
+    DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"CenterFreq:%f\n\r",CenterFreq);
+    
+    DBG5(&g_gld.cmd.dbg.ring_out,dbg,64,"aDUP[0]:%d %d %d %d %d\n\r",aPLC[0],aPLC[1],aPLC[2],bPLC[1],bPLC[2]);
+    */
 }
 
 /******************************************************************************/

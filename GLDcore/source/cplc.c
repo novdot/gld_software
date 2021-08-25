@@ -14,8 +14,9 @@
 #define  PLC_SHIFT				(6) //(6) 	
 #define	 PLC_PHASE_DET_SHIFT	(18) //for analog output
 
-#define  PLC_RESET_THRESHOLD 	(-3276) //e. correspond to the voltage +1.2 Volts
+#define  PLC_RESET_THRESHOLD 	(-3276)//(-3276) //e. correspond to the voltage +1.2 Volts
 #define	 WP_REG32MAX_SATURATION (32767 << PLC_SHIFT)
+#define	 WP_REG32MIN_SATURATION (-32767 << PLC_SHIFT)
 #define	 WP_REG32MIN_NEW_SATURATION (PLC_RESET_THRESHOLD << PLC_SHIFT)
 #define  WP_TMP_THRESHOLD		(7) //e. temperature threshold, defining heats up or cool down the device
 
@@ -158,6 +159,9 @@ void cplc_regulator(void)
     int WP_Phase_Det = 0; 
     int i =0;
     
+    static int index = 0;
+    int sinus = 0;
+    
     //линейный переход
     //e. state of linear transition at reset of the CPLC regulator
 	static enum {
@@ -173,8 +177,13 @@ void cplc_regulator(void)
 		poz_sin_flag = 1;
 	}
     
+	/*if (index >= Device_blk.Str.PI_b3)
+		index = 0;
+    sinus = (int)(g_sin_func[index]*Device_blk.Str.PI_a4);
+    index++;*/
 	//e. band-pass filter for the CPLC regulator 
-    WP_Phase_Det = PLC_PhaseDetFilt(g_input.word.wp_sel);
+    WP_Phase_Det = PLC_PhaseDetFilt(g_input.word.wp_sel
+        );
 	
 	if (WP_Phase_Det >0) {
   		phase_Digital = 1;
@@ -223,37 +232,34 @@ void cplc_regulator(void)
                 , g_gld.thermo.Temp_Aver
                 , Device_blk.Str.TemperNormal
                 );
-	  			
-	  			plc_transiton = TRANS_HEATING;
-	  			plc_reset32 = g_gld.thermo.WP_reset_heating << PLC_SHIFT;;
 
-				Device_blk.Str.HF_scl = Device_blk.Str.HF_scl_2;
-	  		} else if ((WP_reg32 < (Device_blk.Str.WP_rdw << PLC_SHIFT)) && !g_gld.thermo.IsHeating)	{
-                //e. cooling
-	  			is_zeroing = 1;
-				//e. voltage of reset at cooling 
-				g_gld.thermo.WP_reset_cooling = CPL_reset_calc(
-                    Device_blk.Str.WP_reset2
-                    , Device_blk.Str.K_WP_rst_cooling
-                    , g_gld.thermo.Temp_Aver
-                    , Device_blk.Str.TemperNormal
-                    );
-  			
-	  			plc_transiton = TRANS_COOLING;
-	  			plc_reset32 = g_gld.thermo.WP_reset_cooling << PLC_SHIFT;
+            plc_transiton = TRANS_HEATING;
+            plc_reset32 = g_gld.thermo.WP_reset_heating << PLC_SHIFT;;
 
-				Device_blk.Str.HF_scl = Device_blk.Str.HF_scl_2;
-			} else { 
-                //e. thresholds are not exceeded, normal operation of regulator 
-				WP_reg32 = L_mac(WP_reg32, phase_Digital, Device_blk.Str.WP_scl );
-            }
+            Device_blk.Str.HF_scl = Device_blk.Str.HF_scl_2;
+        } else if ((WP_reg32 < (Device_blk.Str.WP_rdw << PLC_SHIFT)) && !g_gld.thermo.IsHeating)	{
+            //e. cooling
+            is_zeroing = 1;
+            //e. voltage of reset at cooling 
+            g_gld.thermo.WP_reset_cooling = CPL_reset_calc(
+                Device_blk.Str.WP_reset2
+                , Device_blk.Str.K_WP_rst_cooling
+                , g_gld.thermo.Temp_Aver
+                , Device_blk.Str.TemperNormal
+                );
 
-	} else { 
+            plc_transiton = TRANS_COOLING;
+            plc_reset32 = g_gld.thermo.WP_reset_cooling << PLC_SHIFT;
+
+            Device_blk.Str.HF_scl = Device_blk.Str.HF_scl_2;
+        } else { 
+            //e. thresholds are not exceeded, normal operation of regulator 
+            WP_reg32 = L_mac(WP_reg32, phase_Digital, Device_blk.Str.WP_scl );
+        }
+    } else { 
         //e. flag is set (1) - reset mode
-  			
 		if (plc_transiton != FINISHED) {
 			if (plc_transiton == TRANS_HEATING) {
-				
 				WP_reg32 = L_sub(WP_reg32, Device_blk.Str.WP_transition_step); // WP_reg32 -= Device_blk.Str.WP_transition_step;
 				if (WP_reg32 < plc_reset32) {
 		  			zero_delay = 0;
@@ -278,8 +284,12 @@ void cplc_regulator(void)
             }
         }
 	}
+    
+    // working with "old" CPLC (the range +15 ... -15 V);
+    Saturation(WP_reg32, WP_REG32MAX_SATURATION, WP_REG32MIN_SATURATION);  
+    
+    // working with "new" CPLC (the range 0 ... -15 V) WP_REG32MIN_SATURATION = PLC_RESET_THRESHOLD!;
     //e. the minimum corresponds to a small negative number, appropriate to PLC_RESET_THRESHOLD
-    Saturation(WP_reg32, WP_REG32MAX_SATURATION, WP_REG32MIN_NEW_SATURATION);  
     
 	if ( loop_is_closed(WP_REG_ON) ) {
         //enable auto regulation
@@ -308,7 +318,6 @@ int cplc_calc_modulator(void)
     //TODO for test temporarly recalculate sin in main loop
     //calc_sin_func();
     
-    Device_blk.Str.PI_a4 = 10000;
     
     //modulator ampl
     if (Device_blk.Str.PI_a4 == 0) {

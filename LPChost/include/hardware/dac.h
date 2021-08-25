@@ -22,5 +22,4 @@
 void hardware_dac_init(void);
 void hardware_dac_send(x_uint32_t a_data);
 
-
-#endif
+#endif //__HARDWARE_DAC_H_INCLUDED__

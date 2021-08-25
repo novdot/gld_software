@@ -4,7 +4,7 @@
 #include "core/math_dsp.h"
 
 #include "math.h"
-
+#include "stdlib.h"
 
 #define	TEMP_AVER_PERIOD	4 // e. number of seconds for average
 

@@ -5,6 +5,9 @@
 
 #include "core/global.h"
 
+#include <stdio.h>
+#include <string.h>
+
 /******************************************************************************/
 void memory_read(x_uint32_t a_addr, x_int32_t* a_pdata, x_uint32_t a_u32_cnt)
 {
@@ -27,19 +30,19 @@ void memory_write(x_uint32_t a_sec_begin,x_uint32_t a_sec_end, void* a_pdata, x_
     
     error = u32IAP_PrepareSectors(a_sec_begin,a_sec_end);
     if(error!= IAP_STA_CMD_SUCCESS) {
-        DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"PrepareSectors error %u",error);
+        DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"PrepareSectors error %u\n\r",error);
         goto fail;
     }
     
     error = u32IAP_EraseSectors(a_sec_begin,a_sec_end);
     if(error!= IAP_STA_CMD_SUCCESS) {
-        DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"EraseSectors error %u",error);
+        DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"EraseSectors error %u\n\r",error);
         goto fail;
     }
     
     error = u32IAP_PrepareSectors(a_sec_begin,a_sec_end);
     if(error!= IAP_STA_CMD_SUCCESS) {
-        DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"PrepareSectors error %u",error);
+        DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"PrepareSectors error %u\n\r",error);
         goto fail;
     }
     

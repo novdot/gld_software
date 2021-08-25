@@ -62,6 +62,9 @@ void init1()
 void init()
 {
     //char dbg[64];
+    //program variables
+    x_ring_init(&g_gld.cmd.dbg.ring_in,g_gld.cmd.dbg.buf_in,GLD_RINGBUFFER_SIZE);
+    x_ring_init(&g_gld.cmd.dbg.ring_out,g_gld.cmd.dbg.buf_out,GLD_RINGBUFFER_SIZE);
     
     //e. clocking control initialization
     SystemInit();
@@ -109,14 +112,11 @@ void init()
     dither_init();
     g_gld.RgConB.word = RATE_VIBRO_1;
     
-    //program variables
-    x_ring_init(&g_gld.cmd.dbg.ring_in,g_gld.cmd.dbg.buf_in,GLD_RINGBUFFER_SIZE);
-    x_ring_init(&g_gld.cmd.dbg.ring_out,g_gld.cmd.dbg.buf_out,GLD_RINGBUFFER_SIZE);
 }
 /******************************************************************************/
 void loop_echo()
 {
-    command_echo();
+    //command_echo();
 }
 void loop()
 {
@@ -141,8 +141,6 @@ void loop()
     hardware_reset_adc(); 
     //state DAC voltage
     hardware_set_dac(); 
-    
-    g_gld.pulses.Curr_Cnt_Vib = qei_get_position();
     				
     Latch_Event();	
     clc_Pulses();

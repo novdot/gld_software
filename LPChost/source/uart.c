@@ -229,7 +229,7 @@ void UART_Init(x_uint32_t baudrate)
 /******************************************************************************/
 void UART0_Init(x_uint32_t baudrate)
 {
-    uint32_t Fdiv = 0;
+    //uint32_t Fdiv = 0;
     uint32_t pclk = 0;
 	int 	dlEest;
 	float 	divAddVal, mulVal;
@@ -279,8 +279,8 @@ void UART0_Init(x_uint32_t baudrate)
 /******************************************************************************/
 void UART1_Init(x_uint32_t baudrate)
 {
-    uint32_t Fdiv = 0;
-    uint32_t usFdiv = 0;
+    //uint32_t Fdiv = 0;
+    //uint32_t usFdiv = 0;
     uint32_t pclk = 0;
     
     int 	dlEest;
@@ -334,8 +334,8 @@ void UART1_Init(x_uint32_t baudrate)
 /******************************************************************************/
 void UART2_Init(x_uint32_t baudrate)
 {
-    uint32_t Fdiv = 0;
-    uint32_t usFdiv = 0;
+    //uint32_t Fdiv = 0;
+    //uint32_t usFdiv = 0;
     uint32_t pclk = 0;
    
     int dlEest = 0;
@@ -639,12 +639,12 @@ void uart_transm(x_uint32_t trm_num_byt, int Device_Mode, x_uint8_t*a_pBufferTra
 /******************************************************************************/
 void UART_SwitchSpeed(unsigned Speed)
 {
-    uint32_t Fdiv = 0;
+    //uint32_t Fdiv = 0;
     uint32_t pclk = 0;
     int baudrate = 0;
 	int dlEest = 0;
 	float divAddVal, mulVal = 0;
-    char dbg[64];
+    //char dbg[64];
     
     /*
     Переключение скорости только при настройке

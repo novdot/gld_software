@@ -4,6 +4,9 @@
 #include "core/global.h"
 #include "hardware/hardware.h"
 
+#include "stdlib.h"
+#include "math.h"
+
 int ExchangeErr = 0;
 int g_ChInd = 0; //< индекс канала ЦАП
 /******************************************************************************/
@@ -51,7 +54,7 @@ void exchange_regul_data_read()
     g_input.word.in2 = ((g_gld.nADCData[3]));//-40092)*38)/100;;
     g_input.word.in1 = ((g_gld.nADCData[4]));//-40092)*38)/100;;
     g_input.word.temp1 = g_gld.nADCData[5];
-    /**/
+    **/
     if(g_gld.nADCData[0] > hf_out_max){
         g_input.word.hf_out = 0;
     }else{

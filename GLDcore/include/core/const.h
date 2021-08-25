@@ -84,7 +84,7 @@
 #define	PI_A3_CONST		(0)	//  33 
 #define	PI_A4_MIN       (64)
 #define	PI_A4_MAX       (0x5999)//(0x7FFF)
-#define	PI_A4_CONST     (PI_A4_MAX) //  34 PLC Mod ampl
+#define	PI_A4_CONST     (5000) //  34 PLC Mod ampl
 #define	PI_A5_CONST		(0)	//  35
 #define	PI_A6_CONST		(0)	//  36
 #define	PI_B1_CONST		(0)	//  37
@@ -113,7 +113,6 @@
 ////////////////////////////////////////////////////////
 
 #define DITHER_REG_PERIOD		40	//e. period of dither regulator (in periods of dither frequency) 
-#define PLC_RESET_THRESHOLD 	(-3276) //e. correspond to the voltage +1.2 Volts 
 
 	//e. minimal allowable output frequency, at which data are considered authentic  
 #define	F_RAS_MIN	    10000 	//e.  minimal output frequency at start

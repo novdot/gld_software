@@ -18,4 +18,4 @@ void spi_write(int* a_nDataOut,int a_nCount,int*a_pExchangeErr);
 void spi_set_cs(x_uint32_t data);
 void spi_reset_cs(x_uint32_t data);
 
-#endif
+#endif //_SPI_H_INCLUDED_
