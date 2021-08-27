@@ -142,12 +142,12 @@ void command_cmd_DELTA_PS()
 	command_utility_SetSpeedPeriod();         		  
     command_SwitchSpeed();
 	//e. work with internal latch
-	if (Device_Mode < 4)	 
-	Device_Mode = DM_INT_LATCH_DELTA_PS;
+	/*if (Device_Mode < 4)	 
+        Device_Mode = DM_INT_LATCH_DELTA_PS;
 	else
-	Device_Mode = DM_EXT_LATCH_DELTA_PS_PULSE;
+        Device_Mode = DM_EXT_LATCH_DELTA_PS_PULSE;
+	*/
 	CMD_Mode = 1;
-	
 	return;
 }
 /******************************************************************************/
@@ -625,9 +625,14 @@ void command_ans_DELTA_PS_EXEC(x_uint32_t paramTmpWord)
     trm_ena = 1; 
 }
 
-/******************************************************************************/
+/*****************************************************************************
+Передача приращения угла в виде накопленных за период запроса разностей счетчиков 
+импульсов из 3-х GLDв систему к μPC; а также передача требуемого параметра
+*/
 void command_ans_DELTA_PS()
 {
+    //TODO
+    
 }
 
 /******************************************************************************/

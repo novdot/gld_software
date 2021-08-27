@@ -160,9 +160,12 @@
 /******************************************************************************/
 //e.   device operation modes
 #define  DM_INT_10KHZ_LATCH				1		//e. mode of internal latch 10 kHz 		
-#define  DM_INT_LATCH_DELTA_PS			2
-#define	 DM_INT_LATCH_DELTA_BINS		3
+//#define  DM_INT_LATCH_DELTA_PS			2
+#define  DM_INT_SIGN_MEANDER_LATCH
+//#define	 DM_INT_LATCH_DELTA_BINS		3
+#define	 DM_EXT_LATCH_DELTA_PS_LINE     3       //e. mode of external latch with output of the Delta_PS command by request from line
 #define  DM_EXT_LATCH_DELTA_PS_PULSE	4		//e. mode of external latch with output of the Delta_PS command by pulse 
+#define  DM_EXT_LATCH_DELTA_BINS_LINE	5		//e. mode of internal latch with output of the Delta_BINS command by requet from line
 #define  DM_EXT_LATCH_DELTA_BINS_PULSE	6		//e. mode of external latch with output of the Delta_BINS command by pulse
 #define  DM_EXT_LATCH_DELTA_SF_PULSE	7		//e. mode of Delta Scale factor 
 

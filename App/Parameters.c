@@ -70,6 +70,7 @@ void params_load_default(void)
     Device_blk.Str.WP_rup = WP_RUP_CONST; 
     Device_blk.Str.WP_rdw = WP_RDW_CONST; 
     Device_blk.Str.WP_mdy = WP_MDY_CONST; 
+    Device_blk.Str.WP_start = 0;
 
     Device_blk.Str.VB_phs = VB_PHS_CONST;
     Device_blk.Str.VB_scl = VB_SCL_CONST;

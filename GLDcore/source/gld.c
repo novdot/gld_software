@@ -93,7 +93,7 @@ void gld_output(void)
                 command_cmd_DELTA_PS_EXEC();
                 break;
 
-            case 5:
+            case 5: //rate mode
                 //e. reset bits of current command code settings of periodicity and transfer rate
                 //r. сбросить в текущем коде команды биты установки периодичности и скорости передачи
                 CMD_Code &= 0xff1f;

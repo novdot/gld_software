@@ -131,8 +131,8 @@ typedef union {
         x_int32_t LoadFlash_enable;		//e. 59 - source loading flag: 1 - load from the flash , 0 - load default parameters (factory)
         
         x_int32_t Device_SerialNumber;		//e. 60 - serial number of the device
-        x_int32_t Reserved0;       //e. 61 - not used
-        x_int32_t	TermoMode;	//e  62 - device operation mode (with thermocompenstion, without it, debug )
+        x_int32_t WP_start;       //e. 61 - start position for CPLC regulation
+        x_int32_t TermoMode;	//e  62 - device operation mode (with thermocompenstion, without it, debug )
         //e. addition for the piecewise-linear termocorrection 
         x_int32_t TemperInt[TERMO_FUNC_SIZE];	//e. 63 
         x_int32_t TermoFunc[TERMO_FUNC_SIZE];	//e. 77

@@ -144,8 +144,8 @@ void clc_ThermoSensors(void)
 
 			StartRdy = 0;	
             //TempOfReset = Temp_Aver;
-			//	Device_blk.Str.WP_scl >>= 1;
-          	//	Device_blk.Str.HF_scl >>= 1;
+			Device_blk.Str.WP_scl >>= 1;
+          	Device_blk.Str.HF_scl >>= 1;
 
             //e. static thermocompensation is enable
 			if ((Device_blk.Str.TermoMode != TERMO_OFF) && \

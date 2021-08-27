@@ -20,8 +20,6 @@
 //#include "commandset.h"
 //#include "CntrlGLD.h"
 
-#include <math.h>
-
 #include "hardware/hardware.h"
 #include "core/command.h"
 #include "core/global.h"
@@ -30,6 +28,8 @@
 #include "core/ring_buffer.h"
 #include "core/sip.h"
 
+#include <math.h>
+#include <stdio.h>
 /******************************************************************************
 **   Main Function  main()
 #DEFINES
@@ -61,7 +61,8 @@ void init1()
 /******************************************************************************/
 void init()
 {
-    //char dbg[64];
+    int i=0;
+    char dbg[64];
     //program variables
     x_ring_init(&g_gld.cmd.dbg.ring_in,g_gld.cmd.dbg.buf_in,GLD_RINGBUFFER_SIZE);
     x_ring_init(&g_gld.cmd.dbg.ring_out,g_gld.cmd.dbg.buf_out,GLD_RINGBUFFER_SIZE);
@@ -112,6 +113,8 @@ void init()
     dither_init();
     g_gld.RgConB.word = RATE_VIBRO_1;
     
+    DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"WP_scl:%d\n\r",Device_blk.Str.WP_scl);
+    
 }
 /******************************************************************************/
 void loop_echo()
@@ -132,8 +135,9 @@ void loop()
     //WDTFeed();
     
     if(g_gld.dbg_buffers.iteration<100){
-        DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%d\n\r",Output.Str.WP_Phase_Det_Array[0]);
+        //DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%d\n\r",Output.Str.WP_Phase_Det_Array[0]);
         //DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%d\n\r",g_input.word.wp_sel);
+        DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%d\n\r",g_gld.pulses.Curr_Cnt_Vib);
         g_gld.dbg_buffers.iteration++;
     }
     

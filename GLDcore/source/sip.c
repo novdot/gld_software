@@ -31,7 +31,17 @@ int interpolation(int y_curr, int x_interp)
 	temp22 = (int)temp3;
 
 	return ((int)temp);
-} // interpolation
+}
+/******************************************************************************/
+void sip_clc_vibro1_mode()
+{
+    
+}
+/******************************************************************************/
+void sip_clc_reperOfMeandr_mode()
+{
+    
+}
 /******************************************************************************/
 void clc_Pulses()
 {
@@ -53,11 +63,10 @@ void clc_Pulses()
     static int32_t	Dif_Curr_32 = 0;//e. current difference without dithering for dithering control
 
     //read pulses
-    g_gld.pulses.Curr_Cnt_Vib = qei_get_position();
+    g_gld.pulses.Curr_Cnt_Vib += 1;//qei_get_position();
     
     //e. accumulated number of pulses
     g_gld.pulses.Dif_Curr_Vib = g_gld.pulses.Curr_Cnt_Vib - Old_Cnt_Vib; 			 
-
     Cnt_Overload(g_gld.pulses.Dif_Curr_Vib, INT32MAX_DIV2, INT32MIN_DIV2);
     
     //e. save current number of pulses

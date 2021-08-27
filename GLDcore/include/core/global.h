@@ -45,7 +45,7 @@ typedef struct gld_cmdDef{
 }gld_cmd;
 
 typedef struct gld_pulsesDef{
-    x_uint32_t Cnt_curr; //< value from qei
+    x_uint32_t Cnt_curr; //< value from qei. Only for RATE_REPER_OR_REFMEANDR
     x_uint32_t Curr_Cnt_Vib; //< value_Vib = diff between curent value and old
     int32_t	Dif_Curr_Vib; //< diff between curent value_Vib and old
 }gld_pulses;

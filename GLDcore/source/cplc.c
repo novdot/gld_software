@@ -20,7 +20,7 @@
 #define	 WP_REG32MIN_NEW_SATURATION (PLC_RESET_THRESHOLD << PLC_SHIFT)
 #define  WP_TMP_THRESHOLD		(7) //e. temperature threshold, defining heats up or cool down the device
 
-int WP_reg32;
+int WP_reg32 = 0;
 //int WP_reset_heating; //e. voltage of reset at heating
 //int WP_reset_cooling; //e. voltage of reset at cooling
 int MaxDelayPLC;
@@ -112,14 +112,16 @@ void calc_sin_func()
 /******************************************************************************/
 void cplc_init(void)
 {
-	int i;
+	int i = 0;
+    //char dbg[32];
 	//e. voltage of reset at heating should not 
     //e.exceed a limit of the upper threshold of the CPLC
 	if (Device_blk.Str.WP_reset < PLC_RESET_THRESHOLD) {
 		Device_blk.Str.WP_reset = PLC_RESET_THRESHOLD + 1;
 	}
     //e. WP_reg start voltage is (WP_rup - WP_rdw)/2	
-	Output.Str.WP_reg = (Device_blk.Str.WP_rup + Device_blk.Str.WP_rdw) >> 1; 
+	//Output.Str.WP_reg = (Device_blk.Str.WP_rup + Device_blk.Str.WP_rdw) >> 1; 
+    Output.Str.WP_reg = Device_blk.Str.WP_start;
 	WP_reg32 = Output.Str.WP_reg<<PLC_SHIFT;
 		   
     calc_sin_func();
@@ -128,7 +130,7 @@ void cplc_init(void)
 	init_BandPass( 1.0/(float)Device_blk.Str.PI_b3, 10.0/(float)(DEVICE_SAMPLE_RATE_HZ), PLC);	
 
     //e. during fist 10 seconds after start we state Device_blk.Str.WP_scl = 2*Device_blk.Str.WP_scl
-	Device_blk.Str.WP_scl <<=  1; 
+	Device_blk.Str.WP_scl =  Device_blk.Str.WP_scl<<1;
 
     //e. max expected delay for phase detector output
 	MaxDelayPLC = Device_blk.Str.PI_b3>>1;
@@ -182,8 +184,7 @@ void cplc_regulator(void)
     sinus = (int)(g_sin_func[index]*Device_blk.Str.PI_a4);
     index++;*/
 	//e. band-pass filter for the CPLC regulator 
-    WP_Phase_Det = PLC_PhaseDetFilt(g_input.word.wp_sel
-        );
+    WP_Phase_Det = PLC_PhaseDetFilt(g_input.word.wp_sel);
 	
 	if (WP_Phase_Det >0) {
   		phase_Digital = 1;
@@ -218,6 +219,7 @@ void cplc_regulator(void)
 	}  
 	// from this WP_Phase_Det - demodulated signal like LIDEM_DIG
 	
+    /**
     // нагрев для зеркальника	
     //e. it is not time for reset 
 	if (!is_zeroing) 	{
@@ -283,7 +285,8 @@ void cplc_regulator(void)
                 is_zeroing = 0;
             }
         }
-	}
+	}**/
+    WP_reg32 = L_mac(WP_reg32, phase_Digital, Device_blk.Str.WP_scl );
     
     // working with "old" CPLC (the range +15 ... -15 V);
     Saturation(WP_reg32, WP_REG32MAX_SATURATION, WP_REG32MIN_SATURATION);  

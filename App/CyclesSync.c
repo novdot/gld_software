@@ -81,39 +81,28 @@ void Latch_Event()
 ** 
 ******************************************************************************/
  __irq void QEI_IRQHandler (void) 
- {
-   static uint32_t halfQEIPeriod = 0;
+{
+    static uint32_t halfQEIPeriod = 0;
 
-	 g_gld.pulses.Cnt_curr =  LPC_QEI->POS;		//e. read accumulated value of counter
-	 if (LPC_QEI->INTSTAT & 0x0008)
-	 {
-//-----------debug-------------------------
-/*if (LPC_QEI->STAT & 1)//(halfPeriod2 & 0x0001)//	if (LPC_GPIO0->FIOPIN & (1<<4))
-{	LPC_GPIO2->FIOSET = 0x10;
-
-	 // 
-//	LPC_GPIO0->FIOSET = (1<<4);	//reset light up signal
-	}
-	 else
-{	 LPC_GPIO2->FIOCLR = 0x10;	 
-
-	 //
-	//	LPC_GPIO0->FIOCLR = (1<<4);	//set light up signal
-		}						 */
-//-----------debug-------------------------
-
-	   data_Rdy = 0x0004;			//e. data for Cnt_Pls or Cnt_Mns calculation are ready
-
-	  if (++halfQEIPeriod & 0x0001)	//e. period elapsed, we can calculate Cnt_Dif
-	  {
-	  // Set_LightUp;
-	   data_Rdy = 0x000C;	
-	   }
-	//   else
-	   //Reset_LightUp;
-	}
-	  LPC_QEI->CLR = 0x1fff;			//e. reset interrupt request //r. сбросить запрос прерывания
- }
+    //e. read accumulated value of counter
+    g_gld.pulses.Cnt_curr += 1;//LPC_QEI->POS;		
+    
+    //check int flag on
+    if( (LPC_QEI->INTSTAT & 0x0008) == 0) goto end;
+    
+	//e. data for Cnt_Pls or Cnt_Mns calculation are ready
+    data_Rdy = 0x0004;
+        
+    //e. period elapsed, we can calculate Cnt_Dif
+    if (++halfQEIPeriod & 0x0001){
+        data_Rdy = 0x000C;	
+    }
+	
+end:
+    // reset interrupt request
+    LPC_QEI->CLR = 0x1fff;			 
+}
+ 
 /******************************************************************************
 ** Function name:		SetIntLatch
 **
@@ -143,11 +132,11 @@ void SetIntLatch(uint32_t cycle)
 ******************************************************************************/
 void SwitchRefMeandInt(uint32_t s)
 {
-  LPC_QEI->CLR = 0x1fff; 			//e. reset all interrupts //r. сбросить все прерывания
- if (s)
-  LPC_QEI->IEC = 0x1fff;			//e.  disable direction changing interrupt //r. запретить прерывание при изменении направления
- else
-  LPC_QEI->IES = 0x0008;			//e.  enable direction changing interrupt //r. разрешить прерывание при изменении направления
+    LPC_QEI->CLR = 0x1fff; 			//e. reset all interrupts
+    if (s)
+        LPC_QEI->IEC = 0x1fff;			//e.  disable direction changing interrupt 
+    else
+        LPC_QEI->IES = 0x0008;			//e.  enable direction changing interrupt
 }
 /******************************************************************************
 ** Function name:		ExtLatch_IRQHandler
@@ -166,6 +155,7 @@ void SwitchRefMeandInt(uint32_t s)
 	LPC_GPIOINT->IO0IntClr |= 0x0000800;//e. clean interrupt request
  //LPC_GPIO2->FIOCLR = 0x00000020;		//e. turn off the LED 
  }
+ 
  /******************************************************************************
 ** Function name:		IntLatch_IRQHandler
 **
@@ -175,7 +165,6 @@ void SwitchRefMeandInt(uint32_t s)
 ** Returned value:		None
 ** 
 ******************************************************************************/
-
 __irq void IntLatch_IRQHandler (void) 
 {
     LatchPhase =(int)LPC_PWM1->TC;			//e. read moment of latch
@@ -236,7 +225,7 @@ int SwitchMode()
  
    UART_SwitchSpeed(SRgR & 0x0030);
 
-   if (Device_Mode == DM_INT_LATCH_DELTA_PS)
+   if (Device_Mode == DM_EXT_LATCH_DELTA_PS_LINE)
    	 SetIntLatch(50000);
    return 1;
 }
