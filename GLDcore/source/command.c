@@ -235,7 +235,7 @@ void command_transm(void)
 {
     x_uint32_t param, param_byte, CRC; 
     x_int16_t *trans_param;	
-    char dbg[64];	
+    //char dbg[64];	
     
     //e. is transfer needed?  
     if (trm_ena == 0)										
@@ -340,7 +340,7 @@ end:
 
 /******************************************************************************/
 //e procedure of set of rate and periodicity of answer 
-void command_utility_SetSpeedPeriod(void)
+void command_utility_read_param(void)
 {
 	//e. is periodic data transmission needed? 
 	if ((rcv_buf[3] & 0x0080) != 0)  {
@@ -435,7 +435,8 @@ void dbg_recieve()
             break;
         
         case '8': 
-            DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%u\n\r",Output.Str.WP_reg);
+            DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"WP_scl:%d\n\r",Device_blk.Str.WP_scl);
+            DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"VB_scl:%d\n\r",Device_blk.Str.VB_scl);
             break;
         
         default:

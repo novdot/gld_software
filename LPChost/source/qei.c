@@ -34,7 +34,7 @@ x_uint32_t qei_get_position()
 /******************************************************************************/
 x_direction_t qei_get_direction()
 {
-    //if (LPC_QEI->STAT) return _x_plus;
+    if (LPC_QEI->STAT) return _x_plus;
     
     return _x_minus;
 }

@@ -237,8 +237,11 @@ typedef union{
     }bit;
     x_uint16_t word;
 }reg_RgConB;
-#define RATE_REPER_OR_REFMEANDR 	0x0000		//e. difference of general counters (not dither counters), latched by Reper or by Sign Meander 
-#define RATE_VIBRO_1	 			0x0001      //e. difference of dither counters after the filter of moving average
+#define RATE_REPER_OR_REFMEANDR 	0x0000 //разность обычных счетчиков (не вибросч), защелкнутых по Reper`у или по RefMeandr`у
+#define RATE_VIBRO_1	 			0x0001 
+#define RATE_VIBRO_2	 			0x0002
+#define RATE_MEANDER_5KHZ	 		0x0004 
+
 
 
 /**

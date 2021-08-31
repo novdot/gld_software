@@ -63,7 +63,7 @@ x_bool_t check_lcc(x_uint8_t* a_pBuffer,x_uint32_t a_uCount);
     @brief procedure of set of rate and periodicity of answer 
     @return 
 */
-void command_utility_SetSpeedPeriod(void);
+void command_utility_read_param(void);
 
 typedef enum{ 
     _command_recieve_flag_gld = 0 //< логика ГЛД
@@ -101,5 +101,11 @@ void command_handle(void);
     @return
 */
 void dbg_recieve();
+
+/**
+    @brief 
+    @return
+*/
+void command_SwitchSpeed(void);
 
 #endif

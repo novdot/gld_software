@@ -34,6 +34,7 @@ x_int32_t rx_buf_copy;
 x_int32_t rcv_byt_copy;
 x_uint32_t rcv_num_byt_old;
 
+x_uint32_t trm_cycl;
 x_uint32_t trm_num_byt;
 x_uint32_t trm_ena;
 x_uint32_t num_of_par;
@@ -62,7 +63,6 @@ inputData g_input;
 
 //e. system register of the ADSP card 
 x_uint32_t 	SRgR;  
-x_uint32_t 	trm_cycl;
 
 x_uint32_t Vibro_2_CountIn;
 

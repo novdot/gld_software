@@ -34,6 +34,7 @@
 void command_SwitchSpeed(void)
 {
     int i = 0;
+    
     //check if trm_rate changed
     if(g_gld.cmd.trm_rate == g_gld.cmd.trm_rate_prev) {
         return;
@@ -139,15 +140,27 @@ void command_handle(void)
 void command_cmd_DELTA_PS()
 {
 	//e. and set the answer transfer rate and its periodicity 
-	command_utility_SetSpeedPeriod();         		  
+	command_utility_read_param();         		  
     command_SwitchSpeed();
 	//e. work with internal latch
-	/*if (Device_Mode < 4)	 
-        Device_Mode = DM_INT_LATCH_DELTA_PS;
+	/*if (Device_Mode < 4)	 //???? DM_EXT_LATCH_DELTA_PS_PULSE ????
+        Device_Mode = DM_EXT_LATCH_DELTA_PS_LINE;
 	else
         Device_Mode = DM_EXT_LATCH_DELTA_PS_PULSE;
 	*/
+    
+    
+    //g_gld.RgConB.word =  RATE_REPER_OR_REFMEANDR;
+    //SwitchRefMeandInt(RATE_REPER_OR_REFMEANDR);
+    
+    //Device_Mode = DM_EXT_LATCH_DELTA_PS_LINE;
+    
 	CMD_Mode = 1;
+    
+    wrk_period = 250000; 
+    //command_cmd_DELTA_PS_EXEC();
+    SetIntLatch(wrk_period);
+    
 	return;
 }
 /******************************************************************************/
@@ -166,7 +179,7 @@ void command_cmd_DELTA_PS_EXEC()
         , &(Output.Str.Tmp_Out[4])
         , &(Output.Str.Tmp_Out[5])
     };
-	static uint32_t val, paramTmpWord;
+	static uint32_t val, paramTmpWord = 0;
 	static uint32_t * ptr;
 	static uint32_t index = 0;
 		   
@@ -192,7 +205,7 @@ void command_cmd_DELTA_PS_EXEC()
 		index = 0;
 	}
     
-    command_ans_DELTA_PS_EXEC(paramTmpWord);
+    command_ans_DELTA_PS_EXEC(&paramTmpWord);
     
 	return;
 }
@@ -202,7 +215,7 @@ void command_cmd_DELTA_BINS()
 	//e. set in the additional register of device control the mode of work with 
 	//dither counters  and the filter of moving average
 	g_gld.RgConB.word = RATE_VIBRO_1;
-	command_utility_SetSpeedPeriod(); 
+	command_utility_read_param(); 
 	command_SwitchSpeed();
 	CMD_Mode = 4;
 	// reset all bits of status word
@@ -383,7 +396,7 @@ void command_subcmd_M_VIB_W()
 /******************************************************************************/
 void command_subcmd_M_CNT_R()
 {
-	command_utility_SetSpeedPeriod(); //e. set the answer transfer rate and its periodicity
+	command_utility_read_param(); //e. set the answer transfer rate and its periodicity
 	command_SwitchSpeed();
 	
 	command_ans_M_CNT_R();
@@ -527,7 +540,7 @@ void command_subcmd_M_PULSE()
 /******************************************************************************/
 void command_subcmd_M_RATE1()
 {
-    command_utility_SetSpeedPeriod();
+    command_utility_read_param();
     command_SwitchSpeed();
     
     g_gld.RgConB.word =  RATE_REPER_OR_REFMEANDR;
@@ -546,7 +559,7 @@ void command_subcmd_M_RATE1()
 /******************************************************************************/
 void command_subcmd_M_RATE2()
 {
-    command_utility_SetSpeedPeriod();
+    command_utility_read_param();
     command_SwitchSpeed();
     
     g_gld.RgConB.word = RATE_REPER_OR_REFMEANDR;
@@ -562,7 +575,7 @@ void command_subcmd_M_RATE2()
 /******************************************************************************/
 void command_subcmd_M_RATE3()
 {
-    command_utility_SetSpeedPeriod();
+    command_utility_read_param();
     command_SwitchSpeed();
     
     wrk_period = 2500;
@@ -573,7 +586,7 @@ void command_subcmd_M_RATE3()
 /******************************************************************************/
 void command_subcmd_M_RATE7()
 {
-    command_utility_SetSpeedPeriod();
+    command_utility_read_param();
     command_SwitchSpeed();
     
     wrk_period = 20000;
@@ -604,7 +617,7 @@ void command_ans_common(void)
 void command_ans_device_status(void)
 {
     //e. and set the answer transfer rate and its periodicity
-	command_utility_SetSpeedPeriod();
+	command_utility_read_param();
 	num_of_par = 2;
 	//e. the register address of the self-testing result
 	COMMAND_UTILITY_ANSWER_FIELD(0,(void*)&blt_in_test,2);
@@ -617,11 +630,11 @@ void command_ans_device_status(void)
 }
 
 /******************************************************************************/
-void command_ans_DELTA_PS_EXEC(x_uint32_t paramTmpWord)
+void command_ans_DELTA_PS_EXEC(x_uint32_t* paramTmpWord)
 {
     num_of_par = 2;
     COMMAND_UTILITY_ANSWER_FIELD(0,(void*)&Output.Str.PS_dif,2);
-    COMMAND_UTILITY_ANSWER_FIELD(1,(void*)&paramTmpWord,2);
+    COMMAND_UTILITY_ANSWER_FIELD(1,(void*)paramTmpWord,2);
     trm_ena = 1; 
 }
 
@@ -753,7 +766,7 @@ void command_ans_M_E5R_W()
 void command_ans_M_ADC_R()
 {
 	//e. set the answer transfer rate and its periodicity 
-	command_utility_SetSpeedPeriod(); 
+	command_utility_read_param(); 
 	command_SwitchSpeed();
 	
 	num_of_par = 4;     		//e. 4 parameters output

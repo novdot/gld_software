@@ -113,8 +113,7 @@ void init()
     dither_init();
     g_gld.RgConB.word = RATE_VIBRO_1;
     
-    DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"WP_scl:%d\n\r",Device_blk.Str.WP_scl);
-    
+    g_gld.dbg_buffers.iteration = 100;
 }
 /******************************************************************************/
 void loop_echo()

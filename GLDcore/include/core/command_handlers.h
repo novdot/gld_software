@@ -94,7 +94,7 @@ void command_subcmd_M_RATE5K();
 
 void command_ans_common(void);
 void command_ans_device_status(void);
-void command_ans_DELTA_PS_EXEC(x_uint32_t paramTmpWord);
+void command_ans_DELTA_PS_EXEC(x_uint32_t* paramTmpWord);
 void command_ans_DELTA_PS();
 void command_ans_DELTA_BINS();
 void command_ans_DELTA_SF();

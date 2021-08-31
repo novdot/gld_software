@@ -42,33 +42,23 @@ uint32_t	Delay_UART_Enbl = DELAY_UART_ENBL;
 ******************************************************************************/
 void Latch_Event()
 {
-  static unsigned PreLatch = 0;
-//  static int cc = 0;
-	  if (LatchPhase < INT32_MAX)  //e. latch is present
-	    {	
-		  Latch_Rdy = 1;		   //e. set the flag for processing below
-		   if (g_gld.RgConB.word)			   //e. work whith vibro counters
-			{
-		  	  if (PreLatch)		   //e. we have had delayed latch
-		     	  PreLatch = 0;		 	  				
-		  	  else if ((LatchPhase < LPC_PWM1->TC) && (num == Sys_Clock)) //e. latch have appeared in current cycle
-		  		{			
-		  			Latch_Rdy = 0;	//e. bring it to the next cycle	
-					PreLatch = 1;
-		  		}						  			
-			} 
-		}
-	  else
-		Latch_Rdy = 0;				//e. latch is absent
- //---------------------------temp-------------------------------
- /*	Latch_Rdy = 0;				//e. latch is absent  
-	if (cc++ == 19)
-	{
-	  cc = 0;
-	  Latch_Rdy = 1; 
-	  LatchPhase = 2500; 
-	} 	*/
-	//----------------------temp--------------------------------
+    static unsigned PreLatch = 0;
+    //e. latch is present
+    if (LatchPhase < INT32_MAX){	
+        Latch_Rdy = 1; //e. set the flag for processing below
+        if (g_gld.RgConB.word) {
+            //e. work whith vibro counters
+            if (PreLatch){ //e. we have had delayed latch
+                PreLatch = 0;		 	  				
+            }else if ((LatchPhase < LPC_PWM1->TC) && (num == Sys_Clock)){
+                //e. latch have appeared in current cycle
+                Latch_Rdy = 0;	//e. bring it to the next cycle	
+                PreLatch = 1;
+            }						  			
+        } 
+    }
+    else
+    Latch_Rdy = 0;				//e. latch is absent
 }
 
 /******************************************************************************
@@ -85,7 +75,7 @@ void Latch_Event()
     static uint32_t halfQEIPeriod = 0;
 
     //e. read accumulated value of counter
-    g_gld.pulses.Cnt_curr += 1;//LPC_QEI->POS;		
+    g_gld.pulses.Cnt_curr += LPC_QEI->POS;		
     
     //check int flag on
     if( (LPC_QEI->INTSTAT & 0x0008) == 0) goto end;
@@ -114,12 +104,11 @@ end:
 ******************************************************************************/
 void SetIntLatch(uint32_t cycle)
 {
- LPC_TIM3->TCR = 0x2;							//switch off and reset timer3
- if (cycle != 0)
- {
- 	LPC_TIM3->MR0 = (cycle<<2);						//load new value
- 	LPC_TIM3->TCR = 1;							//switch on timer3
- }
+    LPC_TIM3->TCR = 0x2; //switch off and reset timer3
+    if (cycle != 0) {
+        LPC_TIM3->MR0 = (cycle<<2); //load new value
+        LPC_TIM3->TCR = 1; //switch on timer3
+    }
 }
 /******************************************************************************
 ** Function name:		SwitchRefMeandInt
@@ -132,11 +121,11 @@ void SetIntLatch(uint32_t cycle)
 ******************************************************************************/
 void SwitchRefMeandInt(uint32_t s)
 {
-    LPC_QEI->CLR = 0x1fff; 			//e. reset all interrupts
+    LPC_QEI->CLR = 0x1fff; //e. reset all interrupts
     if (s)
-        LPC_QEI->IEC = 0x1fff;			//e.  disable direction changing interrupt 
+        LPC_QEI->IEC = 0x1fff; //e.  disable direction changing interrupt 
     else
-        LPC_QEI->IES = 0x0008;			//e.  enable direction changing interrupt
+        LPC_QEI->IES = 0x0008; //e.  enable direction changing interrupt
 }
 /******************************************************************************
 ** Function name:		ExtLatch_IRQHandler
@@ -148,13 +137,13 @@ void SwitchRefMeandInt(uint32_t s)
 ** 
 ******************************************************************************/
  __irq void EINT3_IRQHandler (void) 
- {
- //LPC_GPIO2->FIOSET = 0x00000020;		//e. turn on the LED 
- 	LatchPhase = LPC_PWM1->TC;			//e. read moment of latch
-	LPC_TIM0->TCR = 1;					//e. start Mltdrop delay timer
-	LPC_GPIOINT->IO0IntClr |= 0x0000800;//e. clean interrupt request
- //LPC_GPIO2->FIOCLR = 0x00000020;		//e. turn off the LED 
- }
+{
+    //LPC_GPIO2->FIOSET = 0x00000020;		//e. turn on the LED 
+    LatchPhase = LPC_PWM1->TC;			//e. read moment of latch
+    LPC_TIM0->TCR = 1;					//e. start Mltdrop delay timer
+    LPC_GPIOINT->IO0IntClr |= 0x0000800;//e. clean interrupt request
+    //LPC_GPIO2->FIOCLR = 0x00000020;		//e. turn off the LED 
+}
  
  /******************************************************************************
 ** Function name:		IntLatch_IRQHandler
