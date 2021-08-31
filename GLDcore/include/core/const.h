@@ -57,7 +57,7 @@
 #define	VB_NMAX_CONST   64000	    //e. 16 - maximum of the output value of the oscillation period regulator 
 #define	VB_FDF_HI_CONST	3	    //e. 17 - adjusted output frequency (H)                     
 #define	VB_FDF_LO_CONST	0  		//e. 18 - (L) (double precision)                    
-#define	VB_FSC_CONST	-2000	//e. 19 - the gain factor of the output frequency regulator 
+#define	VB_FSC_CONST	2000	//e. 19 - the gain factor of the output frequency regulator 
 #define	VB_TMIN_CONST	100	//e. 20 - minimum of the output value of the Tau regulator 
 #define	VB_TMAX_CONST	10022	//e. 21 - maximum of the output value of the Tau regulator 
 #define	L_VIB_START     5120	//e. 22 - pulse width of the dither drive (before noiseness)
