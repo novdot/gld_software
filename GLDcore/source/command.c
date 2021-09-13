@@ -435,8 +435,13 @@ void dbg_recieve()
             break;
         
         case '8': 
-            DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"WP_scl:%d\n\r",Device_blk.Str.WP_scl);
-            DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"VB_scl:%d\n\r",Device_blk.Str.VB_scl);
+            DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"cnt_int:%d\n\r"
+                ,g_gld.pulses.reper_meandr.cnt_int_sum);
+            break;
+        
+        case '9': 
+            DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"cnt_iter:%d\n\r"
+                ,g_gld.pulses.reper_meandr.cnt_iter_sum);
             break;
         
         default:

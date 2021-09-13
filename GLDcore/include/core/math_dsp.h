@@ -18,6 +18,8 @@ typedef enum BAND_PASS_TYPE_{
 #define	Cnt_Overload(Uin, UpSat, DwnSat)	if (Uin > UpSat) Uin -= INT32_MAX; \
 											if (Uin < DwnSat) Uin += INT32_MAX;
 
+#define	Cnt_Overload_Unsigned(Uin, UpSat)	if (Uin > UpSat) Uin -= UpSat;
+
 #define	CPL_reset_calc(U0, Kgrad, Ti, T0)	U0 + L_mult( Kgrad, (Ti - T0) )	
 
 /**

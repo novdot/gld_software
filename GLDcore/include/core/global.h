@@ -24,7 +24,7 @@ typedef struct gld_cplcDef{
     int WP_DelaySin_Array[21];
 }gld_cplc;
 
-#define GLD_RINGBUFFER_SIZE (512)
+#define GLD_RINGBUFFER_SIZE (1024)
 typedef struct gld_cmdDef{
     x_uint32_t trm_rate; //rate from cmd
     x_uint32_t trm_rate_prev; //set rate to uart
@@ -48,6 +48,34 @@ typedef struct gld_pulsesDef{
     x_uint32_t Cnt_curr; //< value from qei. Only for RATE_REPER_OR_REFMEANDR
     x_uint32_t Curr_Cnt_Vib; //< value_Vib = diff between curent value and old
     int32_t	Dif_Curr_Vib; //< diff between curent value_Vib and old
+    
+    struct{
+        x_uint32_t cnt_curr;
+        x_uint32_t cnt_prev;
+        x_uint32_t cnt_dif;
+        x_uint32_t cnt_reduced;
+    }vibro1;
+    struct{
+        x_uint32_t cnt_curr;
+        x_uint32_t cnt_prev;
+        x_int32_t cnt_dif;
+        x_uint32_t cnt_pls;
+        x_uint32_t cnt_mns;
+        x_int32_t cnt_delta;
+        x_uint32_t cnt_iter; //счетчик итераций между прерываниями
+        x_uint32_t cnt_iter_sum; //счетчик итераций на выдачу с частотой Rate
+        x_uint32_t cnt_int; //счетчик прерываний
+        x_uint32_t cnt_int_sum; //счетчик прерываний на выдачу с частотой Rate
+        x_uint32_t cnt_tc_prev; //TC0 previous
+        union{
+            struct{
+                unsigned get_zero:1;
+                unsigned get_peak:1;
+                unsigned reserve:6;
+            }bit;
+            x_uint8_t word;
+        }flags;
+    }reper_meandr;
 }gld_pulses;
 
 /**
@@ -88,6 +116,18 @@ typedef struct gld_globalDef{
         int val[24];
         int iteration;
     }dbg_buffers;
+    
+    struct{
+        union{
+            struct{
+                unsigned isLimInt: 1;//< get interrupt pulse was formed(full period)
+                unsigned In_Flag: 1;//< int main cycle pulse was formed
+                unsigned SwitchCntInq: 1;//<
+                unsigned reserve: 5;
+            }bit;
+            x_uint8_t word;
+        }flags;
+    }dither;
 }gld_global;
 
 extern gld_global g_gld;
@@ -102,6 +142,7 @@ void gld_global_init(void);
 extern x_uint32_t  trm_num_byt;
 extern x_uint32_t  rcv_num_byt;
 extern x_uint32_t  rcv_Rdy;
+extern x_uint32_t trm_cycl;
 
 extern x_uint8_t trm_buf[256];//64
 extern x_uint8_t rcv_buf[256];
@@ -114,10 +155,15 @@ extern x_uint32_t size_param[16];
 extern x_uint32_t rcv_num_byt_old;
 extern x_int32_t rcv_byt_copy;
 extern x_uint32_t trm_ena;
+extern x_int32_t rx_buf_copy; //e. is copying of present received packet needed
 
+//command
+extern x_uint32_t blt_in_test;
+
+//regs
 extern x_uint32_t line_err;
 extern x_uint32_t line_sts;
-extern x_int32_t rx_buf_copy;
+extern x_uint32_t SRgR;
 
 //extern INPUT Input;
 extern OUTPUT Output;
@@ -128,8 +174,6 @@ extern x_uint32_t CMD_Mode;
 extern x_uint32_t CMD_Code;
 extern int Device_Mode;
 
-extern x_uint32_t SRgR;
-extern x_uint32_t trm_cycl;
 
 extern x_uint32_t Vibro_2_CountIn;
 
@@ -166,12 +210,6 @@ extern x_uint32_t count;
 extern x_uint32_t main_cycle_latch; 
 extern x_uint32_t Out_main_cycle_latch; //e. counter of main cycles between external latch pulse appearence
 extern x_uint32_t T_latch, Out_T_latch, temp_T_latch;
-
-//dither
-extern x_uint32_t In_Flag;
-
-//command
-extern x_uint32_t blt_in_test;
 
 //e. run period in cycles 
 extern x_uint32_t wrk_period;

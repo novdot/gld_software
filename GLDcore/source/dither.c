@@ -35,8 +35,6 @@ x_int32_t VB_tau_Ins; //e. local value of the Tau regulator
 int32_t VB_Nmin0; //e. minimum of the output value of a regulator of the period for the Device_blk.Str.TemperNormal temperature
 int32_t VB_Nmax0; //e. maximum of the output value of a regulator of the period for the Device_blk.Str.TemperNormal 
 
-uint32_t SwitchCntInq = 0;
-
 int32_t accum_error = 0;
 int32_t ph_error = 0;
 int32_t accum_error_old = 0;
@@ -149,13 +147,10 @@ void clc_OutFreq_regulator(void)
             Valid_Data &= ~OUT_FREQ_ERROR;
         } 
     }
-    //noise
-    if (loop_is_closed(VB_TAU_ON)) {
-        dither_noise_regulator();
-    }
 
     //e.  is stabilization regulator switched on?  
     if ( loop_is_closed(VB_TAU_ON) ) {
+        dither_noise_regulator();
         //e. otherwise, load new value of pulse width of the dither drive
         Output.Str.L_Vibro = Device_blk.Str.VB_tau; 
     }
@@ -174,24 +169,26 @@ void clc_Dith_regulator(void)
         ph_error = 0;
 
     //vibro pulse has been formed
-    if(pwm_is_pulse_was_formed()==_x_true) {
+    //if(pwm_is_pulse_was_formed()==_x_true) {
+    if(g_gld.dither.flags.bit.isLimInt==1){
         if( pwm_pulse_calc( 
                 Output.Str.T_Vibro
                 ,  Output.Str.L_Vibro
                 ,  Vibro_2_CountIn
-                ,  SwitchCntInq
+                ,  g_gld.dither.flags.bit.SwitchCntInq
             )==_x_true) {
-            if (SwitchCntInq) {
-                SwitchCntInq = 0;
+            if (g_gld.dither.flags.bit.SwitchCntInq) {
+                g_gld.dither.flags.bit.SwitchCntInq = 0;
             }
-            In_Flag = 0;
         } else {
-            In_Flag = 1;
+            g_gld.dither.flags.bit.In_Flag = 1;
             dith_period++; 
         }
     }
+    g_gld.dither.flags.bit.isLimInt = 0;
+    
     //e. outgoing of the delayed menader signal 
-    temp3 = VB_MeanderDelay(In_Flag, Device_blk.Str.VB_phs, MaxDelay); 
+    temp3 = VB_MeanderDelay(g_gld.dither.flags.bit.In_Flag, Device_blk.Str.VB_phs, MaxDelay); 
     temp2 = ( ( temp3 ^ ph_error ) << 1 ) - 1; //e. the PD XOR analog out (-1..+1, since const=1) 
     accum_error += temp2; 
 
@@ -220,10 +217,11 @@ void clc_Dith_regulator(void)
         Output.Str.T_Vibro = Device_blk.Str.VB_N;  
         //Output.Str.L_Vibro = Device_blk.Str.VB_tau;  
         //e. has switched on, load calculated values of period 
-        pwm_set(Output.Str.T_Vibro, Output.Str.L_Vibro);
+        //pwm_set(Output.Str.T_Vibro, Output.Str.L_Vibro);
         //e. enable loading counter inquiry timer at the next vibro halfperiod
-        SwitchCntInq = 1;  
+        g_gld.dither.flags.bit.SwitchCntInq = 1;  
     }
+    pwm_set(Output.Str.T_Vibro, Output.Str.L_Vibro);
 	// cyclic built-in test
 	if (
         (Output.Str.T_Vibro > Device_blk.Str.VB_Nmax) 
@@ -238,7 +236,7 @@ void VibroDither_Set()
 { 
     pwm_set(Output.Str.T_Vibro,Output.Str.L_Vibro);
     //to enable inquiry timer reloading
-    SwitchCntInq = 1;	 
+    g_gld.dither.flags.bit.SwitchCntInq = 1;	 
 }
 /******************************************************************************/
 void VibroDither_SwitchOn()

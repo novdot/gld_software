@@ -133,13 +133,6 @@ void loop()
     //delay();
     //WDTFeed();
     
-    if(g_gld.dbg_buffers.iteration<100){
-        //DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%d\n\r",Output.Str.WP_Phase_Det_Array[0]);
-        //DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%d\n\r",g_input.word.wp_sel);
-        DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%d\n\r",g_gld.pulses.Curr_Cnt_Vib);
-        g_gld.dbg_buffers.iteration++;
-    }
-    
     //prepare ADC for sampling
     hardware_reset_adc(); 
     //state DAC voltage

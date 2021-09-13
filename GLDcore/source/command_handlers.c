@@ -149,16 +149,13 @@ void command_cmd_DELTA_PS()
         Device_Mode = DM_EXT_LATCH_DELTA_PS_PULSE;
 	*/
     
-    
-    //g_gld.RgConB.word =  RATE_REPER_OR_REFMEANDR;
-    //SwitchRefMeandInt(RATE_REPER_OR_REFMEANDR);
-    
-    //Device_Mode = DM_EXT_LATCH_DELTA_PS_LINE;
+    //e. disable interrupt from referense meander
+    g_gld.RgConB.word = RATE_VIBRO_1;
+    SwitchRefMeandInt(RATE_VIBRO_1);   
     
 	CMD_Mode = 1;
     
-    wrk_period = 250000; 
-    //command_cmd_DELTA_PS_EXEC();
+    wrk_period = 50000; 
     SetIntLatch(wrk_period);
     
 	return;
@@ -455,8 +452,8 @@ void command_subcmd_M_E5RA_W()
 void command_cmd_MAINT()
 {
 	if (!g_gld.RgConB.word) {
-	    g_gld.RgConB.word = RATE_VIBRO_1;
 		//e. disable interrupt from referense meander
+	    g_gld.RgConB.word = RATE_VIBRO_1;
 		SwitchRefMeandInt(RATE_VIBRO_1);   
 	}
 	//e. yes, switch on present mode 
@@ -552,7 +549,6 @@ void command_subcmd_M_RATE1()
     
     //e. load needed length of working period 1
     wrk_period = 25000000; 
-    
     command_ans_M_RATE1();
     SetIntLatch(wrk_period);
 }
@@ -800,7 +796,7 @@ void command_ans_M_GPH_W()
 void command_ans_M_FLG_R()
 {
 	num_of_par = 1; //e. 1 parameter output
-	COMMAND_UTILITY_ANSWER_FIELD(0,(void*)&In_Flag,2);
+	//COMMAND_UTILITY_ANSWER_FIELD(0,(void*)&g_gld.dither.flags.bit.In_Flag,2);
 	trm_ena = 1; //e. allow operation of the transmitter
 }
 /******************************************************************************/

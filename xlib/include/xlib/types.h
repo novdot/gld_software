@@ -25,6 +25,7 @@ typedef enum x_bool_tDef{
 typedef enum x_direction_tDef{ 
 	_x_plus = 0
 	, _x_minus = 1
+	, _x_unk = 2
 } x_direction_t;
 
 typedef enum x_switch_tDef{ 

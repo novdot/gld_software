@@ -66,13 +66,15 @@ void pwm_init(int a_VB_N,int a_VB_tau)
     LPC_MCPWM->CON_SET |= 1<<30;
     //LPC_MCPWM->CON_SET |= 1<<29;
     //start PWM channel 0,1,2
-    LPC_MCPWM->CON_SET |= (1<<8) |1 |(1<<16);
-    //for 0
+    LPC_MCPWM->CON_SET |= 1 |(1<<8) |(1<<16);
+    //CENTER0 POLA0
     LPC_MCPWM->CON_SET |= (1<<1) | (1<<2);
     //POLA1 CENTER1
     LPC_MCPWM->CON_SET |= (1<<10) | (1<<9);
     //POLA2 CENTER2
     LPC_MCPWM->CON_SET |= (0<<18) | (1<<17);
+    
+    NVIC_EnableIRQ(MCPWM_IRQn);
 }
 
 
@@ -81,7 +83,7 @@ void pwm_set(int a_nPeriod,int a_nPulse)
 {
     a_nPulse /= 2;
     LPC_MCPWM->LIM0 = MCPWM_VAL2CODE(a_nPeriod);
-    LPC_MCPWM->MAT0 = MCPWM_VAL2CODE(a_nPeriod);
+    LPC_MCPWM->MAT0 = MCPWM_VAL2CODE(a_nPeriod>>1);
     //e. pulse width of the PhA dither drive
     LPC_MCPWM->MAT2 = MCPWM_VAL2CODE(a_nPulse);
     //e. pulse width of the PhB dither drive  at first time

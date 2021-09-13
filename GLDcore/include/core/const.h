@@ -49,7 +49,7 @@
 //e. =============== parameters of the dither drive regulator of the GLD
 #define	VB_PHS_CONST	4     	//e. 12 - the phase delay parameter of the dither drive PLL 
 #define	VB_SCL_CONST	1024	//e. 13 - the gain factor (1.15) of the dither drive PLL
-#define	T_VIB_START     16600	//e. 14 - divider for dither drive period (defines dither period)
+#define	T_VIB_START     18916//16600	//e. 14 - divider for dither drive period (defines dither period)
                                 //e. _VB_N - the initial value of the oscillation period of the dither drive (406Hz-18916, 17067 - 450Hz)
 #define	T_VIB_DELTA	    1000	    //e. the range of the oscillation period of the dither drive (~ +/- 10 Hz)
 
@@ -57,7 +57,7 @@
 #define	VB_NMAX_CONST   64000	    //e. 16 - maximum of the output value of the oscillation period regulator 
 #define	VB_FDF_HI_CONST	3	    //e. 17 - adjusted output frequency (H)                     
 #define	VB_FDF_LO_CONST	0  		//e. 18 - (L) (double precision)                    
-#define	VB_FSC_CONST	2000	//e. 19 - the gain factor of the output frequency regulator 
+#define	VB_FSC_CONST	-2000	//e. 19 - the gain factor of the output frequency regulator 
 #define	VB_TMIN_CONST	100	//e. 20 - minimum of the output value of the Tau regulator 
 #define	VB_TMAX_CONST	10022	//e. 21 - maximum of the output value of the Tau regulator 
 #define	L_VIB_START     5120	//e. 22 - pulse width of the dither drive (before noiseness)

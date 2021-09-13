@@ -70,29 +70,47 @@ void Latch_Event()
 ** Returned value:		None
 ** 
 ******************************************************************************/
+
+#include "hardware/qei.h"
+#include "core/sip.h"
+#include "core/math_dsp.h"
+#include <math.h>
+#include <stdlib.h>
  __irq void QEI_IRQHandler (void) 
 {
     static uint32_t halfQEIPeriod = 0;
-
-    //e. read accumulated value of counter
-    g_gld.pulses.Cnt_curr += LPC_QEI->POS;		
+    //static x_direction_t direction_pos = _x_unk;
     
-    //check int flag on
+    //check int flag position on
     if( (LPC_QEI->INTSTAT & 0x0008) == 0) goto end;
+    if(g_gld.pulses.reper_meandr.cnt_iter<7) goto end;
     
-	//e. data for Cnt_Pls or Cnt_Mns calculation are ready
-    data_Rdy = 0x0004;
+    g_gld.pulses.reper_meandr.cnt_iter = 0;
+    
+    g_gld.pulses.reper_meandr.cnt_curr = qei_get_position();
+  
+    g_gld.pulses.reper_meandr.cnt_int++;
         
+    data_Rdy |= HALF_PERIOD;
     //e. period elapsed, we can calculate Cnt_Dif
-    if (++halfQEIPeriod & 0x0001){
-        data_Rdy = 0x000C;	
+    if( (++halfQEIPeriod)&1 ){
+        data_Rdy |= WHOLE_PERIOD;	
     }
 	
-end:
+end:;		 
     // reset interrupt request
-    LPC_QEI->CLR = 0x1fff;			 
+    LPC_QEI->CLR = 1<<3;	
 }
  
+
+__irq void MCPWM_IRQHandler (void) 
+{
+    //check LIM0 interrupt
+    if (LPC_MCPWM->INTF & 0x0001) {	 
+        g_gld.dither.flags.bit.isLimInt = 1;
+        LPC_MCPWM->INTF_CLR |= 0x0001;
+	}
+}
 /******************************************************************************
 ** Function name:		SetIntLatch
 **
@@ -122,10 +140,15 @@ void SetIntLatch(uint32_t cycle)
 void SwitchRefMeandInt(uint32_t s)
 {
     LPC_QEI->CLR = 0x1fff; //e. reset all interrupts
-    if (s)
-        LPC_QEI->IEC = 0x1fff; //e.  disable direction changing interrupt 
-    else
+    
+    switch(s){
+    case RATE_VIBRO_1:
+        LPC_QEI->IEC = 0x1fff; //e.  disable direction changing interrupt
+        break;
+    case RATE_REPER_OR_REFMEANDR:
         LPC_QEI->IES = 0x0008; //e.  enable direction changing interrupt
+        break;
+    }
 }
 /******************************************************************************
 ** Function name:		ExtLatch_IRQHandler

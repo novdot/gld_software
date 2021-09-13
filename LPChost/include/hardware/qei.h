@@ -20,6 +20,7 @@
 #include "core/types.h"
 #include "lpc17xx.h"
 
+#define  MAX_QEI_CNT				2147483646	//e .limit of input counter	 (INT32_MAX - 1)
 /**
     @brief Quadrature encoder initialization.
     @return
