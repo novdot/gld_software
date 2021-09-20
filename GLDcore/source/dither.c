@@ -108,15 +108,18 @@ void clc_OutFreq_regulator(void)
     if (g_gld.time_1_Sec == DEVICE_SAMPLE_RATE_uks) {
         //e. the regulator loop is closed
         if (loop_is_closed(VB_TAU_ON)) {
+            //возьмем желательное значение частоты
             temp = Device_blk.Str.VB_Fdf_Hi << 16;
             temp |= Device_blk.Str.VB_Fdf_Lo;
             //memorize pure temo before 
             //temp_pure = temp;
             // (out_freq_sum - temp) with saturation, then >> 3
+            //получим дельту - уход тек от заданного.
             temp = L_sub(out_freq_sum, temp) >> 3;
             // error saturation if error is out of range
             Saturation(temp, 32767, -32768);
             //e. scaling and summing with rounding and saturation 
+            //аккумулируем в VB_tau_Ins 
             VB_tau_Ins = mac_r( 
                     VB_tau_Ins << (16 - DITH_VB_TAU_SHIFT)
                     , temp
@@ -180,15 +183,27 @@ void clc_Dith_regulator(void)
             if (g_gld.dither.flags.bit.SwitchCntInq) {
                 g_gld.dither.flags.bit.SwitchCntInq = 0;
             }
-        } else {
-            g_gld.dither.flags.bit.In_Flag = 1;
-            dith_period++; 
+        } else { 
+            dith_period++;
         }
     }
-    g_gld.dither.flags.bit.isLimInt = 0;
+    
+    //восстанавливаем меандр
+    if(g_gld.dither.halfPulseCycleCnt!=0){
+        if(LPC_MCPWM->TC0>g_gld.dither.halfPulseCycleCnt){
+            g_gld.dither.flags.bit.In_Flag = 1;
+            g_gld.dither.halfPulseCycleCnt = 0;
+        }else{
+            g_gld.dither.flags.bit.In_Flag = 0;
+        }
+    }
     
     //e. outgoing of the delayed menader signal 
-    temp3 = VB_MeanderDelay(g_gld.dither.flags.bit.In_Flag, Device_blk.Str.VB_phs, MaxDelay); 
+    temp3 = VB_MeanderDelay(
+        g_gld.dither.flags.bit.In_Flag
+        , Device_blk.Str.VB_phs
+        , MaxDelay
+    ); 
     temp2 = ( ( temp3 ^ ph_error ) << 1 ) - 1; //e. the PD XOR analog out (-1..+1, since const=1) 
     accum_error += temp2; 
 
@@ -222,6 +237,12 @@ void clc_Dith_regulator(void)
         g_gld.dither.flags.bit.SwitchCntInq = 1;  
     }
     pwm_set(Output.Str.T_Vibro, Output.Str.L_Vibro);
+    
+    if(g_gld.dither.flags.bit.isLimInt==1){
+        g_gld.dither.halfPulseCycleCnt = MCPWM_VAL2CODE(Output.Str.T_Vibro/2);
+    }
+    g_gld.dither.flags.bit.isLimInt = 0;
+    
 	// cyclic built-in test
 	if (
         (Output.Str.T_Vibro > Device_blk.Str.VB_Nmax) 
@@ -251,7 +272,7 @@ void VibroDither_SwitchOff()
 /******************************************************************************/
 int VB_MeanderDelay(int VB_Meander, int Delay100uS, int MaxDly)
 {
-	static int poz_counter = 0, neg_counter = 0, flg_delay;
+	static int poz_counter = 0, neg_counter = 0, flg_delay = 0;
 	
 	if (Delay100uS == 0) {
 		return (VB_Meander);

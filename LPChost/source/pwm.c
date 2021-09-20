@@ -7,9 +7,6 @@
 #define MCPWM_F2CODE(ffreq)\
     (-0.00031233*powf((ffreq),3) + 0.501693*powf((ffreq),2) - 288.607*(ffreq) + 70637.8)
 
-#define MCPWM_VAL2CODE(val)\
-    ((val)*MULT_7680_12500)>>SHIFT_7680_12500
-    
 void pwm_init(int a_VB_N,int a_VB_tau)
 {
     // Turn On MCPWM PCLK

@@ -8,6 +8,9 @@
 #define		DITH_VB_TAU_SHIFT       2
 #define 	MULT_7680_12500			26667
 
+#define MCPWM_VAL2CODE(val)\
+    ((val)*MULT_7680_12500)>>SHIFT_7680_12500
+    
 void pwm_init(int a_VB_N,int a_VB_tau);
 void pwm_set(int a_nPeriod,int a_nPulse);
 x_bool_t pwm_is_pulse_was_formed();

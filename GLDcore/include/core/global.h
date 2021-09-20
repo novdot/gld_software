@@ -121,12 +121,13 @@ typedef struct gld_globalDef{
         union{
             struct{
                 unsigned isLimInt: 1;//< get interrupt pulse was formed(full period)
-                unsigned In_Flag: 1;//< int main cycle pulse was formed
+                unsigned In_Flag: 1;//< meandr
                 unsigned SwitchCntInq: 1;//<
                 unsigned reserve: 5;
             }bit;
             x_uint8_t word;
         }flags;
+        x_int16_t halfPulseCycleCnt; //< кол-во тактов 10КГц на пол-периода
     }dither;
 }gld_global;
 

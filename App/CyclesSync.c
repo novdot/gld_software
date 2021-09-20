@@ -106,7 +106,7 @@ end:;
 __irq void MCPWM_IRQHandler (void) 
 {
     //check LIM0 interrupt
-    if (LPC_MCPWM->INTF & 0x0001) {	 
+    if (LPC_MCPWM->INTF & 0x0001) {
         g_gld.dither.flags.bit.isLimInt = 1;
         LPC_MCPWM->INTF_CLR |= 0x0001;
 	}

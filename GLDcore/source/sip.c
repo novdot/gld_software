@@ -172,7 +172,8 @@ void clc_Pulses()
         /////////////////////////////////////////////////
         if (data_Rdy & HALF_PERIOD) {
             //g_gld.pulses.Cnt_curr = g_gld.pulses.Curr_Cnt_Vib;
-            /*RefMeand_Cnt_Dif = L_abs(g_gld.pulses.Cnt_curr - Old_Cnt);
+            /*
+            RefMeand_Cnt_Dif = L_abs(g_gld.pulses.Cnt_curr - Old_Cnt);
             Old_Cnt = g_gld.pulses.Cnt_curr;
             Cnt_Overload(RefMeand_Cnt_Dif, INT32MAX_DIV2, INT32MIN_DIV2);*/
             

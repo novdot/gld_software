@@ -172,7 +172,7 @@ typedef union {
         x_uint32_t F_ras; //e. really output frequency, divided by 16  (for transmission) 		    
         x_uint32_t L_Vibro; //e. period of oscillation of the dither drive 
         x_uint32_t T_Vibro; //e. pulse width of the dither drive 
-        x_uint32_t T_VB_pll; //e. PD output of the frequency regulator of the dither drive 
+        x_int32_t T_VB_pll; //e. PD output of the frequency regulator of the dither drive 
         int PS_dif; //
         int BINS_dif;
         int Cnt_Dif;
