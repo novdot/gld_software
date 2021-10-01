@@ -78,7 +78,7 @@ int DynamicDeltaCalc()
 /******************************************************************************/
 void clc_ThermoSensors(void)	
 {
-	unsigned i;
+	unsigned i = 0;
 	static int TS_sum = 0;
 	static int seconds_aver = 0, TenSeconds = 0;
 	static int Temp_AverPrevDynCalc = -7000;
@@ -186,12 +186,16 @@ void clc_ThermoSensors(void)
 	}
 
 	// cyclic built-in test
-	if ( (Output.Str.Tmp_Out[4] < TS_MIN) || (Output.Str.Tmp_Out[4] > TS_MAX) || (Output.Str.Tmp_Out[5] < TS_MIN) || (Output.Str.Tmp_Out[5] > TS_MAX) )
-	{
+	if ( 
+        (Output.Str.Tmp_Out[4] < TS_MIN) 
+        || (Output.Str.Tmp_Out[4] > TS_MAX) 
+        || (Output.Str.Tmp_Out[5] < TS_MIN) 
+        || (Output.Str.Tmp_Out[5] > TS_MAX) 
+    ) {
 		Valid_Data |= THERMO_RANGE_ERROR;
 	}
 
-	if ( abs( Output.Str.Tmp_Out[4] - Output.Str.Tmp_Out[5]) > TS_DIFF_MAX)
+	if ( abs( Output.Str.Tmp_Out[4] - Output.Str.Tmp_Out[5]) > TS_DIFF_MAX )
 	{
 		Valid_Data |= THERMO_DIFF_ERROR;
 	}		

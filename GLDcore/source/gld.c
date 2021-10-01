@@ -83,10 +83,12 @@ void gld_status(void)
 /******************************************************************************/
 void gld_output(void)
 {
+    x_uint8_t dbg[64];
+    int i;
     //latch appeared
     if (Latch_Rdy) {
         //enable packet generation
-        if (trm_cycl) trm_ena = 1;   
+        if (g_gld.cmd.trm_cycl) trm_ena = 1;   
 
         switch (CMD_Mode) {
             case 1: //e. Delta _PS mode

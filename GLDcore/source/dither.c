@@ -189,14 +189,14 @@ void clc_Dith_regulator(void)
     }
     
     //восстанавливаем меандр
-    if(g_gld.dither.halfPulseCycleCnt!=0){
+    //if(g_gld.dither.halfPulseCycleCnt!=0){
         if(LPC_MCPWM->TC0>g_gld.dither.halfPulseCycleCnt){
             g_gld.dither.flags.bit.In_Flag = 1;
-            g_gld.dither.halfPulseCycleCnt = 0;
         }else{
             g_gld.dither.flags.bit.In_Flag = 0;
         }
-    }
+    //}
+    g_gld.dither.halfPulseCycleCnt = LPC_MCPWM->TC0;//MCPWM_VAL2CODE(Output.Str.T_Vibro);
     
     //e. outgoing of the delayed menader signal 
     temp3 = VB_MeanderDelay(
@@ -204,9 +204,12 @@ void clc_Dith_regulator(void)
         , Device_blk.Str.VB_phs
         , MaxDelay
     ); 
-    temp2 = ( ( temp3 ^ ph_error ) << 1 ) - 1; //e. the PD XOR analog out (-1..+1, since const=1) 
+    //e. the PD XOR analog out (-1..+1, since const=1) 
+    temp2 = ( ( temp3 ^ ph_error ) << 1 ) - 1; 
+    //r. накопление суммы за 40 периодов
     accum_error += temp2; 
 
+    //r. формирование проинтегрированного за 1 сек аналогового сигнала ФД вибропривода
     //e. outgoing of the integrated for 1 Sec analog signal of the PD of the dither drive 
 	Output.Str.T_VB_pll = VB_PhaseDetectorRate(temp2, g_gld.time_1_Sec); 
     //e. checking status of the dith_period counter  
@@ -214,6 +217,7 @@ void clc_Dith_regulator(void)
         dith_period = 0; //e. 40 periods - resetting the counter of dither drive periods                     
         //e. scaling and summing with rounding and saturation 
         if ( loop_is_closed(VB_FREQ_ON) ) {	
+            //r. масштабирование и суммирование с округлением и насыщением
             Device_blk.Str.VB_N = mac_r(
                     Device_blk.Str.VB_N << (16 - DITH_VBN_SHIFT)
                     , -accum_error
@@ -238,9 +242,6 @@ void clc_Dith_regulator(void)
     }
     pwm_set(Output.Str.T_Vibro, Output.Str.L_Vibro);
     
-    if(g_gld.dither.flags.bit.isLimInt==1){
-        g_gld.dither.halfPulseCycleCnt = MCPWM_VAL2CODE(Output.Str.T_Vibro/2);
-    }
     g_gld.dither.flags.bit.isLimInt = 0;
     
 	// cyclic built-in test

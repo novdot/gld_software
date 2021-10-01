@@ -42,23 +42,28 @@ uint32_t	Delay_UART_Enbl = DELAY_UART_ENBL;
 ******************************************************************************/
 void Latch_Event()
 {
+    x_uint8_t dbg[64];
+    int i;
     static unsigned PreLatch = 0;
+    
     //e. latch is present
     if (LatchPhase < INT32_MAX){	
+        //DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"Latch_Event LatchPhase\n\r");
         Latch_Rdy = 1; //e. set the flag for processing below
         if (g_gld.RgConB.word) {
             //e. work whith vibro counters
             if (PreLatch){ //e. we have had delayed latch
+                //DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"PreLatch\n\r");
                 PreLatch = 0;		 	  				
             }else if ((LatchPhase < LPC_PWM1->TC) && (num == Sys_Clock)){
+                //DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"appeared in current cycle\n\r");
                 //e. latch have appeared in current cycle
                 Latch_Rdy = 0;	//e. bring it to the next cycle	
                 PreLatch = 1;
-            }						  			
+            }	  			
         } 
-    }
-    else
-    Latch_Rdy = 0;				//e. latch is absent
+    } else
+        Latch_Rdy = 0;				//e. latch is absent
 }
 
 /******************************************************************************
@@ -150,40 +155,7 @@ void SwitchRefMeandInt(uint32_t s)
         break;
     }
 }
-/******************************************************************************
-** Function name:		ExtLatch_IRQHandler
-**
-** Descriptions:		Routine for external latch appearence processing
-**
-** parameters:			None
-** Returned value:		None
-** 
-******************************************************************************/
- __irq void EINT3_IRQHandler (void) 
-{
-    //LPC_GPIO2->FIOSET = 0x00000020;		//e. turn on the LED 
-    LatchPhase = LPC_PWM1->TC;			//e. read moment of latch
-    LPC_TIM0->TCR = 1;					//e. start Mltdrop delay timer
-    LPC_GPIOINT->IO0IntClr |= 0x0000800;//e. clean interrupt request
-    //LPC_GPIO2->FIOCLR = 0x00000020;		//e. turn off the LED 
-}
- 
- /******************************************************************************
-** Function name:		IntLatch_IRQHandler
-**
-** Descriptions:		Routine for Internal latch appearence processing
-**
-** parameters:			None
-** Returned value:		None
-** 
-******************************************************************************/
-__irq void IntLatch_IRQHandler (void) 
-{
-    LatchPhase =(int)LPC_PWM1->TC;			//e. read moment of latch
-    LPC_TIM3->IR = 0x0001;				//e. clear interrupt flag 
-    num = Sys_Clock;
-    //	count++;
-}
+
  
  /******************************************************************************
 ** Function name:		SwitchMode
@@ -196,49 +168,86 @@ __irq void IntLatch_IRQHandler (void)
 ******************************************************************************/
 int SwitchMode()
 {
+    x_uint8_t dbg[64];
+    int i;
+    DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"SwitchMode\n\r");
+    
     //disable latch sources
     SetIntLatch(0); 	   					//e. disable internal latch
     LPC_TIM3->IR = 0x0001;				//e. clear internal latch interrupt request
 
-    LPC_GPIOINT->IO0IntEnR &= ~0x0000800;	//e. disable external latch
-    LPC_GPIOINT->IO0IntClr |=  0x0000800;	//e. clean external latch interrupt request
+    LPC_GPIOINT->IO0IntEnR &= ~(1<<1);	//e. disable external latch
+	LPC_GPIOINT->IO0IntClr |= (1<<1);	//e. clean external latch interrupt request
 
     LPC_TIM0->TCR = 2;						//e. stop and reset the multidrop delay timer
     LPC_TIM0->IR = 0x03F;				//e. clear internal latch interrupt request
     //wait while UART and DMA are active									 	
-	if ( LPC_GPDMACH1->CConfig & DMA_BUSY)				//e. if DMA channel is busy, wait //r. если канал передачи занят, ждать
+	if ( LPC_GPDMACH1->CConfig & DMA_BUSY)				//e. if DMA channel is busy, wait
 	  return 0;	
 	LPC_GPDMACH1->CConfig &=  ~DMAChannelEn;			//e. disable DMA for UART transmition
 	LPC_GPDMACH2->CConfig &=  ~DMAChannelEn;
 
-	if (!(LPC_UART1->LSR & TRANS_SHIFT_BUF_EMPTY))      //e. transmit buffer is not empty //r. передающий буфер не пуст
-	 return 0;
+	if (!(LPC_UART1->LSR & TRANS_SHIFT_BUF_EMPTY))      //e. transmit buffer is not empty
+        return 0;
 	///LPC_UART1->FCR |= 0x4;								//e. reset TX FIFO
 
-	LPC_TIM0->IR = 0x3F;				 		//e. clear all interrupt flags 
-//---------------------configure a new exchanging parameters------------
-   if (Device_Mode > 3)		   					//e. external latch mode enabled
-   {
-    LPC_TIM0->MR0 = 10;	
-	LPC_TIM0->MR1 = 50;						//e. /10 = delay before enable signal (us)
- //   LPC_UART1->FCR &= ~0x08;  					//e. TX FIFO is not source for DMA request
+	//LPC_TIM0->IR = 0x3F;				 		//e. clear all interrupt flags 
+    //---------------------configure a new exchanging parameters------------
+    if (Device_Mode > 3) //e. external latch mode enabled
+    {
+        LPC_TIM0->MR0 = Device_blk.Str.My_Addres*10;	
+        LPC_TIM0->MR1 = Device_blk.Str.My_Addres*5000; //e. /10 = delay before enable signal (us)
+        
+        LPC_SC->DMAREQSEL = 0x3; //0xC //e. external latch delay timer is source for DMA request
+        LPC_UART1->FCR &= ~0x08;  					//e. TX FIFO is not source for DMA request
 
-// 	LPC_SC->DMAREQSEL = 0xC;						//e. external latch delay timer is source for DMA request
-//	LPC_GPIOINT->IO0IntEnR |= 0x0000800;	//e. enable rising edge interrupt
-   }
-   else						   				//e. internal latch mode enabled
-   {
-   	LPC_TIM0->MR0 = 10;	
-	LPC_TIM0->MR1 = 5000;						//e. /10 = delay before enable signal (us)
-//	LPC_SC->DMAREQSEL = 0x3;   				//e. FIFO generate DMA request
-
-//	LPC_SC->EXTINT = 0x8;					//e. clean interrupt request
-   }
- 
-   UART_SwitchSpeed(SRgR & 0x0030);
-
-   if (Device_Mode == DM_EXT_LATCH_DELTA_PS_LINE)
-   	 SetIntLatch(50000);
+        //LPC_GPIOINT->IO0IntEnR |= 0x0000800;	//e. enable rising edge interrupt
+    }
+    else //e. internal latch mode enabled
+    {
+        LPC_TIM0->MR0 = Device_blk.Str.My_Addres*10;	
+        LPC_TIM0->MR1 = Device_blk.Str.My_Addres*5000; //e. /10 = delay before enable signal (us)
+        
+        LPC_SC->DMAREQSEL = 0;//0x3; //e. FIFO generate DMA request
+        LPC_UART1->FCR |= 0x08;
+        //	LPC_SC->EXTINT = 0x8; //e. clean interrupt request
+    }
+    //UART_SwitchSpeed(SRgR & 0x0030);
+    UART_SwitchSpeed(g_gld.cmd.trm_rate);
+   
+    switch(Device_Mode){
+    case DM_INT_10KHZ_LATCH:
+        //РІРЅСѓС‚СЂРµРЅРЅСЏСЏ Р—Р°С‰РµР»РєР°
+        if(g_gld.cmd.trm_cycl==1){
+            SetIntLatch(g_gld.internal_latch.work_period);
+        }
+        break;
+    case DM_INT_SIGN_MEANDER_LATCH:
+        if(g_gld.cmd.trm_cycl==1){
+            g_gld.internal_latch.work_period = 50000;
+            SetIntLatch(g_gld.internal_latch.work_period);
+        }
+        break;
+    
+    case DM_EXT_LATCH_DELTA_PS_LINE:
+    case DM_EXT_LATCH_DELTA_BINS_LINE:
+        //РїРѕ Р·Р°РїСЂРѕСЃСѓ UART
+        break;
+    
+    case DM_EXT_LATCH_DELTA_PS_PULSE:
+    case DM_EXT_LATCH_DELTA_BINS_PULSE:
+        //РѕС‚ РІРЅРµС€РЅРµР№ Р—Р°С‰РµР»РєРё
+        //if(g_gld.cmd.trm_cycl==0){
+        LPC_GPIOINT->IO0IntEnR |= (1<<1);
+        LPC_GPIOINT->IO0IntClr |= (1<<1); //e. clean external latch interrupt request
+        //}else{
+        //SetIntLatch(50000);
+        //}
+        break;
+    }
+   DBG2(&g_gld.cmd.dbg.ring_out,dbg,64,"SwitchMode:%d sp:%d\n\r",Device_Mode,g_gld.cmd.trm_rate);
+   
+   
    return 1;
 }
 
@@ -327,7 +336,7 @@ void CounterIquiryCycle_Init(uint32_t cycle)
   return ;
 }
 
-/******************************************************************************/
+/******************************************************************************
 __irq void TIMER0_IRQHandler()
 {
   int val = LPC_TIM0->IR;
@@ -335,13 +344,13 @@ __irq void TIMER0_IRQHandler()
 
   if (val & 1)	//MAT 1.0 interrupt
   {
-    LPC_GPIO2->FIOSET |= 1<<6;		// turn on the LED 	
+    //LPC_GPIO2->FIOSET |= 1<<6;		// turn on the LED 	
 	LPC_TIM0->IR |= 1;
 	 return;
   }
   if (val & 2)	 //MAT 1.1 interrupt
   {
-	LPC_GPIO2->FIOCLR |= 1<<6;		// turn on the LED 	
+	//LPC_GPIO2->FIOCLR |= 1<<6;		// turn on the LED 	
 	LPC_TIM0->IR |= 2;
 	 return;
   }
@@ -354,7 +363,27 @@ __irq void TIMER0_IRQHandler()
   }			 
  return;
 }
-
+/******************************************************************************
+** Function name:		ExtLatch_IRQHandler
+**
+** Descriptions:		Routine for external latch appearence processing
+**
+** parameters:			None
+** Returned value:		None
+** 
+******************************************************************************/
+ __irq void EINT3_IRQHandler(void) 
+{
+	LPC_GPIOINT->IO0IntClr =  (1<<1);	//e. clean external latch interrupt request
+    
+    LatchPhase = (int)LPC_PWM1->TC; //e. read moment of latch
+    LPC_TIM0->TCR = 3; //e. start and reset the multidrop delay timer
+    //LPC_TIM0->TCR = 1; //e. start Mltdrop delay timer
+    //LPC_GPIOINT->IO0IntClr |= 0x0000800; //e. clean interrupt request
+    num = Sys_Clock;
+    
+    g_gld.dbg_buffers.counters_latch++;
+}
 /******************************************************************************
 ** Function name:		ExtLatch_Init
 **
@@ -366,29 +395,63 @@ __irq void TIMER0_IRQHandler()
 ******************************************************************************/
 void ExtLatch_Init() 
 {
-	LPC_PINCON->PINSEL4 &= ~0xC000000;		//e. select P2.13 as general purpose (not EINT3)
+	//LPC_PINCON->PINSEL4 &= ~0xC000000;		//e. select P2.13 as general purpose (not EINT3)
+    /*
     LPC_PINCON->PINSEL0 &= ~0x0C00000;		//e. select P0.11 as general purpose
 	LPC_GPIO0->FIODIR   &= ~0x0000800;		//e. select P0.11 as input	
 	LPC_GPIOINT->IO0IntEnR &= ~0x0000800;	//e. disable external latch
 	LPC_GPIOINT->IO0IntClr |=  0x0000800;	//e. clean external latch interrupt request
-
+    /**/
+    
+    NVIC_DisableIRQ(EINT3_IRQn);
+    /**/
+    // GPIO P0.1 as input.
+    LPC_PINCON->PINSEL0 &= ~(0x3 << 2);		
+    LPC_PINCON->PINMODE0 &= ~(0x3 << 2);
+    LPC_PINCON->PINMODE0 |= (0x3 << 2);
+	LPC_GPIO0->FIODIR   &= ~(1<<1);		//e. select as input	
+	LPC_GPIOINT->IO0IntEnR &= ~(1<<1);	//e. disable external latch
+	LPC_GPIOINT->IO0IntClr |= (1<<1);	//e. clean external latch interrupt request
+    
+    //LPC_SC->EXTINT = 1<<3;
+    /**/
 	NVIC_EnableIRQ(EINT3_IRQn);	
 
-//+++++++ initialization of timer for multidrop delay generation+++++++++++++++++++++++
-										 //e.  TIMER0 enabled by default   
+    // initialization of timer for multidrop delay generation
+	//e.  TIMER0 enabled by default   
 	LPC_SC->PCLKSEL0 &= ~(3<<2);		 //e. reset timer 0 input frequency 
     LPC_SC->PCLKSEL0 |= (3<<2);		 	 //e. timer 0 input frequency equal to CLCK/8
 	LPC_TIM0->PR = 0;					 //e. set timer 0 prescaler to 0
 	LPC_TIM0->IR = 0x3F;				 //e. clear all interrupt flags 
-	LPC_TIM0->MCR = 1 |(1<<3)|MR1_RESET |MR1_STOP; //e. reset and stop timer after MR1 matches TC
+	LPC_TIM0->MCR = 1 |(1<<3)|MR1_RESET | MR1_STOP; //e. reset and stop timer after MR1 matches TC
 	LPC_TIM0->CCR = 0; 			 		 //e. content of TC0 is loaded when rising edge of ext. latch appear
 	LPC_TIM0->CTCR = 0; 				 //e. timer1 is in timer mode
 	
-	LPC_TIM0->MR0 = /*Device_blk.Address**/10;	 		//e. delay before UART transmitter loading
-	LPC_TIM0->MR1 = /*Device_blk.Address**/5000;		//e. delay before UART transmitter start
+	LPC_TIM0->MR0 = Device_blk.Str.My_Addres*10;	 		//e. delay before UART transmitter loading
+	LPC_TIM0->MR1 = Device_blk.Str.My_Addres*5000;		//e. delay before UART transmitter start
 									//e. set first empty) event of timer
 	NVIC_DisableIRQ(TIMER0_IRQn);		 
 }
+
+ /******************************************************************************
+** Function name:		IntLatch_IRQHandler
+**
+** Descriptions:		Routine for Internal latch appearence processing
+**
+** parameters:			None
+** Returned value:		None
+** 
+******************************************************************************/
+__irq void IntLatch_IRQHandler (void) 
+{
+    LatchPhase =(int)LPC_PWM1->TC;			//e. read moment of latch
+    LPC_TIM3->IR = 0x0001;				//e. clear interrupt flag 
+    num = Sys_Clock;
+    //	count++;
+    
+    //g_gld.dbg_buffers.counters_latch++;
+}
+ 
 /******************************************************************************
 ** Function name:		IntLatch_Init
 **

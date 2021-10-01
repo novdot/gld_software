@@ -114,6 +114,7 @@ void init()
     g_gld.RgConB.word = RATE_VIBRO_1;
     
     g_gld.dbg_buffers.iteration = 100;
+    __enable_irq();
 }
 /******************************************************************************/
 void loop_echo()
@@ -129,9 +130,25 @@ void loop()
     uart_recieve_unblocked(0,&g_gld.cmd.dbg.ring_in);
     UART_DBG_SEND(&g_gld.cmd.dbg.ring_out);
     
+    command_recieve(_command_recieve_flag_gld);
+    command_decode();
+    
     if (! (LPC_PWM1->IR & 0x0001) ) return;
     //delay();
     //WDTFeed();
+    nSwitch++;
+    if(nSwitch>10000){
+        nSwitch = 0;
+        DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"latch:%d \n\r",g_gld.dbg_buffers.counters_latch);
+        g_gld.dbg_buffers.counters_latch = 0;
+        //DBG2(&g_gld.cmd.dbg.ring_out,dbg,64,"SwitchMode:%d sp:%d\n\r",Device_Mode,g_gld.cmd.trm_rate);
+        DBG2(&g_gld.cmd.dbg.ring_out,dbg,64,"LPC_TIM0-TC:0x%08x LatchPhase:%d\n\r"
+            ,LPC_TIM0->TC
+            ,LatchPhase);
+    }
+    /*if(LPC_GPIO0->FIOPIN&(1<<1)){
+        g_gld.dbg_buffers.counters_latch++;
+    }*/
     
     //prepare ADC for sampling
     hardware_reset_adc(); 
@@ -162,10 +179,8 @@ void loop()
     
     hardware_photo_exchange(&Output.Str.Cnt_Dif);
     
-    //command_echo();
-    command_recieve(_command_recieve_flag_gld);
-    command_decode();
     command_transm();
+    //command_echo();
     
     dbg_recieve();
     

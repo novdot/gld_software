@@ -26,6 +26,7 @@ typedef struct gld_cplcDef{
 
 #define GLD_RINGBUFFER_SIZE (1024)
 typedef struct gld_cmdDef{
+    x_uint8_t trm_cycl; //rate from cmd
     x_uint32_t trm_rate; //rate from cmd
     x_uint32_t trm_rate_prev; //set rate to uart
     
@@ -107,6 +108,9 @@ typedef struct gld_globalDef{
     //tim
     x_int32_t time_1_Sec;//e. pseudosecond timer
     x_uint32_t time_Seconds; //seconds from power on
+    struct{
+        x_uint32_t work_period;
+    }internal_latch;
     
     //cmd
     gld_cmd cmd;
@@ -115,6 +119,7 @@ typedef struct gld_globalDef{
     struct{
         int val[24];
         int iteration;
+        x_uint32_t counters_latch;
     }dbg_buffers;
     
     struct{
@@ -127,7 +132,7 @@ typedef struct gld_globalDef{
             }bit;
             x_uint8_t word;
         }flags;
-        x_int16_t halfPulseCycleCnt; //< кол-во тактов 10КГц на пол-периода
+        x_int16_t halfPulseCycleCnt; //< кол-во тактов для построения вибро меандра
     }dither;
 }gld_global;
 
@@ -140,10 +145,10 @@ void gld_global_init(void);
 
 /******************************************************************************/
 //TODO
-extern x_uint32_t  trm_num_byt;
-extern x_uint32_t  rcv_num_byt;
-extern x_uint32_t  rcv_Rdy;
-extern x_uint32_t trm_cycl;
+extern x_uint32_t trm_num_byt;
+extern x_uint32_t rcv_num_byt;
+extern x_uint32_t rcv_Rdy;
+//extern x_uint32_t trm_cycl;
 
 extern x_uint8_t trm_buf[256];//64
 extern x_uint8_t rcv_buf[256];
@@ -174,7 +179,6 @@ extern inputData g_input;
 extern x_uint32_t CMD_Mode;
 extern x_uint32_t CMD_Code;
 extern int Device_Mode;
-
 
 extern x_uint32_t Vibro_2_CountIn;
 

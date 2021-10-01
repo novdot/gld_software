@@ -293,6 +293,7 @@ void cplc_regulator(void)
     
     // working with "new" CPLC (the range 0 ... -15 V) WP_REG32MIN_SATURATION = PLC_RESET_THRESHOLD!;
     //e. the minimum corresponds to a small negative number, appropriate to PLC_RESET_THRESHOLD
+    //Saturation(WP_reg32, 0, WP_REG32MIN_SATURATION); 
     
 	if ( loop_is_closed(WP_REG_ON) ) {
         //enable auto regulation

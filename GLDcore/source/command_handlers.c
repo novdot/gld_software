@@ -155,8 +155,10 @@ void command_cmd_DELTA_PS()
     
 	CMD_Mode = 1;
     
-    wrk_period = 50000; 
-    SetIntLatch(wrk_period);
+    //wrk_period = 50000; 
+    //SetIntLatch(wrk_period);
+    g_gld.internal_latch.work_period = 50000;
+    SwitchMode();
     
 	return;
 }
@@ -238,12 +240,12 @@ void command_cmd_DELTA_SF()
 /******************************************************************************/
 void command_cmd_DEV_MODE()
 {
-	CMD_Mode = 3;
+	//CMD_Mode = 3;
 	//e. read the byte of command parameter from the receiver buffer
 	//e. and write it to the counter mode register
 	Device_Mode = rcv_buf[3] & 0x00ff;
 	//e. periodic data transmission is not needed
-	trm_cycl = 0;
+	g_gld.cmd.trm_cycl = 0;
 	
 	command_ans_DEV_MODE();
 	return;
@@ -264,7 +266,7 @@ void command_cmd_BIT_MODE()
 	} else {
 		Is_BIT = 0;
 	}
-	trm_cycl = 0;	//e. periodic data transmission is not needed
+	g_gld.cmd.trm_cycl = 0;	//e. periodic data transmission is not needed
 	
 	command_ans_DEV_MODE();
 	return;
@@ -385,7 +387,7 @@ void command_subcmd_M_VIB_W()
     Device_blk.Str.VB_N = Output.Str.T_Vibro; 
     Device_blk.Str.VB_tau = Output.Str.L_Vibro;
 	VibroDither_Set();       //e. and output its value to period registers on card
-	trm_cycl = 0;      //e. periodic data transmission is not needed
+	g_gld.cmd.trm_cycl = 0;      //e. periodic data transmission is not needed
 	
 	command_ans_common();
 	return;
@@ -409,7 +411,7 @@ void command_subcmd_M_GPH_W()
 	//e. display these values to digital potentiometers 
 	hardware_photo_set(Device_blk.Str.Gain_Ph_A, Device_blk.Str.Gain_Ph_B);
 	
-	trm_cycl = 0;      //e. periodic data transmission is not needed
+	g_gld.cmd.trm_cycl = 0;      //e. periodic data transmission is not needed
 	command_ans_common();
 	return;
 }  
@@ -429,7 +431,7 @@ void command_subcmd_M_PARAM_W()
 	ptr += rcv_buf[3]; // calculate offset
 	*ptr = (rcv_buf[4] << 8) | (rcv_buf[5] & 0xFF); // write new parameter value
 
-	trm_cycl = 0; //e. periodic data transmission is not needed 
+	g_gld.cmd.trm_cycl = 0; //e. periodic data transmission is not needed 
 	
 	command_ans_common();
 	return;
@@ -491,7 +493,7 @@ void command_subcmd_M_LDPAR_F()
 	params_load(_params_load_fash);
 	blt_in_test = ((uint32_t)FIRMWARE_VER << 8) | (Device_blk.Str.Device_SerialNumber & 0x00FF);
 	//Init_software();
-	trm_cycl = 0; //e. periodic data transmission is not needed 
+	g_gld.cmd.trm_cycl = 0; //e. periodic data transmission is not needed 
 	
 	command_ans_common();
 	return;
@@ -501,7 +503,7 @@ void command_subcmd_M_LDPAR_D()
 {
 	params_load(_params_load_default);
 	//Init_software();
-	trm_cycl = 0;
+	g_gld.cmd.trm_cycl = 0;
 
 	command_ans_common();
 	return;	
@@ -512,7 +514,7 @@ void command_subcmd_M_START()
 	//start_Rq = 1;      	//e. set the flag of the GLD switch on request
 	//TODO
     ignit_set_request(_x_true);
-    trm_cycl = 0;      	//e. periodic data transmission is not needed 
+    g_gld.cmd.trm_cycl = 0;      	//e. periodic data transmission is not needed 
 	command_ans_common();
 	return;	
 }
@@ -520,7 +522,7 @@ void command_subcmd_M_START()
 void command_subcmd_M_STOP()
 {
 	stop_Rq = 1;      	//e. set the flag of the GLD switch off request
-	trm_cycl = 0;      	//e. periodic data transmission is not needed 
+	g_gld.cmd.trm_cycl = 0;      	//e. periodic data transmission is not needed 
 	command_ans_common();
 	return;	
 }
@@ -529,7 +531,7 @@ void command_subcmd_M_PULSE()
 {
 	//pulse_Rq = 1;      	//e. set the flag of the GLD switch on request
 	ignit_set_request(_x_true);
-    trm_cycl = 0;      	//e. periodic data transmission is not needed 
+    g_gld.cmd.trm_cycl = 0;      	//e. periodic data transmission is not needed 
 	command_ans_common();
 	return;	
 }
@@ -548,9 +550,9 @@ void command_subcmd_M_RATE1()
     Valid_Data = 0;
     
     //e. load needed length of working period 1
-    wrk_period = 25000000; 
+    g_gld.internal_latch.work_period = 25000000;
     command_ans_M_RATE1();
-    SetIntLatch(wrk_period);
+    SetIntLatch(g_gld.internal_latch.work_period);
 }
 /******************************************************************************/
 void command_subcmd_M_RATE2()
@@ -563,10 +565,10 @@ void command_subcmd_M_RATE2()
     SwitchRefMeandInt(RATE_REPER_OR_REFMEANDR);
     
     //e. frequency of output = fvibro 
-    wrk_period = 0;     
 
+    g_gld.internal_latch.work_period = 0;
     command_ans_M_RATE2();
-    SetIntLatch(wrk_period);
+    SetIntLatch(g_gld.internal_latch.work_period);
 }
 /******************************************************************************/
 void command_subcmd_M_RATE3()
@@ -574,10 +576,9 @@ void command_subcmd_M_RATE3()
     command_utility_read_param();
     command_SwitchSpeed();
     
-    wrk_period = 2500;
-    
+    g_gld.internal_latch.work_period = 2500;
     command_ans_M_RATE3();
-    SetIntLatch(wrk_period);
+    SetIntLatch(g_gld.internal_latch.work_period);
 }
 /******************************************************************************/
 void command_subcmd_M_RATE7()
@@ -585,10 +586,9 @@ void command_subcmd_M_RATE7()
     command_utility_read_param();
     command_SwitchSpeed();
     
-    wrk_period = 20000;
-    
+    g_gld.internal_latch.work_period = 20000;
     command_ans_M_RATE7();
-    SetIntLatch(wrk_period);
+    SetIntLatch(g_gld.internal_latch.work_period);
 }
 /******************************************************************************/
 void command_subcmd_M_RATE5K()
@@ -621,7 +621,7 @@ void command_ans_device_status(void)
 	COMMAND_UTILITY_ANSWER_FIELD(1,(void*)&ser_num,2);
 
 	g_gld.cmd.trm_rate = 0;       //e. set the transfer rate to the 38400 bauds
-	trm_cycl = 0;       //e. forbid cyclic transmission of the parameter 
+	g_gld.cmd.trm_cycl = 0;       //e. forbid cyclic transmission of the parameter 
 	trm_ena = 1;        //e. allow operation of the transmitter
 }
 
@@ -674,7 +674,7 @@ void command_ans_DEV_MODE()
 	COMMAND_UTILITY_ANSWER_FIELD(0,(void*)&Device_Mode,2);
 	//e. address of the mode register of the processor card 
 	COMMAND_UTILITY_ANSWER_FIELD(1,(void*)&SRgR,2);
-	trm_cycl = 0; //e. forbid cyclic transmission of the parameter 
+	g_gld.cmd.trm_cycl = 0; //e. forbid cyclic transmission of the parameter 
 	trm_ena = 1; //e. allow operation of the transmitter
 }
 /******************************************************************************/
@@ -743,7 +743,7 @@ void command_ans_M_CTL_M()
 	}
 	
 	CMD_Code &= 0xff10; //e. clear in command bit of errors and byte number 
-	trm_cycl = 0; //e. forbid cyclic transmission of the parameter
+	g_gld.cmd.trm_cycl = 0; //e. forbid cyclic transmission of the parameter
 	trm_ena = 1; //e. allow operation of the transmitter of line 
 }
 /******************************************************************************/
@@ -835,7 +835,7 @@ void command_ans_M_MIRR()
 		size_param[0] = 64;		//e. maximal amount - no more than double length of the copy buffer 
 	}
 	g_gld.cmd.trm_rate = 0;       //e. set the transfer rate to the 38400 bauds
-	trm_cycl = 0;       //e. forbid cyclic transmission of the parameter
+	g_gld.cmd.trm_cycl = 0;       //e. forbid cyclic transmission of the parameter
 	trm_ena = 1;        //e. allow operation of the transmitter
 }
 /******************************************************************************/

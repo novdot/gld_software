@@ -345,10 +345,10 @@ void command_utility_read_param(void)
 	//e. is periodic data transmission needed? 
 	if ((rcv_buf[3] & 0x0080) != 0)  {
         //e. yes, set present flag 
-		trm_cycl = 1;
+		g_gld.cmd.trm_cycl = 1;
 	} else {
         //e. no, reset present flag
-		trm_cycl = 0; 
+		g_gld.cmd.trm_cycl = 0; 
 	}
 	//e. clear the bit of transfer rate
 	SRgR &= 0xffcf;
