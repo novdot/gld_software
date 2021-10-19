@@ -66,9 +66,14 @@ void exchange_regul_data_read()
     g_input.word.in2 = -16495 + g_gld.nADCData[2]*423/1000;
     g_input.word.in1 = -16495 + g_gld.nADCData[3]*423/1000;
     g_input.word.temp1 = g_gld.nADCData[4];
+    g_input.word.delta_t = 0;
     
     //for ask gld
+    Output.Str.Tmp_Out[0] = 0;
+    Output.Str.Tmp_Out[1] = 0;
     Output.Str.Tmp_Out[2] = g_input.word.in1;
     Output.Str.Tmp_Out[3] = g_input.word.in2;
+    
+    Output.Str.Tmp_Out[5] = g_input.word.delta_t;
     /**/
 }

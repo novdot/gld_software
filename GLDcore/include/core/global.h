@@ -29,14 +29,12 @@ typedef struct gld_cmdDef{
     x_uint8_t trm_cycl; //rate from cmd
     x_uint32_t trm_rate; //rate from cmd
     x_uint32_t trm_rate_prev; //set rate to uart
-    
     struct{
         x_ring_buffer_t ring_in;
         x_ring_buffer_t ring_out;
         uint8_t buf_in[GLD_RINGBUFFER_SIZE];
         uint8_t buf_out[GLD_RINGBUFFER_SIZE];
     }dbg;
-
     struct{
         x_ring_buffer_t ring_in;
         x_ring_buffer_t ring_out;
@@ -49,7 +47,6 @@ typedef struct gld_pulsesDef{
     x_uint32_t Cnt_curr; //< value from qei. Only for RATE_REPER_OR_REFMEANDR
     x_uint32_t Curr_Cnt_Vib; //< value_Vib = diff between curent value and old
     int32_t	Dif_Curr_Vib; //< diff between curent value_Vib and old
-    
     struct{
         x_uint32_t cnt_curr;
         x_uint32_t cnt_prev;

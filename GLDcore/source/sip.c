@@ -86,10 +86,6 @@ void clc_Pulses()
 			if (Latch_Rdy) {	
                 dif_Curr_32_Ext = interpolation(Dif_Curr_32, LatchPhase ); 
                 
-                //#NDA no cnt
-				//Output.Str.Tmp_Out[2] = (int)((g_gld.Curr_Cnt_Vib>>16)& 0xffff); 
-				//Output.Str.Tmp_Out[3] = (int)(g_gld.Curr_Cnt_Vib & 0xffff); 
-                
 				//e. add to the accumulated sum the interpolated sample of an external latch 		
                 PSdif_sum_Vib_32 += dif_Curr_32_Ext; // PSdif_sum_Vib_32 += dif_Curr_32_Ext; 
 				PSdif_sum_Vib_64 += dif_Curr_32_Ext; //e. receive last data
@@ -222,11 +218,7 @@ void clc_Pulses()
         //e it's time for output 
 		if (Latch_Rdy) {
             LatchPhase = INT32_MAX;
-
-            //#NDA TODO temporarly off
-            //Output.Str.Tmp_Out[2] = (int)((g_gld.Curr_Cnt_Vib>>16)& 0xffff); 
-            //Output.Str.Tmp_Out[3] = (int)(g_gld.Curr_Cnt_Vib & 0xffff); 
-
+            
             //cntPls_sum_32 += last_Cnt_Plus - preLast_Cnt_Plus;
             //preLast_Cnt_Plus = last_Cnt_Plus;	 //e. current last sample became previous
 

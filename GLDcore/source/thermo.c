@@ -1,3 +1,12 @@
+/**
+14 точек (то есть 13 отрезков) диапазона температур.
+Для каждого отрезка своя коррекция.
+На переходах, для того чтобы убрать ступеньки, используем интерполяцию
+
+Система нужна для предсказания работы прибора в части подсчета импульсов
+вне зависимости от темп. в определенном диапазоне.
+*/
+
 #include "core/thermo.h"
 #include "core/global.h"
 #include "core/const.h"
@@ -46,8 +55,7 @@ int DynamicDeltaCalc()
 	t = g_gld.thermo.Temp_Aver;
 
     if (g_gld.thermo.IsHeating){
-		if(t > Device_blk.Str.TemperIntDyn[TERMO_FUNC_SIZE - 1])
-		{
+		if(t > Device_blk.Str.TemperIntDyn[TERMO_FUNC_SIZE - 1]) {
 			t = Device_blk.Str.TemperIntDyn[TERMO_FUNC_SIZE - 1];
 		}
 	
@@ -87,16 +95,20 @@ void clc_ThermoSensors(void)
     static int TempEvolution = 0;
     int	StartTermoCompens = 0; //начальная термокомпенсация
 
-	for (i=0; i<2; i++){
-		//e. conversion of temperature values on ADC output 
-		//e. to range -32768 .. +32767 ( additional code; format 1.15 )
+    //e. conversion of temperature values on ADC output 
+    //to range -32768 .. +32767 ( additional code; format 1.15 )
+	/*for (i=0; i<2; i++){
         Output.Str.Tmp_Out[i] = mac_r(Device_blk.Str.Tmp_bias[i] << 16,
 												(g_input.array[1+i] - 0x8000), 
 												Device_blk.Str.Tmp_scal[i]);
         //save to [4] and [5] 
 		Output.Str.Tmp_Out[i+4] = g_input.array[1+i];																	
-	}
+	}*/
+    Output.Str.Tmp_Out[4] = mac_r(Device_blk.Str.Tmp_bias[4] << 16,
+                                    (g_input.word.temp1 - 0x8000), 
+                                    Device_blk.Str.Tmp_scal[4]);
 
+    Output.Str.Tmp_Out[4] = 50000;
     //e. 1 second elapsed
 	if (g_gld.time_1_Sec == DEVICE_SAMPLE_RATE_uks) {
 		seconds_aver++;
