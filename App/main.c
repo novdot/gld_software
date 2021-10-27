@@ -139,12 +139,9 @@ void loop()
     nSwitch++;
     if(nSwitch>10000){
         nSwitch = 0;
-        DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"latch:%d \n\r",g_gld.dbg_buffers.counters_latch);
+        DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"nADCData:%d \n\r",g_gld.nADCData[4]);
+        DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"Tmp_Out:%d \n\r",Output.Str.Tmp_Out[4]);
         g_gld.dbg_buffers.counters_latch = 0;
-        //DBG2(&g_gld.cmd.dbg.ring_out,dbg,64,"SwitchMode:%d sp:%d\n\r",Device_Mode,g_gld.cmd.trm_rate);
-        DBG2(&g_gld.cmd.dbg.ring_out,dbg,64,"LPC_TIM0-TC:0x%08x LatchPhase:%d\n\r"
-            ,LPC_TIM0->TC
-            ,LatchPhase);
     }
     /*if(LPC_GPIO0->FIOPIN&(1<<1)){
         g_gld.dbg_buffers.counters_latch++;

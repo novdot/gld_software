@@ -146,11 +146,11 @@ typedef union {
         x_int32_t WP_transition_step; //e. 98 - step of change of a heater voltage at resetting 
         x_int32_t Reserved3;          //e. 99 -not used
         x_int32_t HF_scl_2;           //e. 100 -
-        x_int32_t TemperIntDyn[TERMO_FUNC_SIZE]; //e. 114 - 
-        x_int32_t ThermoHeatDelta[TERMO_FUNC_SIZE]; //e. 128 - 
+        x_int32_t TemperIntDyn[TERMO_FUNC_SIZE]; //e. 114 - точки температуры
+        x_int32_t ThermoHeatDelta[TERMO_FUNC_SIZE]; //e. 128 - смещение
         x_int32_t DeltaTempRecalc;    //e. temperature delta for dynamic thermocompensation recalculation(in relative units)
-        x_int32_t TemperCoolIntDyn[TERMO_FUNC_SIZE]; // e. 143 - 
-        x_int32_t ThermoCoolDelta[TERMO_FUNC_SIZE];  //e. 157 - 
+        x_int32_t TemperCoolIntDyn[TERMO_FUNC_SIZE]; // e. 143 - точки температуры скорости
+        x_int32_t ThermoCoolDelta[TERMO_FUNC_SIZE];  //e. 157 - скорость смещение
     } Str;
 } TDEVICE_BLK;
 

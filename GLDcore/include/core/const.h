@@ -49,7 +49,7 @@
 //e. =============== parameters of the dither drive regulator of the GLD
 #define	VB_PHS_CONST	4     	//e. 12 - the phase delay parameter of the dither drive PLL 
 #define	VB_SCL_CONST	1024	//e. 13 - the gain factor (1.15) of the dither drive PLL
-#define	T_VIB_START     18916//16600	//e. 14 - divider for dither drive period (defines dither period)
+#define	T_VIB_START     18916   //16600	//e. 14 - divider for dither drive period (defines dither period)
                                 //e. _VB_N - the initial value of the oscillation period of the dither drive (406Hz-18916, 17067 - 450Hz)
 #define	T_VIB_DELTA	    1000	    //e. the range of the oscillation period of the dither drive (~ +/- 10 Hz)
 
@@ -97,7 +97,7 @@
 #define	PI_B6_CONST		(0)	//  42
 
 #define TMP_SCALE		(0x4000) // 43 - 54  Tmp_bias[6]; Tmp_scal[6]
-#define TMP_BIAS		(0)
+#define TMP_BIAS		(-4000)
 #define	WP_RESET_CONST  (7360)	// 55
 #define WP_RESET2_CONST (29216)
 #define WP_TRANS_STEP	(32767)		
