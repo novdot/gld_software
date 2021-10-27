@@ -167,7 +167,7 @@ void loop()
     exchange_regul_data_read();
     exchange_regul_data_write();
     
-    clc_ThermoSensors();	 
+    thermo_clc_ThermoSensors();	 
     clc_HFO();
     cplc_regulator();
     clc_Dith_regulator(); 

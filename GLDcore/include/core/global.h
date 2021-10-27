@@ -189,9 +189,6 @@ extern x_uint32_t Valid_Data;
 
 extern x_uint32_t ser_num;
 
-extern int VB_Nmin0;  //e. minimum of the output value of a regulator of the period for the Device_blk.TemperNormal temperature
-extern int VB_Nmax0;  //e. maximum of the output value of a regulator of the period for the Device_blk.TemperNormal 
-
 extern x_uint32_t BIT_number;
 extern x_uint32_t Is_BIT; 
 

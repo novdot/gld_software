@@ -9,13 +9,13 @@
 #define	TEMP_AVER_PERIOD	4 // e. number of seconds for average
 
 /******************************************************************************/
-void Max_Saturation(unsigned *lvl, unsigned limit)
+void thermo_Max_Saturation(unsigned *lvl, unsigned limit)
 {
 	if (*lvl>limit) *lvl = limit;	
 }
 
 /******************************************************************************/
-int StaticTermoCompens(int temperature)
+int thermo_StaticTermoCompens(int temperature)
 {
     //e. the value of the thermocompensation for 1 device period (100 uSec) 
 	float TermoCompens_Curr; 
@@ -38,7 +38,7 @@ int StaticTermoCompens(int temperature)
 }
 
 /******************************************************************************/
-int DynamicDeltaCalc() 
+int thermo_DynamicDeltaCalc() 
 {
 	int i, t = 0;
     int	TermoCompDelta = 0; 
@@ -76,7 +76,7 @@ int DynamicDeltaCalc()
 } 
 
 /******************************************************************************/
-void clc_ThermoSensors(void)	
+void thermo_clc_ThermoSensors(void)	
 {
 	unsigned i = 0;
 	static int TS_sum = 0;
@@ -84,139 +84,150 @@ void clc_ThermoSensors(void)
 	static int Temp_AverPrevDynCalc = -7000;
 	static int StartRdy = 1;
 	static int PrevTemp = -7000;
-    static int TempEvolution = 0;
-    int	StartTermoCompens = 0; //начальная термокомпенсация
+	static int TempEvolution = 0;
+	int	StartTermoCompens = 0; //начальная термокомпенсация
 
 	for (i=0; i<2; i++){
 		//e. conversion of temperature values on ADC output 
 		//e. to range -32768 .. +32767 ( additional code; format 1.15 )
-        Output.Str.Tmp_Out[i] = mac_r(Device_blk.Str.Tmp_bias[i] << 16,
-												(g_input.array[1+i] - 0x8000), 
-												Device_blk.Str.Tmp_scal[i]);
-        //save to [4] and [5] 
+		Output.Str.Tmp_Out[i] = mac_r(Device_blk.Str.Tmp_bias[i] << 16,
+		(g_input.array[1+i] - 0x8000), 
+		Device_blk.Str.Tmp_scal[i]);
+		//save to [4] and [5] 
 		Output.Str.Tmp_Out[i+4] = g_input.array[1+i];																	
 	}
 
-    //e. 1 second elapsed
+	//e. 1 second elapsed
 	if (g_gld.time_1_Sec == DEVICE_SAMPLE_RATE_uks) {
 		seconds_aver++;
-#if !defined DEBUG
+		#if !defined DEBUG
 		//ResetToResetInSeconds++;
-#endif
+		#endif
 	}
 
-    //e. TEMP_AVER_PERIOD second elapsed 
+	//e. TEMP_AVER_PERIOD second elapsed 
 	if (seconds_aver > TEMP_AVER_PERIOD) {
 		seconds_aver = 0;
 		TenSeconds++;
-        //e. save the previous mean temperature for 1 Sec
+		//e. save the previous mean temperature for 1 Sec
 		PrevTemp = g_gld.thermo.Temp_Aver;		 
-        //e. calculating mean temperature for 1 Sec 
+		//e. calculating mean temperature for 1 Sec 
 		g_gld.thermo.Temp_Aver = TS_sum / (DEVICE_SAMPLE_RATE_HZ * TEMP_AVER_PERIOD); 
 
 		if (g_gld.thermo.Temp_Aver > PrevTemp){
-			TempEvolution++;
+		TempEvolution++;
 		}else if (g_gld.thermo.Temp_Aver < PrevTemp){
-			TempEvolution--;
+		TempEvolution--;
 		}
 
-        //e. reset the sum for calculation of an mean
+		//e. reset the sum for calculation of an mean
 		TS_sum = 0; 
 	}else{
 		TS_sum += Output.Str.Tmp_Out[TSENS_NUMB];		
 	}
-	
-    // 10 * TEMP_AVER_PERIOD = 40
+
+	// 10 * TEMP_AVER_PERIOD = 40
 	if (TenSeconds == 10) {
-		TenSeconds = 0;
-		if (TempEvolution > 0){
-			g_gld.thermo.IsHeating = 1;
-		}else if (TempEvolution < 0){
-			g_gld.thermo.IsHeating = 0;
-		}
-		TempEvolution = 0;
+	TenSeconds = 0;
+	if (TempEvolution > 0){
+	g_gld.thermo.IsHeating = 1;
+	}else if (TempEvolution < 0){
+	g_gld.thermo.IsHeating = 0;
+	}
+	TempEvolution = 0;
 	}	
 
 	//e. single calculaiton of some device parameters 
-    //(measurement on the VALID_START_SEC  second after start)
+	//(measurement on the VALID_START_SEC  second after start)
 	if (StartRdy){
-		if (TenSeconds > VALID_START_4SEC){
+	if (TenSeconds > VALID_START_4SEC){
 
-			StartRdy = 0;	
-            //TempOfReset = Temp_Aver;
-			Device_blk.Str.WP_scl >>= 1;
-          	Device_blk.Str.HF_scl >>= 1;
+	StartRdy = 0;	
+	//TempOfReset = Temp_Aver;
+	Device_blk.Str.WP_scl >>= 1;
+	Device_blk.Str.HF_scl >>= 1;
 
-            //e. static thermocompensation is enable
-			if ((Device_blk.Str.TermoMode != TERMO_OFF) && \
-				(Device_blk.Str.TermoMode != TERMO_ON_DYNAMIC_ONLY) && \
-				(Device_blk.Str.TermoMode != TERMO_ON_DYNAMIC_ONLY_NUMB_OFF)) 		
-            {
-                //e. calculation of the static component of the thermocompensation	
-                //e. starting temperature of the device    
-                StartTermoCompens = StaticTermoCompens(g_gld.thermo.Temp_Aver); 			
-            } 			
-			DynamicDeltaCalc();
-			
-			//e. calculation of range for dither drive frequency, 
-            //depending on starting temperature
-            //DithFreqRangeCalc();
-				
-			//e. voltage of reset at heating 
-			g_gld.thermo.WP_reset_heating = CPL_reset_calc(
-                Device_blk.Str.WP_reset
-                , Device_blk.Str.K_WP_rst_heating
-                , g_gld.thermo.Temp_Aver
-                , Device_blk.Str.TemperNormal
-            );
-			//e. voltage of reset at cooling 
-			g_gld.thermo.WP_reset_cooling = CPL_reset_calc(
-                Device_blk.Str.WP_reset2
-                , Device_blk.Str.K_WP_rst_cooling
-                , g_gld.thermo.Temp_Aver
-                , Device_blk.Str.TemperNormal
-            );		
-		}
+	//e. static thermocompensation is enable
+	if ((Device_blk.Str.TermoMode != TERMO_OFF) && \
+	(Device_blk.Str.TermoMode != TERMO_ON_DYNAMIC_ONLY) && \
+	(Device_blk.Str.TermoMode != TERMO_ON_DYNAMIC_ONLY_NUMB_OFF)) 		
+	{
+	//e. calculation of the static component of the thermocompensation	
+	//e. starting temperature of the device    
+	StartTermoCompens = thermo_StaticTermoCompens(g_gld.thermo.Temp_Aver); 			
+	} 			
+	thermo_DynamicDeltaCalc();
+
+	//e. calculation of range for dither drive frequency, 
+	//depending on starting temperature
+	//thermo_DithFreqRangeCalc();
+
+	//e. voltage of reset at heating 
+	g_gld.thermo.WP_reset_heating = CPL_reset_calc(
+	Device_blk.Str.WP_reset
+	, Device_blk.Str.K_WP_rst_heating
+	, g_gld.thermo.Temp_Aver
+	, Device_blk.Str.TemperNormal
+	);
+	//e. voltage of reset at cooling 
+	g_gld.thermo.WP_reset_cooling = CPL_reset_calc(
+	Device_blk.Str.WP_reset2
+	, Device_blk.Str.K_WP_rst_cooling
+	, g_gld.thermo.Temp_Aver
+	, Device_blk.Str.TemperNormal
+	);		
+	}
 	}	
 
-    //e. calculation the mean temperature for 1 Sec for T4 and T5 sensors 
+	//e. calculation the mean temperature for 1 Sec for T4 and T5 sensors 
 	if ( abs(g_gld.thermo.Temp_Aver - Temp_AverPrevDynCalc) > Device_blk.Str.DeltaTempRecalc){
-		Temp_AverPrevDynCalc = g_gld.thermo.Temp_Aver;
-		DynamicDeltaCalc();
+	Temp_AverPrevDynCalc = g_gld.thermo.Temp_Aver;
+	thermo_DynamicDeltaCalc();
 	}
 
 	// cyclic built-in test
 	if ( 
-        (Output.Str.Tmp_Out[4] < TS_MIN) 
-        || (Output.Str.Tmp_Out[4] > TS_MAX) 
-        || (Output.Str.Tmp_Out[5] < TS_MIN) 
-        || (Output.Str.Tmp_Out[5] > TS_MAX) 
-    ) {
-		Valid_Data |= THERMO_RANGE_ERROR;
+	(Output.Str.Tmp_Out[4] < TS_MIN) 
+	|| (Output.Str.Tmp_Out[4] > TS_MAX) 
+	|| (Output.Str.Tmp_Out[5] < TS_MIN) 
+	|| (Output.Str.Tmp_Out[5] > TS_MAX) 
+	) {
+	Valid_Data |= THERMO_RANGE_ERROR;
 	}
 
 	if ( abs( Output.Str.Tmp_Out[4] - Output.Str.Tmp_Out[5]) > TS_DIFF_MAX )
 	{
-		Valid_Data |= THERMO_DIFF_ERROR;
+	Valid_Data |= THERMO_DIFF_ERROR;
 	}		
-} // clc_ThermoSensors
+}
 
 
 /******************************************************************************/
-void DithFreqRangeCalc(void)
+void thermo_DithFreqRangeCalc(void)
 {
-	unsigned int min_level, max_level;
-	int delta_VB_N;
+	static int32_t VB_Nmin0 = 0; //e. minimum of the output value of a regulator of the period for the Device_blk.Str.TemperNormal temperature
+	static int32_t VB_Nmax0 = 0; //e. maximum of the output value of a regulator of the period for the Device_blk.Str.TemperNormal 
+
+	unsigned int min_level, max_level = 0;
+	int delta_VB_N = 0;
 	
+	//init first iteration
+	if(VB_Nmin0==0){
+		VB_Nmin0 = Device_blk.Str.VB_Nmin >> DITH_VBN_SHIFT;
+		VB_Nmax0 = Device_blk.Str.VB_Nmax >> DITH_VBN_SHIFT;
+	}
+
 	delta_VB_N = mult_r(
-        Device_blk.Str.K_vb_tu >> DITH_VBN_SHIFT
-        , (g_gld.thermo.Temp_Aver - Device_blk.Str.TemperNormal));
+			Device_blk.Str.K_vb_tu >> DITH_VBN_SHIFT
+			, (g_gld.thermo.Temp_Aver - Device_blk.Str.TemperNormal)
+	);
+	//сделать суммирование с насыщением, а затем сдвиг
 	min_level = VB_Nmin0 + delta_VB_N;
 	max_level = VB_Nmax0 + delta_VB_N;
 	// maximum saturation for unsigned levels  
-    // min should be always less then max_level by 1
-	Max_Saturation(&min_level, ((unsigned int)0xFFFF >> DITH_VBN_SHIFT)-1);
-	Max_Saturation(&max_level, ((unsigned int)0xFFFF >> DITH_VBN_SHIFT));
+	// min should be always less then max_level by 1
+	thermo_Max_Saturation(&min_level, ((unsigned int)0xFFFF >> DITH_VBN_SHIFT)-1);
+	thermo_Max_Saturation(&max_level, ((unsigned int)0xFFFF >> DITH_VBN_SHIFT));
 	Device_blk.Str.VB_Nmin = min_level << DITH_VBN_SHIFT;
 	Device_blk.Str.VB_Nmax = max_level << DITH_VBN_SHIFT;
 }

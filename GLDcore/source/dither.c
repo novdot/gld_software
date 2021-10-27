@@ -31,10 +31,6 @@ x_int32_t RI_diff; //e.input signal of "recovery" APS
 x_int32_t MaxDelay;
 x_int32_t VB_tau_Ins; //e. local value of the Tau regulator  
 
-
-int32_t VB_Nmin0; //e. minimum of the output value of a regulator of the period for the Device_blk.Str.TemperNormal temperature
-int32_t VB_Nmax0; //e. maximum of the output value of a regulator of the period for the Device_blk.Str.TemperNormal 
-
 int32_t accum_error = 0;
 int32_t ph_error = 0;
 int32_t accum_error_old = 0;
