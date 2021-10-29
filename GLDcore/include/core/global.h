@@ -11,7 +11,8 @@
 
 typedef struct gld_thermoDef{
     int	TermoCompens_Sum;//< накопление термокомпенсации
-    x_uint8_t IsHeating;//< признак нагрева
+	int	StartTermoCompens; //начальная термокомпенсация
+    x_uint8_t IsHeating;//< признак нагрева для зеркального прибора
     int dThermoHeatDeltaPer_dTermo[TERMO_FUNC_SIZE];
     int	dThermoCoolDeltaPer_dTermo[TERMO_FUNC_SIZE];
     int	dFuncPer_dTermo[TERMO_FUNC_SIZE];

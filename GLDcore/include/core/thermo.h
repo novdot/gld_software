@@ -1,6 +1,6 @@
 /**
     @brief Thermo.
-    Термокомпенсация.
+    Термокомпенсация. для режима DELTA_PS коррекция переменной PS_dif на TermoCompens_Sum
 */
 #ifndef __THERMO_H_INCLUDED 
 #define __THERMO_H_INCLUDED
@@ -15,6 +15,10 @@ void thermo_Max_Saturation(unsigned *lvl, unsigned limit);
 		@return 
 */
 int thermo_StaticTermoCompens(int temperature);  
+
+//e. calculation of the termocompensation for 1 device period (100 uSec) 
+//r. расчет термокомпенсации за один период прибора (100 мкс)
+int thermo_DynamicTermoCompens(void);
 
 /**
     @brief DynamicDeltaCalc.

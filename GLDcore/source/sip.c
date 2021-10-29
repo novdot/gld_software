@@ -79,6 +79,33 @@ void clc_Pulses()
     //e. Precision of filtration is 1/(2^18)	
     Dif_Curr_32 = VibroReduce(g_gld.pulses.Dif_Curr_Vib << SHIFT_TO_FRACT); 
     //Dif_Curr_32 = g_gld.pulses.Dif_Curr_Vib;
+	
+	//e. selecting therStrmocompensation mode
+	switch (Device_blk.Str.TermoMode&0x0F) {
+	case TERMO_ON:
+	case TERMO_ON_NUMB_OFF:
+		//e. accumulation of the value of thermocompensation from request to request 
+		g_gld.thermo.TermoCompens_Sum += g_gld.thermo.StartTermoCompens + thermo_DynamicTermoCompens(); 
+		break;
+
+	case TERMO_ON_STATIC_ONLY:
+	case TERMO_ON_STATIC_ONLY_NUMB_OFF:
+		//e. accumulation of the value of thermocompensation from request to request 
+		g_gld.thermo.TermoCompens_Sum += g_gld.thermo.StartTermoCompens; 
+		break;
+
+	case	TERMO_ON_DYNAMIC_ONLY:
+	case	TERMO_ON_DYNAMIC_ONLY_NUMB_OFF:
+		//e. accumulation of the value of thermocompensation from request to request 
+		g_gld.thermo.TermoCompens_Sum += thermo_DynamicTermoCompens(); 
+		break;
+
+	case	TERMO_OFF:
+	default:
+		//e. thermocompensation is disable, therefore its part is equal to zero 
+		g_gld.thermo.TermoCompens_Sum = 0;
+		break;
+	}
  
     //e. selecting display mode in the Rate mode
     switch (g_gld.RgConB.word) {
