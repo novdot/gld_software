@@ -6,7 +6,6 @@
 
 #define	INT32MAX_DIV2   (1073741823)	//e. 0.5*MAX_QEI_CNT
 #define INT32MIN_DIV2   (-1073741823)	//e. -0.5*MAX_QEI_CNT
-#define SHIFT_TO_FRACT  (18) //e. shift for converting integer to float (14.18) format 
 
 void ResetBitsOfWord(int * x32, int truncate_bits);
 

@@ -5,6 +5,11 @@
 #ifndef __THERMO_H_INCLUDED 
 #define __THERMO_H_INCLUDED
 
+/**
+    @brief thermo_init.
+    @return void
+*/
+void thermo_init();
 
 void thermo_Max_Saturation(unsigned *lvl, unsigned limit);
 

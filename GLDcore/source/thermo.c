@@ -18,6 +18,13 @@
 #define TSENS_NUMB          4 //e. number of the temperature sensor used for the thermocompensation
 #define TS_DELTA_NUMB          5 //e. number of the temperature sensor used for the thermocompensation
 
+int	g_nTermoCompDelta = 0; 
+int	g_nTermoCompDelta_dNdT = 0; 
+
+#define	TEMPERFILT_LEN	4 
+#define	TEMPERFILT_SHIFT 2
+int buffer_dT[TEMPERFILT_LEN];
+long int smooth_dT;
 /******************************************************************************/
 void thermo_Max_Saturation(unsigned *lvl, unsigned limit)
 {
@@ -53,7 +60,7 @@ int thermo_StaticTermoCompens(int temperature)
 int thermo_DynamicTermoCompens(void)
 {
 	//float x = TermoCompDelta + TermoCompDelta_dNdT;
-    return 0;//LONG_2_FRACT_14_18(x);
+    return (g_nTermoCompDelta + g_nTermoCompDelta_dNdT);//LONG_2_FRACT_14_18(x);
 }
 
 /******************************************************************************/
@@ -64,7 +71,7 @@ int thermo_DynamicDeltaCalc()
 
 	t = g_gld.thermo.Temp_Aver;
 
-    if (g_gld.thermo.IsHeating){
+    //if (g_gld.thermo.IsHeating){
 		if(t > Device_blk.Str.TemperIntDyn[TERMO_FUNC_SIZE - 1]) {
 			t = Device_blk.Str.TemperIntDyn[TERMO_FUNC_SIZE - 1];
 		}
@@ -76,9 +83,8 @@ int thermo_DynamicDeltaCalc()
             Device_blk.Str.ThermoHeatDelta[i] 
             - g_gld.thermo.dThermoHeatDeltaPer_dTermo[i] * (float)( Device_blk.Str.TemperIntDyn[i] - t ) 
             );
-    }else{
-		if(t > Device_blk.Str.TemperCoolIntDyn[TERMO_FUNC_SIZE - 1])
-		{
+    /*}else{
+		if(t > Device_blk.Str.TemperCoolIntDyn[TERMO_FUNC_SIZE - 1]) {
 			t = Device_blk.Str.TemperCoolIntDyn[TERMO_FUNC_SIZE - 1];
 		}
 	
@@ -89,7 +95,7 @@ int thermo_DynamicDeltaCalc()
             Device_blk.Str.ThermoCoolDelta[i] 
             - g_gld.thermo.dThermoCoolDeltaPer_dTermo[i] * (float)( Device_blk.Str.TemperCoolIntDyn[i] - t ) 
             );
-    }  
+    }  */
 	return TermoCompDelta; 
 } 
 
@@ -108,7 +114,8 @@ void thermo_DithFreqRangeCalc(void)
 	
 	delta_VB_N = mult_r(
         Device_blk.Str.K_vb_tu >> DITH_VBN_SHIFT
-        , (g_gld.thermo.Temp_Aver - Device_blk.Str.TemperNormal));
+        , (g_gld.thermo.Temp_Aver - Device_blk.Str.TemperNormal)
+    );
 	min_level = VB_Nmin0 + delta_VB_N;
 	max_level = VB_Nmax0 + delta_VB_N;
 	// maximum saturation for unsigned levels  
@@ -120,6 +127,101 @@ void thermo_DithFreqRangeCalc(void)
 }
 
 /******************************************************************************/
+void thermo_init()
+{
+    int i = 0;
+    int i_buff = 0;
+    int dT, dT_dyn;
+	
+//r.x	TermoCompHeatingDelta = -0.001000; //r. коэфф., при котором за 1 сек накапливается 10 импульс
+//r.x	TermoCompCoolingDelta = +0.001000; //r. коэфф., при котором за 1 сек накапливается 10 импульс
+	
+    //test
+    Device_blk.Str.TermoMode = TERMO_ON;
+    for (i = 1; i < TERMO_FUNC_SIZE; i++)  {
+        Device_blk.Str.TermoFunc[i] = 100*i;
+        Device_blk.Str.ThermoHeatDelta[i] = 100*i;
+        Device_blk.Str.ThermoCoolDelta[i] = 0*i;
+		Device_blk.Str.TemperInt[i] = 100*i; 
+    }
+    
+	Device_blk.Str.TermoFunc[0] = (Device_blk.Str.TermoFunc[0]);
+    Device_blk.Str.ThermoHeatDelta[0] = (Device_blk.Str.ThermoHeatDelta[0]);
+    Device_blk.Str.ThermoCoolDelta[0] = (Device_blk.Str.ThermoCoolDelta[0]);
+	for (i = 1; i < TERMO_FUNC_SIZE; i++)  {
+		Device_blk.Str.TermoFunc[i] = (Device_blk.Str.TermoFunc[i]);
+		Device_blk.Str.ThermoHeatDelta[i] = (Device_blk.Str.ThermoHeatDelta[i]);
+		Device_blk.Str.ThermoCoolDelta[i] = (Device_blk.Str.ThermoCoolDelta[i]);
+		dT = Device_blk.Str.TemperInt[i] - Device_blk.Str.TemperInt[i-1]; 
+		if (dT == 0) {
+            //r. защита от деления на 0
+            g_gld.thermo.dFuncPer_dTermo[i] = 0.0; 
+        } else {	
+			g_gld.thermo.dFuncPer_dTermo[i] = (Device_blk.Str.TermoFunc[i] - Device_blk.Str.TermoFunc[i-1]) / (float)dT;
+        }
+        
+		dT_dyn = Device_blk.Str.TemperIntDyn[i] - Device_blk.Str.TemperIntDyn[i-1];
+		if (dT_dyn == 0) {
+            g_gld.thermo.dThermoHeatDeltaPer_dTermo[i] = 0.0;
+        } else {
+            g_gld.thermo.dThermoHeatDeltaPer_dTermo[i] = 
+                (Device_blk.Str.ThermoHeatDelta[i] - Device_blk.Str.ThermoHeatDelta[i-1]) 
+                / (float)dT_dyn;
+        }
+        
+		dT_dyn = Device_blk.Str.TemperCoolIntDyn[i] - Device_blk.Str.TemperCoolIntDyn[i-1];       
+		if (dT_dyn == 0) {
+            g_gld.thermo.dThermoCoolDeltaPer_dTermo[i] = 0.0;
+        } else {
+            g_gld.thermo.dThermoCoolDeltaPer_dTermo[i] = 
+                (Device_blk.Str.ThermoCoolDelta[i] - Device_blk.Str.ThermoCoolDelta[i-1]) 
+                / (float)dT_dyn;
+        }
+    }
+    
+    //Filter
+    buffer_dT[0] = 0;	
+    
+    //e. smooth average initialization 
+    //r. инициализация температурного фильтра скользящего среднего
+    for (i_buff = 1; i_buff < TEMPERFILT_LEN; i_buff++) buffer_dT[i_buff] = 0;
+    
+    smooth_dT = 0;//Temp_Aver2 << TEMPERFILT_SHIFT;
+
+}
+/******************************************************************************/
+int thermo_MovAver_filter_init(int Temp_Aver)
+{
+    int t = Temp_Aver;
+    int i_buff = 0;
+
+    if(t > Device_blk.Str.TemperCoolIntDyn[TERMO_FUNC_SIZE - 1]) {
+        t = Device_blk.Str.TemperCoolIntDyn[TERMO_FUNC_SIZE - 1];
+    }
+
+    while( t > Device_blk.Str.TemperCoolIntDyn[i_buff] ) i_buff++;
+
+    Device_blk.Str.Reserved2 = 
+        Device_blk.Str.ThermoCoolDelta[i_buff] 
+        - g_gld.thermo.dThermoCoolDeltaPer_dTermo[i_buff] * ( Device_blk.Str.TemperCoolIntDyn[i_buff] - t );
+}
+/******************************************************************************/
+//moving average for termocorrection
+int thermo_MovAver_filter(int Input)
+{
+    static unsigned i_dT = 0;
+
+    smooth_dT -= buffer_dT[i_dT];
+    buffer_dT[i_dT] = Input;
+    smooth_dT += Input;
+
+    i_dT++;
+    i_dT &= (TEMPERFILT_LEN-1);
+
+    //shift on additional 6 bits for smoothing 2^TEMPERFILT_SHIFT = TEMPERFILT_LENGTH 
+    return ((int)(smooth_dT>>TEMPERFILT_SHIFT));	
+} 
+/******************************************************************************/
 void thermo_clc_ThermoSensors(void)	
 {
 	//unsigned i = 0;
@@ -129,14 +231,23 @@ void thermo_clc_ThermoSensors(void)
 	static x_bool_t StartRdy = _x_true;
 	static int Temp_Aver_prev = -7000;
 	static int TempEvolution = 0;
+    static x_bool_t bSingleInit = _x_true;
 
 	//e. conversion of temperature values on ADC output 
 	//to range -32768 .. +32767 ( additional code; format 1.15 )
-	Output.Str.Tmp_Out[TSENS_NUMB] = mac_r(Device_blk.Str.Tmp_bias[4] << 16,
-								(g_input.word.temp1 - 0x8000), 
-								Device_blk.Str.Tmp_scal[4]);
+	Output.Str.Tmp_Out[TSENS_NUMB] = mac_r(Device_blk.Str.Tmp_bias[TSENS_NUMB] << 16
+								, (g_input.word.temp1 - 0x8000)
+								, Device_blk.Str.Tmp_scal[TSENS_NUMB]
+                                );
+    
+	Output.Str.Tmp_Out[TS_DELTA_NUMB] = mac_r(Device_blk.Str.Tmp_bias[TS_DELTA_NUMB] << 16
+                                , (g_input.word.delta_t - 0x8000)
+                                , Device_blk.Str.Tmp_scal[TS_DELTA_NUMB]
+                                );
+    
 
-	Output.Str.Tmp_Out[TSENS_NUMB] = 50000;
+    //for tests
+	Output.Str.Tmp_Out[TSENS_NUMB] = 1000;
 	
 	//e. 1 second elapsed
 	if (g_gld.time_1_Sec == DEVICE_SAMPLE_RATE_uks) {
@@ -158,6 +269,26 @@ void thermo_clc_ThermoSensors(void)
 		}else if (g_gld.thermo.Temp_Aver < Temp_Aver_prev){
 			TempEvolution--;
 		}
+        
+        if(TenSeconds>2){
+            if(bSingleInit){
+                thermo_MovAver_filter_init(g_gld.thermo.Temp_Aver);
+                bSingleInit = _x_false;
+            }
+        }
+        
+        switch (Device_blk.Str.TermoMode & 0xF0) {
+            case 0x00:
+                g_nTermoCompDelta_dNdT = Device_blk.Str.Reserved2 * 
+                    (thermo_MovAver_filter((g_gld.thermo.Temp_Aver-Temp_Aver_prev)<<4));
+            break;
+        
+            case 0x10:
+                //for TS_DELTA_NUMB
+                /*g_nTermoCompDelta_dNdT = Device_blk.Str.Reserved2 * 
+                    (thermo_MovAver_filter(Temp_Aver2<<4));*/
+            break;
+        }	
 
 		//e. reset the sum for calculation of an mean
 		TS_sum = 0; 
@@ -166,7 +297,7 @@ void thermo_clc_ThermoSensors(void)
 	}
 
 	// 10 * TEMP_AVER_PERIOD = 40
-	if (TenSeconds == 10) {
+	/*if (TenSeconds == 10) {
 		TenSeconds = 0;
 		if (TempEvolution > 0){
 			g_gld.thermo.IsHeating = 1;
@@ -174,7 +305,7 @@ void thermo_clc_ThermoSensors(void)
 			g_gld.thermo.IsHeating = 0;
 		}
 		TempEvolution = 0;
-	}	
+	}*/
 
 	//e. single calculaiton of some device parameters 
 	//(measurement on the VALID_START_SEC  second after start)
@@ -193,7 +324,7 @@ void thermo_clc_ThermoSensors(void)
 				//e. starting temperature of the device    
 				g_gld.thermo.StartTermoCompens = thermo_StaticTermoCompens(g_gld.thermo.Temp_Aver); 			
 			} 			
-			thermo_DynamicDeltaCalc();
+			g_nTermoCompDelta = thermo_DynamicDeltaCalc();
 
 			//e. calculation of range for dither drive frequency, 
 			//depending on starting temperature
@@ -220,7 +351,7 @@ void thermo_clc_ThermoSensors(void)
 	//r. расчет средней за 1 секунду температуры датчиков T4, T5
 	if ( abs(g_gld.thermo.Temp_Aver - Temp_AverPrevDynCalc) > Device_blk.Str.DeltaTempRecalc){
 		Temp_AverPrevDynCalc = g_gld.thermo.Temp_Aver;
-		thermo_DynamicDeltaCalc();
+		g_nTermoCompDelta = thermo_DynamicDeltaCalc();
 	}
 
 	// cyclic built-in test

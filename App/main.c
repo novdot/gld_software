@@ -106,6 +106,8 @@ void init()
     hardware_photo_init();
     hardware_photo_set(Device_blk.Str.Gain_Ph_A, Device_blk.Str.Gain_Ph_B);
     
+    thermo_init();
+    
     open_all_loops();
     
     Output.Str.HF_reg = Device_blk.Str.HF_ref;

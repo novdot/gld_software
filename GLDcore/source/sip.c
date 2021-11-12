@@ -106,6 +106,7 @@ void clc_Pulses()
 		g_gld.thermo.TermoCompens_Sum = 0;
 		break;
 	}
+    g_gld.thermo.TermoCompens_Sum = g_gld.thermo.TermoCompens_Sum << SHIFT_TO_FRACT;
  
     //e. selecting display mode in the Rate mode
     switch (g_gld.RgConB.word) {

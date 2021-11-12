@@ -31,13 +31,13 @@ typedef enum
 //e. thermocompensation modes 
 typedef enum _TERMO_MODE   
 {
-	TERMO_OFF						//e. thermocompensation is switched off  
-	,TERMO_ON					    //e. thermocompensation is switched on  
-    ,TERMO_ON_NUMB_OFF			    //e. thermocompensation is switched on, number resets (debug mode) 
-	,TERMO_ON_STATIC_ONLY		    //e. only static thermocompensation is switched on  
-	,TERMO_ON_DYNAMIC_ONLY		    //e. only dynamic thermocompensation is switched on  
-	,TERMO_ON_STATIC_ONLY_NUMB_OFF	//e. static thermocompensation is switched on, number resets (debug mode) 
-	,TERMO_ON_DYNAMIC_ONLY_NUMB_OFF	//e. dynamic thermocompensation is switched on, number resets (debug mode) 
+	TERMO_OFF = 0						//e. thermocompensation is switched off  
+	,TERMO_ON = 1					    //e. thermocompensation is switched on  
+    ,TERMO_ON_NUMB_OFF = 2	//10b		    //e. thermocompensation is switched on, number resets (debug mode) 
+	,TERMO_ON_STATIC_ONLY = 3 //11b		    //e. only static thermocompensation is switched on  
+	,TERMO_ON_DYNAMIC_ONLY = 4		    //e. only dynamic thermocompensation is switched on  
+	,TERMO_ON_STATIC_ONLY_NUMB_OFF = 5	//e. static thermocompensation is switched on, number resets (debug mode) 
+	,TERMO_ON_DYNAMIC_ONLY_NUMB_OFF = 6	//e. dynamic thermocompensation is switched on, number resets (debug mode) 
 } TERMO_MODE;
 
 //e. variants of control points for scope 

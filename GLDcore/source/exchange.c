@@ -74,6 +74,5 @@ void exchange_regul_data_read()
     Output.Str.Tmp_Out[2] = g_input.word.in1;
     Output.Str.Tmp_Out[3] = g_input.word.in2;
     
-    Output.Str.Tmp_Out[5] = g_input.word.delta_t;
     /**/
 }

@@ -7,6 +7,9 @@
 //#include  <math.h>
 #include "dspfns.h"
 
+
+#define SHIFT_TO_FRACT  (18) //e. shift for converting integer to float (14.18) format 
+
 typedef enum BAND_PASS_TYPE_{
     PLC
     , DUP
