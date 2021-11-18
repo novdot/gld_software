@@ -2,6 +2,8 @@
 #include "bootloader/global.h"
 #include "hardware/hardware.h"
 #include "core/global.h"
+#include "core/command.h"
+#include "xlib/ring_buffer.h"
 
 void command_ans_common0();
 void command_ans_common1();
@@ -13,6 +15,7 @@ void command_handle()
 	x_uint32_t uCmdCode = 0;
     x_uint32_t uCmdCodeLong = 0;
     char dbg[64];
+    int i = 0;
 
     uCmdCode = (rcv_buf[2] & 0xFF) << 8;
     CMD_Code = uCmdCode | (rcv_buf[3] & 0xFF);
@@ -20,7 +23,7 @@ void command_handle()
     //e. initialization of the flag of copying of receiving buffer
 	rx_buf_copy = 1;
     
-    DBG0(dbg,64,"command_handle");
+    DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"command_handle");
     
     switch(uCmdCode){
 		case  CMD_M_PTR_R    :   command_cmd_M_PTR_R();  return;
@@ -171,8 +174,11 @@ void command_cmd_M_PTR_R()
     command_save_prevCmd();
     
     //set answer speed
-	command_utility_SetSpeedPeriod();         		  
-	UART_SwitchSpeed(trm_rate);
+	/*command_utility_SetSpeedPeriod();         		  
+	UART_SwitchSpeed(trm_rate);*/
+    command_utility_read_param();
+    command_SwitchSpeed();
+    
     //читаем что за указатель к нам пришел
     params.word = rcv_buf[3]&0x1F;
     
@@ -217,8 +223,11 @@ void command_cmd_M_PTR_W()
     command_save_prevCmd();
     
     //set answer speed
-	command_utility_SetSpeedPeriod();         		  
-	UART_SwitchSpeed(trm_rate);
+	/*command_utility_SetSpeedPeriod();         		  
+	UART_SwitchSpeed(trm_rate);*/
+    command_utility_read_param();
+    command_SwitchSpeed();
+    
     //читаем что за указатель к нам пришел
     params.word = rcv_buf[3]&0x1F;
     
@@ -260,8 +269,11 @@ void command_cmd_M_DAT_R()
 {
     command_save_prevCmd();
     
-	command_utility_SetSpeedPeriod();         		  
-	UART_SwitchSpeed(trm_rate);
+	/*command_utility_SetSpeedPeriod();         		  
+	UART_SwitchSpeed(trm_rate);*/
+    
+    command_utility_read_param();
+    command_SwitchSpeed();
     
     //чтение блока данных из буфера у-ва.
 }
@@ -271,8 +283,11 @@ void command_cmd_M_DAT_W()
 {
     command_save_prevCmd();
     
-	command_utility_SetSpeedPeriod();         		  
-	UART_SwitchSpeed(trm_rate);
+	/*command_utility_SetSpeedPeriod();         		  
+	UART_SwitchSpeed(trm_rate);*/
+    
+    command_utility_read_param();
+    command_SwitchSpeed();
     
     //запись блока данных в буфер у-ва
     
@@ -372,15 +387,15 @@ void command_ans_common(void)
 {
 	//prepare of the standart answer
 	num_of_par = 1;             //e. total amount parameters in aswer - 1 
-	COMMAND_UTILITY_ANSWER_FIELD(0,&CMD_Code,2);
+	COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint16_t*)&CMD_Code,2);
 	trm_ena = 1;              	//e. allow operation of the transmitter of the device
 }
 /******************************************************************************/
 void command_ans_common0()
 {
 	num_of_par = 2;
-	COMMAND_UTILITY_ANSWER_FIELD(0,&num_of_par,2);//TODO адрес первого параметра
-	COMMAND_UTILITY_ANSWER_FIELD(1,&line_err,2);
+	COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint16_t*)&num_of_par,2);//TODO адрес первого параметра
+	COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint16_t*)&line_err,2);
 	trm_ena = 1;
 }
 
@@ -395,8 +410,8 @@ void command_ans_common1()
     g_bootloader.cmd.nCmdCodeL &= 0x1F;//TODO add error code
     
 	num_of_par = 2;
-	COMMAND_UTILITY_ANSWER_FIELD(0,&(g_bootloader.cmd.nCmdCodeH),1);
-	COMMAND_UTILITY_ANSWER_FIELD(1,&(g_bootloader.cmd.nCmdCodeL),1);
+	COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint16_t*)&(g_bootloader.cmd.nCmdCodeH),1);
+	COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint16_t*)&(g_bootloader.cmd.nCmdCodeL),1);
 	trm_ena = 1;
 }
 
@@ -404,8 +419,8 @@ void command_ans_common1()
 void command_ans_m_status()
 {
 	num_of_par = 2;
-	COMMAND_UTILITY_ANSWER_FIELD(0,&blt_in_test,2);
-    COMMAND_UTILITY_ANSWER_FIELD(1,&line_err,2);
+	COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint16_t*)&blt_in_test,2);
+    COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint16_t*)&line_err,2);
 	trm_ena = 1;
 }
 
@@ -458,7 +473,7 @@ void command_ans_M_MIRR()
 	num_of_par = (g_bootloader.prevCmd.size)*2;
     for(ipar=0;ipar<g_bootloader.prevCmd.size;ipar++){
         COMMAND_UTILITY_ANSWER_FIELD(ipar*2,0,1);
-        COMMAND_UTILITY_ANSWER_FIELD(ipar*2+1,(x_uint32_t*)&(g_bootloader.prevCmd.buf[ipar]),1);
+        COMMAND_UTILITY_ANSWER_FIELD(ipar*2+1,(x_uint16_t*)&(g_bootloader.prevCmd.buf[ipar]),1);
     }
 	trm_ena = 1;
 }
@@ -484,10 +499,10 @@ void command_ans_M_PTR_R(x_uint32_t data)
     g_bootloader.cmd.send_data_ptr[2] = (data>>16)&0xff;
     
     num_of_par = 4;
-	COMMAND_UTILITY_ANSWER_FIELD(0,&(g_bootloader.cmd.nCmdCodeH),1);
-	COMMAND_UTILITY_ANSWER_FIELD(1,&(g_bootloader.cmd.send_data_ptr[2]),1);
-	COMMAND_UTILITY_ANSWER_FIELD(2,&(g_bootloader.cmd.send_data_ptr[1]),1);
-	COMMAND_UTILITY_ANSWER_FIELD(3,&(g_bootloader.cmd.send_data_ptr[0]),1);
+	COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint16_t*)&(g_bootloader.cmd.nCmdCodeH),1);
+	COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint16_t*)&(g_bootloader.cmd.send_data_ptr[2]),1);
+	COMMAND_UTILITY_ANSWER_FIELD(2,(x_uint16_t*)&(g_bootloader.cmd.send_data_ptr[1]),1);
+	COMMAND_UTILITY_ANSWER_FIELD(3,(x_uint16_t*)&(g_bootloader.cmd.send_data_ptr[0]),1);
 	trm_ena = 1;
 }
 
@@ -528,9 +543,9 @@ void command_ans_M_CTL_R(x_uint32_t*preg)
     g_bootloader.cmd.nCmdCodeL &= (0x10); 
     
     num_of_par = 3;
-	COMMAND_UTILITY_ANSWER_FIELD(0,&(g_bootloader.cmd.nCmdCodeH),1);
-	COMMAND_UTILITY_ANSWER_FIELD(1,&(g_bootloader.cmd.nCmdCodeL),1);
-	COMMAND_UTILITY_ANSWER_FIELD(2,preg,2);
+	COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint16_t*)&(g_bootloader.cmd.nCmdCodeH),1);
+	COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint16_t*)&(g_bootloader.cmd.nCmdCodeL),1);
+	COMMAND_UTILITY_ANSWER_FIELD(2,(x_uint16_t*)preg,2);
 	trm_ena = 1;
 }
 
@@ -541,9 +556,9 @@ void command_ans_M_CTL_M(x_uint32_t*preg)
     g_bootloader.cmd.nCmdCodeL &= (0x10); 
     
     num_of_par = 3;
-	COMMAND_UTILITY_ANSWER_FIELD(0,&(g_bootloader.cmd.nCmdCodeH),1);
-	COMMAND_UTILITY_ANSWER_FIELD(1,&(g_bootloader.cmd.nCmdCodeL),1);
-	COMMAND_UTILITY_ANSWER_FIELD(2,(preg),2);
+	COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint16_t*)&(g_bootloader.cmd.nCmdCodeH),1);
+	COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint16_t*)&(g_bootloader.cmd.nCmdCodeL),1);
+	COMMAND_UTILITY_ANSWER_FIELD(2,(x_uint16_t*)(preg),2);
 	trm_ena = 1;
 }
 

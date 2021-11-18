@@ -17,21 +17,27 @@ void thermo_Max_Saturation(unsigned *lvl, unsigned limit);
     @brief StaticTermoCompens.
     calculation the static component of the termocompensation for 1 measure period (100 uSec)
     расчет статической составляющей термокомпенсации за один период прибора (100 мкс)
-		@return 
+	@return 
 */
-int thermo_StaticTermoCompens(int temperature);  
+//int thermo_StaticTermoCompens(int temperature);  
+float thermo_StaticTermoCompens(int temperature);  
 
-//e. calculation of the termocompensation for 1 device period (100 uSec) 
-//r. расчет термокомпенсации за один период прибора (100 мкс)
-int thermo_DynamicTermoCompens(void);
+/**
+    @brief DynamicTermoCompens.
+    calculation of the termocompensation for 1 device period (100 uSec) 
+    расчет термокомпенсации за один период прибора (100 мкс)
+	@return 
+*/
+//int thermo_DynamicTermoCompens(void);
+float thermo_DynamicTermoCompens(void);
 
 /**
     @brief DynamicDeltaCalc.
 calculation the addition termocompensation for 1 reset
 расчет добавки термокомпенсации на одно обнуление
-    @return Thermocompensation addition
+    @return 
 */
-int thermo_DynamicDeltaCalc(); 
+void thermo_DynamicDeltaCalc(); 
 
 /**
     @brief clc_ThermoSensors.

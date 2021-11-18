@@ -100,12 +100,6 @@ void command_handle(void);
     @brief 
     @return
 */
-void dbg_recieve();
-
-/**
-    @brief 
-    @return
-*/
 void command_SwitchSpeed(void);
 
 #endif

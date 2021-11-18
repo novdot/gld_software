@@ -3,6 +3,7 @@
  Обмен с PC по каналу RS485 (полный дуплекс, 38400 бод);
  Период главного цикла - 1 мс.
  
+ Описание под HOST3:
  Монитор, под кристал Alter'ы 1k30 uhost'a, с функцией адресации прибора в режиме
  монитора, что значит, что на стадии инициализации происходит загрузка парметров 
  из 4 сектора flash, и назначение адреса на основе первого считанного параметра.
@@ -18,12 +19,18 @@
 #include "hardware/hardware.h"
 #include "core/config.h"
 #include "core/global.h"
+#include "xlib/ring_buffer.h"
 
 bootloader_global g_bootloader;
 /******************************************************************************/
 //инициализируем периферию для прошивки
 void init()
 {
+    
+    //program variables
+    x_ring_init(&g_gld.cmd.dbg.ring_in,g_gld.cmd.dbg.buf_in,GLD_RINGBUFFER_SIZE);
+    x_ring_init(&g_gld.cmd.dbg.ring_out,g_gld.cmd.dbg.buf_out,GLD_RINGBUFFER_SIZE);
+    
     //e. clocking control initialization
     SystemInit();
     

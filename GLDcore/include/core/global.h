@@ -13,8 +13,8 @@ typedef struct gld_thermoDef{
     int	TermoCompens_Sum;//< накопление термокомпенсации
 	int	StartTermoCompens; //начальная термокомпенсация
     x_uint8_t IsHeating;//< признак нагрева для зеркального прибора
-    int dThermoHeatDeltaPer_dTermo[TERMO_FUNC_SIZE];
-    int	dThermoCoolDeltaPer_dTermo[TERMO_FUNC_SIZE];
+    float dThermoHeatDeltaPer_dTermo[TERMO_FUNC_SIZE];
+    float dThermoCoolDeltaPer_dTermo[TERMO_FUNC_SIZE];
     int	dFuncPer_dTermo[TERMO_FUNC_SIZE];
     int	Temp_Aver; //< the mean temperature for 1 Sec for T4 sensor 
     int WP_reset_heating;	//e. voltage of reset at heating

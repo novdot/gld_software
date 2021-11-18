@@ -133,4 +133,9 @@ void command_ans_M_RATE4();
 void command_ans_M_RATE7();
 void command_ans_M_RATE5K();
 
+/**
+    @brief 
+    @return
+*/
+void dbg_recieve();
 #endif

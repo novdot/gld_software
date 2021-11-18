@@ -31,27 +31,99 @@
 #include "Parameters.h"
 
 /******************************************************************************/
-void command_SwitchSpeed(void)
+void dbg_recieve()
 {
-    int i = 0;
+    char dbg[256];
+    int i =0;
+    //x_uint8_t _rcv_buf[128];
+    //int _rcv_num_byt = 0;
+    x_uint8_t data = 0;
+    x_uint8_t idata = 0;
     
-    //check if trm_rate changed
-    if(g_gld.cmd.trm_rate == g_gld.cmd.trm_rate_prev) {
+    /*uart_recieve_n(0,_rcv_buf,&_rcv_num_byt);
+    if (_rcv_num_byt == 0)
         return;
-    }else{
-        g_gld.cmd.trm_rate_prev = g_gld.cmd.trm_rate;
+    
+    for(idata=0;idata<_rcv_num_byt;idata++){
+    //while(_rcv_num_byt>0){
+        //_rcv_num_byt--;
+        x_ring_put(_rcv_buf[idata],&g_gld.cmd.dbg.ring_in);
     }
-    //if changed upd registers
     
-    //disable DMA
-    //whait until current tranfer ends
-    uart_disable_transm();
+    //if (x_ring_get_count(&g_gld.cmd.ring_in) < 2)
+    //    return;
+    */
+    if(x_ring_get_count(&g_gld.cmd.dbg.ring_in)==0) return;
     
-    //switch uart speed
-    UART_SwitchSpeed(g_gld.cmd.trm_rate);
+    switch(x_ring_pop(&g_gld.cmd.dbg.ring_in)){
+        case 'h':
+            DBG2(&g_gld.cmd.dbg.ring_out,dbg,256,"Build in %s %s\n\r"
+                "ASCII code\n\r"
+                "1..4 - ADC0..3\n\r"
+                "5..6 - DAC0..2\n\r"
+                "w - write flash\n\r"
+                "r - read from flash\n\r"
+                ,__DATE__,__TIME__);
+            break;
+        
+        case '1':
+            DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%u\n\r",(unsigned int)g_gld.nADCData[0]);
+            break;
+        
+        case '2':
+            DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%u\n\r",(unsigned int)g_gld.nADCData[1]);
+            break;
+            
+        case '3':
+            DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%u\n\r",(unsigned int)g_gld.nADCData[2]);
+            break;
+            
+        case '4':
+            DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%u\n\r",(unsigned int)g_gld.nADCData[3]);
+            break;
+            
+        case '5':
+            DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%u\n\r",(unsigned int)g_gld.nDACData[0]);
+            break;
+            
+        case '6':
+            DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%u\n\r",(unsigned int)g_gld.nDACData[1]);
+            break;
+            
+        case 'w':
+            DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"save to flash\n\r");
+            params_save2flash();
+            break;
+        
+        case 'r':
+            DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"load from flash\n\r");
+            params_load_flash();
+            break;
+        
+        case '7':
+            g_gld.dbg_buffers.iteration = 0;
+            break;
+        
+        case '8': 
+            DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"cnt_int:%d\n\r"
+                ,g_gld.pulses.reper_meandr.cnt_int_sum);
+            break;
+        
+        case '9': 
+            DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"cnt_iter:%d\n\r"
+                ,g_gld.pulses.reper_meandr.cnt_iter_sum);
+            break;
+        
+        default:
+            DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"fail cmd\n\r");
+            goto clear;
+    }
     
-    //enable DMA
-    uart_enable_transm();
+    return;
+clear:
+    return;
+    //x_ring_clear(&g_gld.cmd.ring_in);
+    //_rcv_num_byt = 0;    
 }
 /******************************************************************************/
 void command_handle(void)
