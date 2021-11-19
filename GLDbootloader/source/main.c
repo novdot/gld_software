@@ -26,6 +26,8 @@ bootloader_global g_bootloader;
 //инициализируем периферию для прошивки
 void init()
 {
+    int i=0;
+    char dbg[64];
     
     //program variables
     x_ring_init(&g_gld.cmd.dbg.ring_in,g_gld.cmd.dbg.buf_in,GLD_RINGBUFFER_SIZE);
@@ -53,12 +55,18 @@ void init()
     
     //init timer
     hardware_tim_init(&g_bootloader.nTimerCnt);
+    
+    DBG2(&g_gld.cmd.dbg.ring_out,dbg,64,"Build in:%s %s\n\r",__DATE__, __TIME__);
+        
 }
 
 /******************************************************************************/
 //основной цикл. ждем подключения, если нет - переключаемся на основную программу
 void loop()
 {
+    uart_recieve_unblocked(0,&g_gld.cmd.dbg.ring_in);
+    UART_DBG_SEND(&g_gld.cmd.dbg.ring_out);
+    
     //обработка команд
     command_recieve(_command_recieve_flag_bootloader);
     command_decode();

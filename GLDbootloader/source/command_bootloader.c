@@ -23,41 +23,97 @@ void command_handle()
     //e. initialization of the flag of copying of receiving buffer
 	rx_buf_copy = 1;
     
-    DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"command_handle");
     
     switch(uCmdCode){
-		case  CMD_M_PTR_R    :   command_cmd_M_PTR_R();  return;
-		case  CMD_M_PTR_W    :   command_cmd_M_PTR_W();  return;
-		case  CMD_M_DAT_R    :   command_cmd_M_DAT_R();  return;
-		case  CMD_M_DAT_W    :   command_cmd_M_DAT_W();  return;
-		case  CMD_M_BUF_R    :   command_cmd_M_BUF_R();  return;
-		case  CMD_M_BUF_W    :   command_cmd_M_BUF_W();  return;                                                        
-		case  CMD_M_CTL_R    :   command_cmd_M_CTL_R();  return;
-		case  CMD_M_CTL_M    :   command_cmd_M_CTL_M();  return;
-		case  CMD_M_FME_E    :   command_cmd_M_FME_E();  return;
-		
-		case  0x0f00    :   
-		case  0x9900    :  
-		case  CMD_M_SUBCMD1    :  
-		case  CMD_M_SUBCMD2    :  
-			uCmdCodeLong = uCmdCode | (rcv_buf[3] & 0xFF);
-			break;
+	case  CMD_M_PTR_R    : 
+        DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_M_PTR_R\n\r");  
+        command_cmd_M_PTR_R();  
+        return;
+	case  CMD_M_PTR_W    : 
+        DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_M_PTR_W\n\r");  
+        command_cmd_M_PTR_W();  
+        return;
+	case  CMD_M_DAT_R    :  
+        DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_M_DAT_R\n\r"); 
+        command_cmd_M_DAT_R();  
+        return;
+	case  CMD_M_DAT_W    :   
+        DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_M_DAT_W\n\r");
+        command_cmd_M_DAT_W();  
+        return;
+    case  CMD_M_BUF_R    :   
+        DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_M_BUF_R\n\r");
+        command_cmd_M_BUF_R();  
+        return;
+    case  CMD_M_BUF_W    :   
+        DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_M_BUF_W\n\r");
+        command_cmd_M_BUF_W();  
+        return;         
+    case  CMD_M_CTL_R    :  
+        DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_M_CTL_R\n\r"); 
+        command_cmd_M_CTL_R();  
+        return;
+    case  CMD_M_CTL_M    :   
+        DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_M_CTL_M\n\r");
+        command_cmd_M_CTL_M();  
+        return;
+    case  CMD_M_FME_E    :   
+        DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_M_FME_E\n\r");
+        command_cmd_M_FME_E();  
+        return;
+    
+    case  0x0f00    :   
+    case  0x9900    :  
+    case  CMD_M_SUBCMD1    :  
+    case  CMD_M_SUBCMD2    :  
+        uCmdCodeLong = uCmdCode | (rcv_buf[3] & 0xFF);
+        break;
 
-		default:
-            line_sts = line_sts | CODE_ERR;
-			return;
+    default:
+        line_sts = line_sts | CODE_ERR;
+        return;
 	}
 	switch(uCmdCodeLong){
-		case  CMD_WRK_PC     :   command_cmd_WRK_PC();   return;
-		case  CMD_MAINT      :   command_cmd_MAINT();    return;
-		case  CMD_M_JUMP     :   command_cmd_M_JUMP();   return;
-		case  CMD_M_LOAD     :   command_cmd_M_LOAD();   return;
-		case  CMD_M_CONF     :   command_cmd_M_CONF();   return;
-		case  CMD_M_DCNF     :   command_cmd_M_DCNF();   return;
-		case  CMD_M_CLEAR    :   command_cmd_M_CLEAR();  return;
-		case  CMD_M_MIRR     :   command_cmd_M_MIRR();   return;
-		case  CMD_M_TSIV1    :   command_cmd_M_TSIV1();  return;
-		case  CMD_M_TSOV2    :	 command_cmd_M_TSOV2();	 return;
+		case  CMD_WRK_PC     :   
+        DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_WRK_PC\n\r");
+            command_cmd_WRK_PC();   
+            return;
+		case  CMD_MAINT      :   
+        DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_MAINT\n\r");
+            command_cmd_MAINT();    
+            return;
+		case  CMD_M_JUMP     :   
+        DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_M_JUMP\n\r");
+            command_cmd_M_JUMP();   
+            return;
+		case  CMD_M_LOAD     :   
+        DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_M_LOAD\n\r");
+            command_cmd_M_LOAD();   
+            return;
+		case  CMD_M_CONF     :   
+        DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_M_CONF\n\r");
+            command_cmd_M_CONF();   
+            return;
+		case  CMD_M_DCNF     :   
+        DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_M_DCNF\n\r");
+            command_cmd_M_DCNF();   
+            return;
+		case  CMD_M_CLEAR    :   
+        DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_M_CLEAR\n\r");
+            command_cmd_M_CLEAR();  
+            return;
+		case  CMD_M_MIRR     :   
+        DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_M_MIRR\n\r");
+            command_cmd_M_MIRR();   
+            return;
+		case  CMD_M_TSIV1    :   
+        DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_M_TSIV1\n\r");
+            command_cmd_M_TSIV1();  
+            return;
+		case  CMD_M_TSOV2    :	 
+        DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_M_TSOV2\n\r");
+            command_cmd_M_TSOV2();	 
+            return;
 		
 		default:
             line_sts = line_sts | MODE_ERR;
