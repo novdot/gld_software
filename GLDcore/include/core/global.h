@@ -25,10 +25,11 @@ typedef struct gld_cplcDef{
     int WP_DelaySin_Array[21];
 }gld_cplc;
 
-#define GLD_RINGBUFFER_SIZE (1024)
+#define GLD_RINGBUFFER_SIZE (2048)
+#define GLD_BUF_SIZE (512)
 typedef struct gld_cmdDef{
-    x_uint8_t trm_cycl; //rate from cmd
-    x_uint32_t trm_rate; //rate from cmd
+    x_uint8_t trm_cycl; //is cyclic bit from cmd
+    x_uint32_t trm_rate; //rate value from cmd
     x_uint32_t trm_rate_prev; //set rate to uart
     struct{
         x_ring_buffer_t ring_in;
@@ -42,6 +43,17 @@ typedef struct gld_cmdDef{
         uint8_t buf_in[GLD_RINGBUFFER_SIZE];
         uint8_t buf_out[GLD_RINGBUFFER_SIZE];
     }ask;
+    x_uint8_t recieve_cmd[GLD_BUF_SIZE];
+    x_uint8_t recieve_cmd_cpy[GLD_BUF_SIZE];
+    union{
+        struct{
+            unsigned rx_cpy:1; //<copy recieve buffer
+            unsigned tx_cycl:1; //<cyclic trasmittion packets
+            unsigned reserve:6;
+        }bit;
+        x_uint8_t word;
+    }flags;
+    x_uint16_t recieve_cmd_size;
 }gld_cmd;
 
 typedef struct gld_pulsesDef{
@@ -143,23 +155,23 @@ void gld_global_init(void);
 
 /******************************************************************************/
 //TODO
-extern x_uint32_t trm_num_byt;
-extern x_uint32_t rcv_num_byt;
-extern x_uint32_t rcv_Rdy;
+//extern x_uint32_t trm_num_byt;
+//extern x_uint32_t rcv_num_byt;
+//extern x_uint32_t rcv_Rdy;
 //extern x_uint32_t trm_cycl;
 
-extern x_uint8_t trm_buf[256];//64
-extern x_uint8_t rcv_buf[256];
-extern x_uint8_t rcv_copy[256];
+//extern x_uint8_t trm_buf[BUF_SIZE];//64
+//extern x_uint8_t rcv_buf[BUF_SIZE];
+//extern x_uint8_t rcv_copy[BUF_SIZE];
 
 extern x_uint32_t num_of_par;
 extern x_uint16_t* addr_param[16]; //void*
 extern x_uint32_t size_param[16];
 
 extern x_uint32_t rcv_num_byt_old;
-extern x_int32_t rcv_byt_copy;
+//extern x_int32_t rcv_byt_copy;
 extern x_uint32_t trm_ena;
-extern x_int32_t rx_buf_copy; //e. is copying of present received packet needed
+//extern x_int32_t rx_buf_copy; //e. is copying of present received packet needed
 
 //command
 extern x_uint32_t blt_in_test;

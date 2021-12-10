@@ -26,21 +26,22 @@ void gld_global_init(void)
 
 /******************************************************************************/
 //command
-x_uint32_t rcv_num_byt;
-x_uint32_t rcv_Rdy;
+//RC
+//x_uint32_t rcv_num_byt;
+//x_uint32_t rcv_Rdy;
+//x_uint8_t rcv_buf[BUF_SIZE];//64
+//x_uint8_t rcv_copy[BUF_SIZE];
 
-x_uint8_t rcv_buf[256];//64
-x_uint8_t rcv_copy[256];
-
-x_int32_t rx_buf_copy;
-x_int32_t rcv_byt_copy;
+//x_int32_t rx_buf_copy;
+//x_int32_t rcv_byt_copy;
 x_uint32_t rcv_num_byt_old;
 
+//TMR
 //x_uint32_t trm_cycl;
-x_uint32_t trm_num_byt;
+//x_uint32_t trm_num_byt;
 x_uint32_t trm_ena;
 x_uint32_t num_of_par;
-x_uint8_t trm_buf[256];//
+//x_uint8_t trm_buf[BUF_SIZE];//
 
 x_uint16_t* addr_param[16];
 x_uint32_t size_param[16];

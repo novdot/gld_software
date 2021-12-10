@@ -212,18 +212,24 @@ void hardware_flash_read(x_uint32_t a_sector,x_uint32_t* a_pmemory, x_uint32_t a
     int start,end = 0;
     
     switch(a_sector){
-        case 0:
+        case MEMORY_BOOT_SEC_NUM:
+            start = MEMORY_BOOT_MEM_START;
+            end = MEMORY_BOOT_MEM_SIZE;
             break;
-        case 1:
+        
+        case MEMORY_MAIN_SEC_NUM:
             start = MEMORY_MAIN_MEM_START;
             end = MEMORY_MAIN_MEM_SIZE;
             break;
-        case 2:
+        
+        case MEMORY_FPGA_SEC_NUM:
             break;
-        case 3:
+        
+        case MEMORY_COEF_SEC_NUM:
             start = MEMORY_COEF_MEM_START;
-            end = MEMORY_COEF_MEM_SIZE;
+            end = a_cnt;
             break;
+        
         default:
             break;
     }

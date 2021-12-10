@@ -15,6 +15,8 @@
 #define GET_OFFSET_FROM_PTR(ptr)    ((ptr&0x3)<<14)+(((ptr&0x00FF00)>>8)<<0)+(((ptr&0x3F0000)>>16)<<8)
 #define GET_SECTOR_FROM_PTR(ptr)    ((ptr&0xFF)>>2)
 
+#define BOOTLOADER_BUF_SIZE (64) 
+
 typedef union bootloader_paramsFieldDef{
     struct{
         unsigned code: 4;
@@ -50,6 +52,7 @@ typedef struct bootloader_prevCmdBufDef{
 typedef struct bootloader_globalDef{
     bootloader_ptr ptr;
     bootloader_cmd cmd;
+    x_uint8_t buf128[BOOTLOADER_BUF_SIZE];
     x_bool_t bMonitorMode;
     x_uint32_t nTimerCnt; //<счетчик времени автоматической загрузки основной программы
     bootloader_prevCmdBuf prevCmd; //< предыдущая команда буффер

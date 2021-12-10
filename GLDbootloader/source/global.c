@@ -1,7 +1,5 @@
 #include "bootloader/global.h"
 
-
-
 /*****************************************************************************/
 void global_bootloader_init()
 {
