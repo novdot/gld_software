@@ -369,7 +369,7 @@
             <vShortWch>0</vShortWch>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>UART1REC UART0DBG  __CONFIG_COMMANDS_DEFAULT</Define>
+              <Define>UART1REC __CONFIG_COMMANDS_DEFAULT</Define>
               <Undefine></Undefine>
               <IncludePath>..\App;..\xlib\include;..\GLDcore\include;..\LPChost\include;..\GLDbootloader\include</IncludePath>
             </VariousControls>
@@ -448,6 +448,11 @@
               <FileName>global.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\GLDbootloader\source\global.c</FilePath>
+            </File>
+            <File>
+              <FileName>command_bootloader2.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\GLDbootloader\source\command_bootloader2.c</FilePath>
             </File>
           </Files>
         </Group>

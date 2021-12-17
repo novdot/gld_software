@@ -265,6 +265,7 @@ void UART_SendString(char* ucData,int size);
 int UART_SendByte(char ucData);
 
 void uart_send_unblocked(int ch, x_ring_buffer_t*a_pbuf);
+void uart_send_blocked(int ch, x_ring_buffer_t*a_pbuf);
 /******************************************************************************
 ** Function name:		uart_recieve
 **

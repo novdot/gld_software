@@ -69,12 +69,12 @@ void init()
 //основной цикл. ждем подключения, если нет - переключаемся на основную программу
 void loop()
 {
-    uart_recieve_unblocked(0,&g_gld.cmd.dbg.ring_in);
-    UART_DBG_SEND(&g_gld.cmd.dbg.ring_out);
+    //uart_recieve_unblocked(0,&g_gld.cmd.dbg.ring_in);
+    //UART_DBG_SEND(&g_gld.cmd.dbg.ring_out);
     
     uart_recieve_unblocked(1,&g_gld.cmd.ask.ring_in);
     if(x_ring_get_count(&g_gld.cmd.ask.ring_out)>0) 
-        uart_send_unblocked(1,&g_gld.cmd.ask.ring_out);
+        uart_send_blocked(1,&g_gld.cmd.ask.ring_out);
     
     //обработка команд
     command_recieve(_command_recieve_flag_bootloader);

@@ -421,6 +421,25 @@ void uart_send_unblocked(int a_ch, x_ring_buffer_t*a_pbuf)
             break;
     }
 }
+void uart_send_blocked(int a_ch, x_ring_buffer_t*a_pbuf)
+{
+    switch(a_ch){
+        case 0:
+            //if(!(LPC_UART0->LSR & 0x20)) return;
+            while(x_ring_get_count(a_pbuf)>0){
+                while (!(LPC_UART0->LSR & 0x20));
+                LPC_UART0->THR = x_ring_pop(a_pbuf);
+            }
+            break;
+        case 1:
+            //if(!(LPC_UART1->LSR & 0x20)) return;
+            while(x_ring_get_count(a_pbuf)>0){
+                while (!(LPC_UART1->LSR & 0x20));
+                LPC_UART1->THR = x_ring_pop(a_pbuf);
+            }
+            break;
+    }
+}
 /******************************************************************************/
 int UART0_SendByte(int ucData)
 {
