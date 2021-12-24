@@ -4,7 +4,7 @@
 #include "core/global.h"
 #include "core/command.h"
 
-/******************************************************************************/
+/******************************************************************************
 x_bool_t bootloader_read_cmd(x_ring_buffer_t *a_pbuf)
 {
     int iStart = 0;
@@ -87,3 +87,5 @@ x_bool_t bootloader_read_cmd(x_ring_buffer_t *a_pbuf)
 fail:
     return _x_false;
 }
+
+/******************************************************************************/
