@@ -93,6 +93,8 @@
 #define     FLASH_SECTOR_28      0x00070000
 #define     FLASH_SECTOR_29      0x00078000
 
+#define MEMORY_VOID_SEC_NUM (0xFF)
+
 #define MEMORY_BOOT_SEC_NUM (0)
 #define MEMORY_BOOT_SEC_START (0)
 #define MEMORY_BOOT_SEC_END (16)

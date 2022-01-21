@@ -259,25 +259,23 @@ void UART_Init(x_uint32_t baudrate);
     DBG_SEND(ring,buf,strlen(buf));
     
     
-/**/
+/**********************/
 void UART_DBG_SendString(char* ucData,int size);
 void UART_SendString(char* ucData,int size);
 int UART_SendByte(char ucData);
 
+/**********************/
+x_uint32_t uart_recieve_byte(x_uint8_t *key);
+void uart_send_byte(x_uint8_t c);
+
+/**********************/
 void uart_send_unblocked(int ch, x_ring_buffer_t*a_pbuf);
 void uart_send_blocked(int ch, x_ring_buffer_t*a_pbuf);
-/******************************************************************************
-** Function name:		uart_recieve
-**
-** Descriptions:		receive process preparation
-**
-** parameters:			None
-** Returned value:		None
-** 
-******************************************************************************/
+
 void uart_recieve(x_uint8_t*a_pBuffer,x_uint32_t*a_uCount);
 void uart_recieve_n(x_uint8_t a_ind, x_uint8_t*a_pBuffer, x_uint32_t*a_uCount);
 void uart_recieve_unblocked(int a_ch, x_ring_buffer_t*a_pbuf);
+
 /******************************************************************************
 ** Function name:		uart_recieve_reset
 **

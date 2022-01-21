@@ -53,10 +53,25 @@
 #define NAK_TIMEOUT             (0x100000)
 #define MAX_ERRORS              (5)
 
+typedef x_uint32_t (*recieve_byte_t)(x_uint8_t *key);
+typedef void (*send_byte_t)(x_uint8_t c);
+typedef x_bool_t (*mem_write_t)(x_uint8_t* file,x_uint16_t size,x_uint8_t *buf);
+typedef x_bool_t (*mem_erase_t)(x_uint8_t* file,x_uint16_t size);
+
+typedef struct{
+    recieve_byte_t recieve_byte;
+    send_byte_t send_byte;
+    mem_write_t mem_write;
+    mem_erase_t mem_erase;
+}x_ymodem_setups;
+
 /* Exported macro ------------------------------------------------------------*/
 /* Exported functions ------------------------------------------------------- */
-x_int32_t x_Ymodem_Receive(x_uint8_t *);
-x_uint8_t x_Ymodem_Transmit(x_uint8_t *,const  x_uint8_t* , x_uint32_t );
+//Receive a file using the ymodem protocol
+x_int32_t x_Ymodem_Receive(x_ymodem_setups, x_uint8_t *);
+
+//Transmit a file using the ymodem protocol
+x_uint8_t x_Ymodem_Transmit(x_ymodem_setups ,x_uint8_t *,const  x_uint8_t* , x_uint32_t );
 
 #endif  /* _YMODEM_H_ */
 

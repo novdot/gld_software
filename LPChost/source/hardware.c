@@ -207,7 +207,35 @@ void hardware_photo_set(x_uint32_t Ph_A, x_uint32_t Ph_B)
 }
 
 /******************************************************************************/
-void hardware_flash_read(x_uint32_t a_sector,x_uint32_t* a_pmemory, x_uint32_t a_cnt)
+x_bool_t compare_str(x_uint8_t* a_filename, char* a_reference)
+{
+    x_uint32_t icnt = 0;
+    x_uint32_t a_cnt = strlen((char*)a_reference);
+    
+    for(icnt=0;icnt<a_cnt;icnt++){
+        if(a_filename[icnt]!=a_reference[icnt]) return _x_false;
+    }
+    return _x_true;
+}
+void hardware_flash_convert_name2sector(
+    x_uint8_t* a_filename
+    , x_uint32_t* a_sector
+)
+{
+    *a_sector = MEMORY_VOID_SEC_NUM;
+    
+    if(compare_str(a_filename,"gld")==_x_true){
+        *a_sector = MEMORY_MAIN_SEC_NUM;
+        
+    }else if(compare_str(a_filename,"params")==_x_true){
+        *a_sector = MEMORY_COEF_SEC_NUM;
+        
+    }
+end:;
+    return;
+}
+/******************************************************************************/
+x_bool_t hardware_flash_read(x_uint32_t a_sector,x_uint32_t* a_pmemory, x_uint32_t a_cnt)
 {
     int start,end = 0;
     
@@ -234,61 +262,96 @@ void hardware_flash_read(x_uint32_t a_sector,x_uint32_t* a_pmemory, x_uint32_t a
             break;
     }
     memory_read(start,a_pmemory,a_cnt);
+    return _x_true;
 }
 /******************************************************************************/
-void hardware_flash_write(x_uint32_t a_sector,x_uint8_t* a_pmemory)
+x_bool_t hardware_flash_write_f(x_uint8_t* a_file, x_uint16_t a_size, x_uint8_t *buf)
+{
+    x_uint32_t a_sector=0;
+    hardware_flash_convert_name2sector(a_file,&a_sector);
+    
+    if(a_sector==MEMORY_VOID_SEC_NUM) return _x_false;
+    return hardware_flash_write(a_sector,buf,a_size);
+}
+
+x_bool_t hardware_flash_write(x_uint32_t a_sector, x_uint8_t* a_pmemory, x_uint16_t a_size)
 {
     int start,end = 0;
     x_uint32_t addr = 0;
     x_uint16_t size = 0;
     
     switch(a_sector){
-        case 0:
+        case MEMORY_BOOT_SEC_NUM:
             break;
-        case 1:
+        
+        case MEMORY_MAIN_SEC_NUM:
             start = MEMORY_MAIN_SEC_START;
             end = MEMORY_MAIN_SEC_END;
             addr = MEMORY_MAIN_MEM_START;
             size = (x_uint16_t)MEMORY_MAIN_MEM_SIZE;
             break;
-        case 2:
+        
+        case MEMORY_FPGA_SEC_NUM:
             break;
-        case 3:
+        
+        case MEMORY_COEF_SEC_NUM:
             start = MEMORY_COEF_SEC_START;
             end = MEMORY_COEF_SEC_END;
             addr = MEMORY_COEF_MEM_START;
             size = (x_uint16_t)MEMORY_COEF_MEM_SIZE;
             break;
+        
         default:
             break;
     }
-    memory_write(start,end,a_pmemory,size);
+    if(size<a_size) return _x_false;
+    memory_write(start,end,a_pmemory,a_size);
+    return _x_true;
 }
 /******************************************************************************/
-void hardware_flash_erase(x_uint32_t a_sector)
+x_bool_t hardware_flash_erase_f(x_uint8_t* a_file, x_uint16_t a_size)
+{
+    x_uint32_t a_sector=0;
+    hardware_flash_convert_name2sector(a_file,&a_sector);
+    
+    if(a_sector==MEMORY_VOID_SEC_NUM) return _x_false;
+    return hardware_flash_erase(a_sector,a_size);
+}
+x_bool_t hardware_flash_erase(x_uint32_t a_sector, x_uint16_t a_size)
 {
     int start,end = 0;
+    x_uint16_t size = 0;
+    
     switch(a_sector){
-        case 0:
+        case MEMORY_BOOT_SEC_NUM:
             start = MEMORY_BOOT_SEC_START;
             end = MEMORY_BOOT_SEC_END;
             break;
-        case 1:
+        
+        case MEMORY_MAIN_SEC_NUM:
             start = MEMORY_MAIN_SEC_START;
             end = MEMORY_MAIN_SEC_END;
+            size = (x_uint16_t)MEMORY_MAIN_MEM_SIZE;
             break;
-        case 2:
+        
+        case MEMORY_FPGA_SEC_NUM:
             break;
-        case 3:
+        
+        case MEMORY_COEF_SEC_NUM:
             start = MEMORY_COEF_SEC_START;
             end = MEMORY_COEF_SEC_END;
+            size = (x_uint16_t)MEMORY_COEF_MEM_SIZE;
             break;
+        
         default:
+            //full erase
             start = MEMORY_BOOT_SEC_START;
             end = MEMORY_COEF_SEC_END;
             break;
     }
+    if(a_sector==MEMORY_VOID_SEC_NUM) return _x_false;
     memory_erase(start,end);
+    return _x_true;
 }
 /******************************************************************************/
 void hardware_flash_load_main()

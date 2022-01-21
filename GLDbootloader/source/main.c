@@ -14,12 +14,14 @@
  с программирующим софтом uhost_Prog, т.к. для ее работы необходимо совпадение адреса
  запроса и адреса ответа.
 * */
-#include "bootloader/command_bootloader.h"
+//#include "bootloader/command_bootloader.h"
 #include "bootloader/global.h"
 #include "hardware/hardware.h"
 #include "core/config.h"
 #include "core/global.h"
+
 #include "xlib/ring_buffer.h"
+#include "xlib/ymodem.h"
 
 bootloader_global g_bootloader;
 /******************************************************************************/
@@ -60,6 +62,12 @@ void init()
     //init timer
     hardware_tim_init(&g_bootloader.nTimerCnt);
     
+    //setups
+    g_bootloader.setups.recieve_byte = uart_recieve_byte;
+    g_bootloader.setups.send_byte = uart_send_byte;
+    g_bootloader.setups.mem_erase = hardware_flash_erase_f;
+    g_bootloader.setups.mem_write = hardware_flash_write_f;
+    
     DBG2(&g_gld.cmd.dbg.ring_out,dbg,64,"Build in:%s %s\n\r",__DATE__, __TIME__);
          
     for(i=0;i<64;i++){x_ring_put(dbg[i],&g_gld.cmd.ask.ring_out);}
@@ -77,9 +85,10 @@ void loop()
         uart_send_blocked(1,&g_gld.cmd.ask.ring_out);
     
     //обработка команд
-    command_recieve(_command_recieve_flag_bootloader);
-    command_decode();
-    command_transm();
+    //command_recieve(_command_recieve_flag_bootloader);
+    //command_decode();
+    //command_transm();
+    x_Ymodem_Receive(g_bootloader.setups,g_gld.cmd.dbg.buf_in);
     
     //если прибор не введен в режим монитора, то проверим, что прошло время 
     //ожидания и запустим основную программу
