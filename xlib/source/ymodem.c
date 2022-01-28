@@ -25,12 +25,12 @@
   
 #include "xlib/ymodem.h"
 
-#define ApplicationAddress    0x8003000
-#define PAGE_SIZE                         (0x400)    /* 1 Kbyte */
-#define FLASH_SIZE                        (0x20000)  /* 128 KBytes */
+//#define ApplicationAddress    0x8003000
+//#define PAGE_SIZE                         (0x400)    /* 1 Kbyte */
+//#define FLASH_SIZE                        (0x20000)  /* 128 KBytes */
 
 /* Compute the FLASH upload image size */  
-#define FLASH_IMAGE_SIZE (uint32_t) (FLASH_SIZE - (ApplicationAddress - 0x08000000))
+//#define FLASH_IMAGE_SIZE (uint32_t) (FLASH_SIZE - (ApplicationAddress - 0x08000000))
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -49,17 +49,17 @@
 
 #define SerialPutString(x) Serial_PutString((uint8_t*)(x))
 
-#define FLASH_IMAGE_SIZE (0)
+//#define FLASH_IMAGE_SIZE (0)
 
 /* Private variables ---------------------------------------------------------*/
 x_uint8_t file_name[FILE_NAME_LENGTH];
-x_uint32_t FlashDestination = ApplicationAddress; /* Flash user program offset */
-x_uint16_t PageSize = PAGE_SIZE;
+//x_uint32_t FlashDestination = ApplicationAddress; /* Flash user program offset */
+//x_uint16_t PageSize = PAGE_SIZE;
 x_uint32_t EraseCounter = 0x0;
 x_uint32_t NbrOfPage = 0;
 //FLASH_Status FLASHStatus = FLASH_COMPLETE;
 x_uint32_t RamSource;
-x_uint8_t tab_1024[1024];
+//x_uint8_t tab_1024[1024];
 
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
@@ -219,12 +219,10 @@ static x_int32_t Receive_Packet (x_ymodem_setups setups,x_uint8_t *data, x_int32
     x_uint16_t i, packet_size;
     x_uint8_t c;
     *length = 0;
-    if (Receive_Byte(setups,&c, timeout) != 0)
-    {
-    return -1;
+    if (Receive_Byte(setups,&c, timeout) != 0) {
+        return -1;
     }
-    switch (c)
-    {
+    switch (c) {
     case SOH:
       packet_size = PACKET_SIZE;
       break;
@@ -250,11 +248,9 @@ static x_int32_t Receive_Packet (x_ymodem_setups setups,x_uint8_t *data, x_int32
       return -1;
     }
     *data = c;
-    for (i = 1; i < (packet_size + PACKET_OVERHEAD); i ++)
-    {
-        if (Receive_Byte(setups,data + i, timeout) != 0)
-        {
-          return -1;
+    for (i = 1; i < (packet_size + PACKET_OVERHEAD); i ++) {
+        if (Receive_Byte(setups,data + i, timeout) != 0) {
+            return -1;
         }
     }
     if (data[PACKET_SEQNO_INDEX] != ((data[PACKET_SEQNO_COMP_INDEX] ^ 0xff) & 0xff))
@@ -271,13 +267,17 @@ static x_int32_t Receive_Packet (x_ymodem_setups setups,x_uint8_t *data, x_int32
   * @param  buf: Address of the first byte
   * @retval The size of the file
   */
+#include "hardware/hardware.h"
 x_int32_t x_Ymodem_Receive (x_ymodem_setups setups, x_uint8_t *buf)
 {
+    int i_=0;
+    char dbg[64];
+    
     x_uint8_t packet_data[PACKET_1K_SIZE + PACKET_OVERHEAD], file_size[FILE_SIZE_LENGTH], *file_ptr, *buf_ptr;
     x_int32_t i, j, packet_length, session_done, file_done, packets_received, errors, session_begin, size = 0;
 
     /* Initialize FlashDestination variable */
-    FlashDestination = ApplicationAddress;
+    //FlashDestination = ApplicationAddress;
 
     for (session_done = 0, errors = 0, session_begin = 0; ;) {
         for (packets_received = 0, file_done = 0, buf_ptr = buf; ;) {
@@ -315,9 +315,9 @@ x_int32_t x_Ymodem_Receive (x_ymodem_setups setups, x_uint8_t *buf)
                                 Str2Int(file_size, &size);
 
                                 /* Test the size of the image to be sent */
-                                /* Image size is greater than Flash size */
+                                /* Image size is greater than Flash size *
                                 if (size > (FLASH_SIZE - 1)){
-                                    /* End session */
+                                    /* End session *
                                     Send_Byte(setups,CA);
                                     Send_Byte(setups,CA);
                                     return -1;
@@ -331,9 +331,16 @@ x_int32_t x_Ymodem_Receive (x_ymodem_setups setups, x_uint8_t *buf)
                                 for (EraseCounter = 0; (EraseCounter < NbrOfPage) && (FLASHStatus == FLASH_COMPLETE); EraseCounter++){
                                     FLASHStatus = FLASH_ErasePage(FlashDestination + (PageSize * EraseCounter));
                                 }*/
-                                setups.mem_erase(file_name,size);
-                                Send_Byte(setups,ACK);
-                                Send_Byte(setups,CRC16);
+                                if(setups.mem_erase(file_name,size)==_x_true){
+                                    Send_Byte(setups,ACK);
+                                    Send_Byte(setups,CRC16);
+                                    //return 255;
+                                }else{
+                                    /* End session */
+                                    Send_Byte(setups,CA);
+                                    Send_Byte(setups,CA);
+                                    return -1;
+                                }
                             }else{
                                 /* Filename packet is empty, end session */
                                 Send_Byte(setups,ACK);
@@ -344,6 +351,7 @@ x_int32_t x_Ymodem_Receive (x_ymodem_setups setups, x_uint8_t *buf)
                         }else{
                             /* Data packet */
                             memcpy(buf_ptr, packet_data + PACKET_HEADER, packet_length);
+                            /*
                             RamSource = (x_uint32_t)buf;
                             for (j = 0;(j < packet_length) && (FlashDestination <  ApplicationAddress + size);j += 4) {
                                 /* Program the data received into STM32F10x Flash */
@@ -354,9 +362,18 @@ x_int32_t x_Ymodem_Receive (x_ymodem_setups setups, x_uint8_t *buf)
                                     Send_Byte(setups,CA);
                                     Send_Byte(setups,CA);
                                     return -2;
-                                }*/
+                                }
                                 FlashDestination += 4;
                                 RamSource += 4;
+                            }
+                            */
+                            if(setups.mem_write(file_name,packet_length,buf_ptr)){
+                                
+                            }else{
+                                /* End session */
+                                Send_Byte(setups,CA);
+                                Send_Byte(setups,CA);
+                                return -2;
                             }
                             Send_Byte(setups,ACK);
                         }
@@ -383,6 +400,7 @@ x_int32_t x_Ymodem_Receive (x_ymodem_setups setups, x_uint8_t *buf)
                     return 0;
                 }
                 Send_Byte(setups,CRC16);
+                return 255;
                 break;
             }
             if (file_done != 0) {
@@ -564,7 +582,6 @@ void Ymodem_SendPacket(x_ymodem_setups setups, x_uint8_t *data, x_uint16_t lengt
   */
 x_uint8_t x_Ymodem_Transmit (x_ymodem_setups setups, x_uint8_t *buf, const x_uint8_t* sendFileName, x_uint32_t sizeFile)
 {
-  
     x_uint8_t packet_data[PACKET_1K_SIZE + PACKET_OVERHEAD];
     x_uint8_t FileName[FILE_NAME_LENGTH];
     x_uint8_t *buf_ptr, tempCheckSum ;
@@ -648,7 +665,7 @@ x_uint8_t x_Ymodem_Transmit (x_ymodem_setups setups, x_uint8_t *buf, const x_uin
             Send_Byte(setups,tempCheckSum);
             }
 
-            /* Wait for Ack */
+            /* Wait for Ack TODO**************
             if ((Receive_Byte(setups,&receivedC[0], 100000) == 0)  && (receivedC[0] == ACK)) {
                 ackReceived = 1;  
                 if (size > pktSize)
@@ -656,7 +673,7 @@ x_uint8_t x_Ymodem_Transmit (x_ymodem_setups setups, x_uint8_t *buf, const x_uin
                    buf_ptr += pktSize;  
                    size -= pktSize;
                    if (blkNumber == (FLASH_IMAGE_SIZE/1024)) {
-                     return 0xFF; /*  error */
+                     return 0xFF; /*  error *
                    } else {
                       blkNumber++;
                    }
@@ -667,7 +684,7 @@ x_uint8_t x_Ymodem_Transmit (x_ymodem_setups setups, x_uint8_t *buf, const x_uin
             }
             else {
                 errors++;
-            }
+            }*********/
         }while(!ackReceived && (errors < 0x0A));
         /* Resend packet if NAK  for a count of 10 else end of commuincation */
 

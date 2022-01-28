@@ -263,7 +263,7 @@ void UART_Init(x_uint32_t baudrate);
 void UART_DBG_SendString(char* ucData,int size);
 void UART_SendString(char* ucData,int size);
 int UART_SendByte(char ucData);
-
+#define UART_SENDSTR(x) UART_SendString(x,strlen(x));
 /**********************/
 x_uint32_t uart_recieve_byte(x_uint8_t *key);
 void uart_send_byte(x_uint8_t c);

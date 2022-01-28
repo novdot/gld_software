@@ -35,9 +35,9 @@ void init()
     x_ring_init(&g_gld.cmd.dbg.ring_in, g_gld.cmd.dbg.buf_in, GLD_RINGBUFFER_SIZE);
     x_ring_init(&g_gld.cmd.dbg.ring_out, g_gld.cmd.dbg.buf_out, GLD_RINGBUFFER_SIZE);
     
-    x_ring_init(&g_gld.cmd.ask.ring_in, g_gld.cmd.ask.buf_in, GLD_RINGBUFFER_SIZE);
-    x_ring_init(&g_gld.cmd.ask.ring_out, g_gld.cmd.ask.buf_out, GLD_RINGBUFFER_SIZE);
-    g_gld.cmd.recieve_cmd_size = 0;
+    //x_ring_init(&g_gld.cmd.ask.ring_in, g_gld.cmd.ask.buf_in, GLD_RINGBUFFER_SIZE);
+    //x_ring_init(&g_gld.cmd.ask.ring_out, g_gld.cmd.ask.buf_out, GLD_RINGBUFFER_SIZE);
+    //g_gld.cmd.recieve_cmd_size = 0;
     
     //e. clocking control initialization
     SystemInit();
@@ -70,25 +70,50 @@ void init()
     
     DBG2(&g_gld.cmd.dbg.ring_out,dbg,64,"Build in:%s %s\n\r",__DATE__, __TIME__);
          
-    for(i=0;i<64;i++){x_ring_put(dbg[i],&g_gld.cmd.ask.ring_out);}
+    //for(i=0;i<64;i++){x_ring_put(dbg[i],&g_gld.cmd.ask.ring_out);}
 }
 
 /******************************************************************************/
 //основной цикл. ждем подключения, если нет - переключаемся на основную программу
+uint8_t tab_1024[1024] = { 0 };
+x_int32_t ret_val = 0;
 void loop()
 {
-    //uart_recieve_unblocked(0,&g_gld.cmd.dbg.ring_in);
-    //UART_DBG_SEND(&g_gld.cmd.dbg.ring_out);
+    int i=0;
+    char dbg[64];
     
-    uart_recieve_unblocked(1,&g_gld.cmd.ask.ring_in);
+    //uart_recieve_unblocked(0,&g_gld.cmd.dbg.ring_in);
+    UART_DBG_SEND(&g_gld.cmd.dbg.ring_out);
+    
+    /*uart_recieve_unblocked(1,&g_gld.cmd.ask.ring_in);
     if(x_ring_get_count(&g_gld.cmd.ask.ring_out)>0) 
-        uart_send_blocked(1,&g_gld.cmd.ask.ring_out);
+        uart_send_blocked(1,&g_gld.cmd.ask.ring_out);*/
     
     //обработка команд
     //command_recieve(_command_recieve_flag_bootloader);
     //command_decode();
     //command_transm();
-    x_Ymodem_Receive(g_bootloader.setups,g_gld.cmd.dbg.buf_in);
+
+    ret_val = x_Ymodem_Receive(g_bootloader.setups,&tab_1024[0]);
+    if (ret_val == 255) {
+        //skip
+    } else if (ret_val > 0) {
+        DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"\n\n\rProgramming Completed Successfully!\n\r");
+        /*SerialPutString(file_name);
+        Int2Str(Number, Size);
+        SerialPutString("\n\r Size: ");
+        SerialPutString(Number);
+        SerialPutString(" Bytes\r\n");
+        SerialPutString("-------------------\n");*/
+    } else if (ret_val == -1) {
+        DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"\n\n\rThe image size is higher than the allowed space memory!\n\r");
+    } else if (ret_val == -2) {
+        DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"\n\n\rVerification failed!\n\r");
+    } else if (ret_val == -3) {
+        DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"\r\n\nAborted by user.\n\r");
+    } else {
+        DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"\n\rFailed to receive the file! code:%d\n\r",ret_val);
+    }
     
     //если прибор не введен в режим монитора, то проверим, что прошло время 
     //ожидания и запустим основную программу
