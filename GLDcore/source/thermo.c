@@ -248,7 +248,7 @@ void thermo_clc_ThermoSensors(void)
     
 
     //TODO for tests
-	Output.Str.Tmp_Out[TSENS_NUMB] = 1000;
+	//Output.Str.Tmp_Out[TSENS_NUMB] = 1000;
 	
 	//e. 1 second elapsed
 	if (g_gld.time_1_Sec == DEVICE_SAMPLE_RATE_uks) {
