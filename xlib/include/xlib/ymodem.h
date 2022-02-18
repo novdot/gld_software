@@ -53,6 +53,13 @@
 #define NAK_TIMEOUT             (0x100000)
 #define MAX_ERRORS              (5)
 
+/*
+
+#define NAK_TIMEOUT             (1000)
+#define MAX_ERRORS              (45)
+*/
+#define YM_MAX_FILESIZE         (10*1024*1024)
+
 typedef x_uint32_t (*recieve_byte_t)(x_uint8_t *key);
 typedef void (*send_byte_t)(x_uint8_t c);
 typedef x_bool_t (*mem_write_t)(x_uint8_t* file,x_uint16_t size,x_uint8_t *buf);
