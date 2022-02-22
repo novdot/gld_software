@@ -22,6 +22,7 @@
 
 #include "xlib/ring_buffer.h"
 #include "xlib/ymodem.h"
+#include "xlib/ymodem_v2.h"
 
 bootloader_global g_bootloader;
 /******************************************************************************/
@@ -77,6 +78,8 @@ void init()
 //основной цикл. ждем подключения, если нет - переключаемся на основную программу
 uint8_t tab_1024[1024] = { 0 };
 x_int32_t ret_val = 0;
+int max_fsize = 128*1024;
+char orig_name[256] = {'\0'};
 void loop()
 {
     int i=0;
@@ -94,17 +97,18 @@ void loop()
     //command_decode();
     //command_transm();
 
+    /*
     ret_val = x_Ymodem_Receive(g_bootloader.setups,&tab_1024[0]);
     if (ret_val == 255) {
         //skip
     } else if (ret_val > 0) {
         DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"\n\n\rProgramming Completed Successfully!\n\r");
-        /*SerialPutString(file_name);
-        Int2Str(Number, Size);
-        SerialPutString("\n\r Size: ");
-        SerialPutString(Number);
-        SerialPutString(" Bytes\r\n");
-        SerialPutString("-------------------\n");*/
+        //SerialPutString(file_name);
+        //Int2Str(Number, Size);
+        //SerialPutString("\n\r Size: ");
+        //SerialPutString(Number);
+        //SerialPutString(" Bytes\r\n");
+        //SerialPutString("-------------------\n");
     } else if (ret_val == -1) {
         DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"\n\n\rThe image size is higher than the allowed space memory!\n\r");
     } else if (ret_val == -2) {
@@ -113,7 +117,9 @@ void loop()
         DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"\r\n\nAborted by user.\n\r");
     } else {
         DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"\n\rFailed to receive the file! code:%d\n\r",ret_val);
-    }
+    }*/
+    
+    ret_val = Ymodem_Receive(g_bootloader.setups, max_fsize, orig_name);
     
     //если прибор не введен в режим монитора, то проверим, что прошло время 
     //ожидания и запустим основную программу
