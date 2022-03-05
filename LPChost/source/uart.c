@@ -513,6 +513,8 @@ x_uint32_t uart_recieve_byte(x_uint8_t *key)
  #if defined UART1REC
     if ((LPC_UART1->LSR & RecievBufEmpty) != 0) { 
         *key = LPC_UART1->RBR;
+        //TODO temp for tests
+        UART0_SendByte(*key);
         return 1;
     }else
 #elif defined UART0REC

@@ -61,12 +61,15 @@ static unsigned short crc16(const unsigned char *buf, unsigned long count)
 /******************************************************************************/
 static int32_t Receive_Byte (x_ymodem_setups setups, unsigned char *c, uint32_t timeout)
 {
-	unsigned char ch;
-    int len = setups.recieve_byte(c);
+	//unsigned char ch;
+    int len = 0;
+    while( (timeout--) > 1 );
+    
+    len = setups.recieve_byte(c);
         //uart_read_bytes(EX_UART_NUM, &ch, 1, timeout / portTICK_RATE_MS);
     if (len <= 0) return -1;
 
-    *c = ch;
+    //*c = ch;
     return 0;
 }
 
@@ -80,14 +83,15 @@ static void uart_consume(x_ymodem_setups setups)
 /******************************************************************************/
 static uint32_t Send_Byte (x_ymodem_setups setups,char c)
 {
-  //uart_write_bytes(EX_UART_NUM, &c, 1);
-  return 0;
+    //uart_write_bytes(EX_UART_NUM, &c, 1);
+    setups.send_byte(c);
+    return 0;
 }
 
 /******************************************************************************/
 static void send_CA ( x_ymodem_setups setups ) {
   Send_Byte(setups,CA);
-  Send_Byte(setups,CA);
+  //Send_Byte(setups,CA);
 }
 
 /******************************************************************************/
@@ -156,7 +160,8 @@ static int32_t Receive_Packet (x_ymodem_setups setups, uint8_t *data, int *lengt
     		*length = -1;
     		return 0;
     	}
-    	else return -1;
+    	else 
+            return -1;
     case ABORT1:
     case ABORT2:
     	return -2;
@@ -195,12 +200,12 @@ static int32_t Receive_Packet (x_ymodem_setups setups, uint8_t *data, int *lengt
 // Receive a file using the ymodem protocol.
 int Ymodem_Receive (x_ymodem_setups setups, unsigned int maxsize, char* getname)
 {
-  uint8_t packet_data[PACKET_1K_SIZE + PACKET_OVERHEAD];
-  uint8_t *file_ptr;
-  char file_size[128];
-  unsigned int i, file_len, write_len, session_done, file_done, packets_received, errors, size = 0;
-  int packet_length = 0;
-  int eof_cnt = 0;
+  static uint8_t packet_data[PACKET_1K_SIZE + PACKET_OVERHEAD];
+  static uint8_t *file_ptr;
+  static char file_size[128];
+  static unsigned int i, file_len, write_len, session_done, file_done, packets_received, errors, size = 0;
+  static int packet_length = 0;
+  static int eof_cnt = 0;
     
   file_len = 0;
   
@@ -218,7 +223,7 @@ int Ymodem_Receive (x_ymodem_setups setups, unsigned int maxsize, char* getname)
             case -2:
                 // error
                 errors ++;
-                if (errors > 5) {
+                if (errors > MAX_ERRORS) {
                   send_CA(setups);
                   size = -2;
                   goto exit;
@@ -242,7 +247,7 @@ int Ymodem_Receive (x_ymodem_setups setups, unsigned int maxsize, char* getname)
               }
               else if ((packet_data[PACKET_SEQNO_INDEX] & 0xff) != (packets_received & 0x000000ff)) {
                 errors ++;
-                if (errors > 5) {
+                if (errors > MAX_ERRORS) {
                   send_CA(setups);
                   size = -3;
                   goto exit;
@@ -287,7 +292,7 @@ int Ymodem_Receive (x_ymodem_setups setups, unsigned int maxsize, char* getname)
                   // Filename packet is empty, end session
                   else {
                       errors ++;
-                      if (errors > 5) {
+                      if (errors > MAX_ERRORS) {
                         send_CA(setups);
                         size = -5;
                         goto exit;
@@ -298,7 +303,7 @@ int Ymodem_Receive (x_ymodem_setups setups, unsigned int maxsize, char* getname)
                 else {
                   // ** Data packet **
                   // Write received data to file
-                  if (file_len < size) {
+                  /*if (file_len < size) {
                     file_len += packet_length;  // total bytes received
                     if (file_len > size) {
                     	write_len = packet_length - (file_len - size);
@@ -314,7 +319,7 @@ int Ymodem_Receive (x_ymodem_setups setups, unsigned int maxsize, char* getname)
                       goto exit;
                     }*/
                     //LED_toggle();
-                  }
+                  //}
                   //success
                   errors = 0;
                   send_ACK(setups);

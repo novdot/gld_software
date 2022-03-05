@@ -32,6 +32,10 @@
 
 #include <stdint.h>
 #include "xlib/ymodem.h"
+typedef enum{
+    _xlib_ymodem_abort_by_sender = -1
+    , _xlib_ymodem_error_rec_packet = -2
+}error_codes;
 
 int Ymodem_Receive (x_ymodem_setups setups, unsigned int maxsize, char* getname);
 int Ymodem_Transmit (x_ymodem_setups setups, char* sendFileName, unsigned int sizeFile);

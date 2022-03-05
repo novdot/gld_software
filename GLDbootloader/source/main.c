@@ -97,8 +97,9 @@ void loop()
     //command_decode();
     //command_transm();
 
-    /*
+    /***/
     ret_val = x_Ymodem_Receive(g_bootloader.setups,&tab_1024[0]);
+    /**/
     if (ret_val == 255) {
         //skip
     } else if (ret_val > 0) {
@@ -117,9 +118,11 @@ void loop()
         DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"\r\n\nAborted by user.\n\r");
     } else {
         DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"\n\rFailed to receive the file! code:%d\n\r",ret_val);
-    }*/
+    }
+    /*****/
     
-    ret_val = Ymodem_Receive(g_bootloader.setups, max_fsize, orig_name);
+    //ret_val = Ymodem_Receive(g_bootloader.setups, max_fsize, orig_name);
+    DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"\n\rcode:%d\n\r",ret_val);
     
     //если прибор не введен в режим монитора, то проверим, что прошло время 
     //ожидания и запустим основную программу
