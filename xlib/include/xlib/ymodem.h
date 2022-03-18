@@ -55,7 +55,7 @@
 #define MAX_ERRORS              (5)
 /****/
 
-#define NAK_TIMEOUT             (0x100000)
+#define NAK_TIMEOUT             (0x300000)
 #define MAX_ERRORS              (45)
 /****/
 #define YM_MAX_FILESIZE         (10*1024*1024)

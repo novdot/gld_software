@@ -22,7 +22,7 @@
 
 #include "xlib/ring_buffer.h"
 #include "xlib/ymodem.h"
-#include "xlib/ymodem_v2.h"
+//#include "xlib/ymodem_v2.h"
 
 bootloader_global g_bootloader;
 /******************************************************************************/
@@ -99,7 +99,7 @@ void loop()
 
     /***/
     ret_val = x_Ymodem_Receive(g_bootloader.setups,&tab_1024[0]);
-    /**/
+    /**
     if (ret_val == 255) {
         //skip
     } else if (ret_val > 0) {
@@ -122,7 +122,7 @@ void loop()
     /*****/
     
     //ret_val = Ymodem_Receive(g_bootloader.setups, max_fsize, orig_name);
-    DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"\n\rcode:%d\n\r",ret_val);
+    //DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"\n\rcode:%d\n\r",ret_val);
     
     //если прибор не введен в режим монитора, то проверим, что прошло время 
     //ожидания и запустим основную программу

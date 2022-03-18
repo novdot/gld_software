@@ -331,12 +331,13 @@ x_int32_t x_Ymodem_Receive (x_ymodem_setups setups, x_uint8_t *buf)
                                 for (EraseCounter = 0; (EraseCounter < NbrOfPage) && (FLASHStatus == FLASH_COMPLETE); EraseCounter++){
                                     FLASHStatus = FLASH_ErasePage(FlashDestination + (PageSize * EraseCounter));
                                 }*/
+                                
                                 if(setups.mem_erase(file_name,size)==_x_true){
                                     Send_Byte(setups,ACK);
                                     Send_Byte(setups,CRC16);
                                     //return 255;
                                 }else{
-                                    /* End session */
+                                    // End session
                                     Send_Byte(setups,CA);
                                     Send_Byte(setups,CA);
                                     return -1;
@@ -358,7 +359,7 @@ x_int32_t x_Ymodem_Receive (x_ymodem_setups setups, x_uint8_t *buf)
                                 /*FLASH_ProgramWord(FlashDestination, *(x_uint32_t*)RamSource);
 
                                 if (*(x_uint32_t*)FlashDestination != *(x_uint32_t*)RamSource) {
-                                    /* End session *
+                                    // End session *
                                     Send_Byte(setups,CA);
                                     Send_Byte(setups,CA);
                                     return -2;
@@ -367,15 +368,14 @@ x_int32_t x_Ymodem_Receive (x_ymodem_setups setups, x_uint8_t *buf)
                                 RamSource += 4;
                             }
                             */
-                            if(setups.mem_write(file_name,packet_length,buf_ptr)){
-                                
+                            if(setups.mem_write(file_name,packet_length,buf_ptr)==_x_true){
+                                Send_Byte(setups,ACK);
                             }else{
-                                /* End session */
+                                // End session
                                 Send_Byte(setups,CA);
                                 Send_Byte(setups,CA);
                                 return -2;
                             }
-                            Send_Byte(setups,ACK);
                         }
                         packets_received ++;
                         session_begin = 1;
@@ -400,7 +400,7 @@ x_int32_t x_Ymodem_Receive (x_ymodem_setups setups, x_uint8_t *buf)
                     return 0;
                 }
                 Send_Byte(setups,CRC16);
-                return 255;
+                //return 255;
                 break;
             }
             if (file_done != 0) {

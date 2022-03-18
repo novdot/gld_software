@@ -440,19 +440,9 @@
               <FilePath>..\GLDbootloader\source\main.c</FilePath>
             </File>
             <File>
-              <FileName>command_bootloader.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\GLDbootloader\source\command_bootloader.c</FilePath>
-            </File>
-            <File>
               <FileName>global.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\GLDbootloader\source\global.c</FilePath>
-            </File>
-            <File>
-              <FileName>command_bootloader2.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\GLDbootloader\source\command_bootloader2.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -529,11 +519,6 @@
         <Group>
           <GroupName>GLDcore</GroupName>
           <Files>
-            <File>
-              <FileName>command.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\GLDcore\source\command.c</FilePath>
-            </File>
             <File>
               <FileName>global.c</FileName>
               <FileType>1</FileType>
