@@ -177,14 +177,21 @@ x_uint32_t Str2Int(x_uint8_t *inputstr, x_int32_t *intnum)
   */
 static x_int32_t Receive_Byte(x_ymodem_setups setups, x_uint8_t *c, x_uint32_t timeout)
 {
-    while (timeout-- > 0)
+    x_uint8_t bInfFlag = 0;
+    if(timeout==0) bInfFlag = 1;
+    while (1)
     {
+        if(bInfFlag==0) {
+            timeout--;
+            if(timeout<=0) goto end;
+        }
         //if (SerialKeyPressed(c) == 1)
         if(setups.recieve_byte(c) == 1)
         {
             return 0;
         }
     }
+end:;
     return -1;
 }
 
@@ -272,6 +279,7 @@ x_int32_t x_Ymodem_Receive (x_ymodem_setups setups, x_uint8_t *buf)
 {
     int i_=0;
     char dbg[64];
+    x_uint32_t timeout = NAK_TIMEOUT;
     
     x_uint8_t packet_data[PACKET_1K_SIZE + PACKET_OVERHEAD], file_size[FILE_SIZE_LENGTH], *file_ptr, *buf_ptr;
     x_int32_t i, j, packet_length, session_done, file_done, packets_received, errors, session_begin, size = 0;
@@ -281,7 +289,7 @@ x_int32_t x_Ymodem_Receive (x_ymodem_setups setups, x_uint8_t *buf)
 
     for (session_done = 0, errors = 0, session_begin = 0; ;) {
         for (packets_received = 0, file_done = 0, buf_ptr = buf; ;) {
-            switch (Receive_Packet(setups, packet_data, &packet_length, NAK_TIMEOUT)) {
+            switch (Receive_Packet(setups, packet_data, &packet_length, timeout)) {
             /* normally return */
             case 0:
                 errors = 0;
@@ -299,8 +307,13 @@ x_int32_t x_Ymodem_Receive (x_ymodem_setups setups, x_uint8_t *buf)
                 default:
                     if ((packet_data[PACKET_SEQNO_INDEX] & 0xff) != (packets_received & 0xff)){
                         Send_Byte(setups,NAK);
-                    }else{
+                        //Send_Byte(setups,ACK);
+                    }else
+                    {
                         if (packets_received == 0){
+                        //if ((packet_data[PACKET_SEQNO_INDEX] & 0xff) == 0){
+                            
+                            //timeout = 0;
                             /* Filename packet */
                             if (packet_data[PACKET_HEADER] != 0){
                                 /* Filename packet has valid data */
@@ -368,7 +381,13 @@ x_int32_t x_Ymodem_Receive (x_ymodem_setups setups, x_uint8_t *buf)
                                 RamSource += 4;
                             }
                             */
-                            if(setups.mem_write(file_name,packet_length,buf_ptr)==_x_true){
+                            if(
+                                setups.mem_write(
+                                    file_name
+                                    ,packet_length
+                                    ,buf_ptr
+                                    ,/*packet_length*(packet_data[PACKET_SEQNO_INDEX] & 0xff)*/ 0
+                                    )==_x_true){
                                 Send_Byte(setups,ACK);
                             }else{
                                 // End session

@@ -62,7 +62,7 @@
 
 typedef x_uint32_t (*recieve_byte_t)(x_uint8_t *key);
 typedef void (*send_byte_t)(x_uint8_t c);
-typedef x_bool_t (*mem_write_t)(x_uint8_t* file,x_uint16_t size,x_uint8_t *buf);
+typedef x_bool_t (*mem_write_t)(x_uint8_t* file,x_uint16_t size,x_uint8_t *buf,x_uint16_t shift);
 typedef x_bool_t (*mem_erase_t)(x_uint8_t* file,x_uint16_t size);
 
 typedef struct{

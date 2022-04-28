@@ -265,16 +265,24 @@ x_bool_t hardware_flash_read(x_uint32_t a_sector,x_uint32_t* a_pmemory, x_uint32
     return _x_true;
 }
 /******************************************************************************/
-x_bool_t hardware_flash_write_f(x_uint8_t* a_file, x_uint16_t a_size, x_uint8_t *buf)
+x_bool_t hardware_flash_write_f(
+    x_uint8_t* a_file
+    , x_uint16_t a_size
+    , x_uint8_t *buf
+    , x_uint16_t shift)
 {
     x_uint32_t a_sector=0;
     hardware_flash_convert_name2sector(a_file,&a_sector);
     
     if(a_sector==MEMORY_VOID_SEC_NUM) return _x_false;
-    return hardware_flash_write(a_sector,buf,a_size);
+    return hardware_flash_write(a_sector,buf,a_size,shift);
 }
 
-x_bool_t hardware_flash_write(x_uint32_t a_sector, x_uint8_t* a_pmemory, x_uint16_t a_size)
+x_bool_t hardware_flash_write(
+    x_uint32_t a_sector
+    , x_uint8_t* a_pmemory
+    , x_uint16_t a_size
+    , x_uint16_t shift)
 {
     int start,end = 0;
     x_uint32_t addr = 0;
@@ -305,7 +313,7 @@ x_bool_t hardware_flash_write(x_uint32_t a_sector, x_uint8_t* a_pmemory, x_uint1
             break;
     }
     if(size<a_size) return _x_false;
-    memory_write(start,end,a_pmemory,a_size);
+    memory_write(start+shift,end,a_pmemory,a_size);
     return _x_true;
 }
 /******************************************************************************/
