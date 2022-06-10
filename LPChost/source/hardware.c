@@ -284,7 +284,7 @@ x_bool_t hardware_flash_write(
     , x_uint16_t a_size
     , x_uint16_t shift)
 {
-    int start,end = 0;
+    int sec_start,sec_end = 0;
     x_uint32_t addr = 0;
     x_uint16_t size = 0;
     
@@ -293,8 +293,8 @@ x_bool_t hardware_flash_write(
             break;
         
         case MEMORY_MAIN_SEC_NUM:
-            start = MEMORY_MAIN_SEC_START;
-            end = MEMORY_MAIN_SEC_END;
+            sec_start = MEMORY_MAIN_SEC_START;
+            sec_end = MEMORY_MAIN_SEC_END;
             addr = MEMORY_MAIN_MEM_START;
             size = (x_uint16_t)MEMORY_MAIN_MEM_SIZE;
             break;
@@ -303,8 +303,8 @@ x_bool_t hardware_flash_write(
             break;
         
         case MEMORY_COEF_SEC_NUM:
-            start = MEMORY_COEF_SEC_START;
-            end = MEMORY_COEF_SEC_END;
+            sec_start = MEMORY_COEF_SEC_START;
+            sec_end = MEMORY_COEF_SEC_END;
             addr = MEMORY_COEF_MEM_START;
             size = (x_uint16_t)MEMORY_COEF_MEM_SIZE;
             break;
@@ -313,7 +313,7 @@ x_bool_t hardware_flash_write(
             break;
     }
     if(size<a_size) return _x_false;
-    memory_write(start+shift,end,a_pmemory,a_size);
+    memory_write(sec_start,sec_end,a_pmemory,a_size);
     return _x_true;
 }
 /******************************************************************************/

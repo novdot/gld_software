@@ -302,6 +302,7 @@ x_int32_t x_Ymodem_Receive (x_ymodem_setups setups, x_uint8_t *buf)
                 case 0:
                     Send_Byte(setups,ACK);
                     file_done = 1;
+                    
                     break;
                 /* Normal packet */
                 default:
@@ -310,9 +311,8 @@ x_int32_t x_Ymodem_Receive (x_ymodem_setups setups, x_uint8_t *buf)
                         //Send_Byte(setups,ACK);
                     }else
                     {
+                        //Recieve #0
                         if (packets_received == 0){
-                        //if ((packet_data[PACKET_SEQNO_INDEX] & 0xff) == 0){
-                            
                             //timeout = 0;
                             /* Filename packet */
                             if (packet_data[PACKET_HEADER] != 0){
@@ -362,7 +362,9 @@ x_int32_t x_Ymodem_Receive (x_ymodem_setups setups, x_uint8_t *buf)
                                 session_done = 1;
                                 break;
                             }
-                        }else{
+                        }
+                        //Recieve #(packet_data[PACKET_SEQNO_INDEX] & 0xff) 
+                        else{
                             /* Data packet */
                             memcpy(buf_ptr, packet_data + PACKET_HEADER, packet_length);
                             /*
@@ -667,7 +669,7 @@ x_uint8_t x_Ymodem_Transmit (x_ymodem_setups setups, x_uint8_t *buf, const x_uin
             }
             else
             {
-            pktSize = PACKET_SIZE;
+                pktSize = PACKET_SIZE;
             }
             Ymodem_SendPacket(setups, packet_data, pktSize + PACKET_HEADER);
             /* Send CRC or Check Sum based on CRC16_F */
