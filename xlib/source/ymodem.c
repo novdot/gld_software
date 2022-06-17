@@ -177,14 +177,14 @@ x_uint32_t Str2Int(x_uint8_t *inputstr, x_int32_t *intnum)
   */
 static x_int32_t Receive_Byte(x_ymodem_setups setups, x_uint8_t *c, x_uint32_t timeout)
 {
-    x_uint8_t bInfFlag = 0;
-    if(timeout==0) bInfFlag = 1;
-    while (1)
+    //x_uint8_t bInfFlag = 0;
+    //if(timeout==0) bInfFlag = 1;
+    while (timeout-- > 0)
     {
-        if(bInfFlag==0) {
+        /*if(bInfFlag==0) {
             timeout--;
             if(timeout<=0) goto end;
-        }
+        }*/
         //if (SerialKeyPressed(c) == 1)
         if(setups.recieve_byte(c) == 1)
         {
@@ -279,7 +279,9 @@ x_int32_t x_Ymodem_Receive (x_ymodem_setups setups, x_uint8_t *buf)
 {
     int i_=0;
     char dbg[64];
-    x_uint32_t timeout = NAK_TIMEOUT;
+    //x_uint32_t timeout = NAK_TIMEOUT;
+    x_uint32_t buffer_length = 0;
+    x_uint8_t buf_data[1024];
     
     x_uint8_t packet_data[PACKET_1K_SIZE + PACKET_OVERHEAD], file_size[FILE_SIZE_LENGTH], *file_ptr, *buf_ptr;
     x_int32_t i, j, packet_length, session_done, file_done, packets_received, errors, session_begin, size = 0;
@@ -289,7 +291,7 @@ x_int32_t x_Ymodem_Receive (x_ymodem_setups setups, x_uint8_t *buf)
 
     for (session_done = 0, errors = 0, session_begin = 0; ;) {
         for (packets_received = 0, file_done = 0, buf_ptr = buf; ;) {
-            switch (Receive_Packet(setups, packet_data, &packet_length, timeout)) {
+            switch (Receive_Packet(setups, packet_data, &packet_length, NAK_TIMEOUT)) {
             /* normally return */
             case 0:
                 errors = 0;
@@ -302,15 +304,27 @@ x_int32_t x_Ymodem_Receive (x_ymodem_setups setups, x_uint8_t *buf)
                 case 0:
                     Send_Byte(setups,ACK);
                     file_done = 1;
-                    
+                    buffer_length = 1;
+                    if(
+                        setups.mem_write(
+                            file_name
+                            ,buffer_length
+                            ,buf_data
+                            , 0
+                            )==_x_true){
+                        //Send_Byte(setups,ACK);
+                    }else{
+                        // End session
+                        //Send_Byte(setups,CA);
+                        //Send_Byte(setups,CA);
+                        return -2;
+                    }
                     break;
                 /* Normal packet */
                 default:
                     if ((packet_data[PACKET_SEQNO_INDEX] & 0xff) != (packets_received & 0xff)){
                         Send_Byte(setups,NAK);
-                        //Send_Byte(setups,ACK);
-                    }else
-                    {
+                    }else {
                         //Recieve #0
                         if (packets_received == 0){
                             //timeout = 0;
@@ -326,6 +340,8 @@ x_int32_t x_Ymodem_Receive (x_ymodem_setups setups, x_uint8_t *buf)
                                 }
                                 file_size[i++] = '\0';
                                 Str2Int(file_size, &size);
+                                
+                                //buf_data = (x_uint8_t*)malloc(size);
 
                                 /* Test the size of the image to be sent */
                                 /* Image size is greater than Flash size *
@@ -367,6 +383,10 @@ x_int32_t x_Ymodem_Receive (x_ymodem_setups setups, x_uint8_t *buf)
                         else{
                             /* Data packet */
                             memcpy(buf_ptr, packet_data + PACKET_HEADER, packet_length);
+                            buffer_length +=packet_length;
+                            memcpy(buf_data + buffer_length - packet_length, buf_ptr, packet_length);
+                            
+                            Send_Byte(setups,ACK);
                             /*
                             RamSource = (x_uint32_t)buf;
                             for (j = 0;(j < packet_length) && (FlashDestination <  ApplicationAddress + size);j += 4) {
@@ -383,12 +403,12 @@ x_int32_t x_Ymodem_Receive (x_ymodem_setups setups, x_uint8_t *buf)
                                 RamSource += 4;
                             }
                             */
-                            if(
+                            /*if(
                                 setups.mem_write(
                                     file_name
                                     ,packet_length
                                     ,buf_ptr
-                                    ,/*packet_length*(packet_data[PACKET_SEQNO_INDEX] & 0xff)*/ 0
+                                    , 0
                                     )==_x_true){
                                 Send_Byte(setups,ACK);
                             }else{
@@ -396,7 +416,7 @@ x_int32_t x_Ymodem_Receive (x_ymodem_setups setups, x_uint8_t *buf)
                                 Send_Byte(setups,CA);
                                 Send_Byte(setups,CA);
                                 return -2;
-                            }
+                            }*/
                         }
                         packets_received ++;
                         session_begin = 1;
