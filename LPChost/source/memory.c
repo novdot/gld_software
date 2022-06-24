@@ -20,15 +20,36 @@ void memory_read(x_uint32_t a_addr, x_int32_t* a_pdata, x_uint32_t a_u32_cnt)
     return;
 }
 /******************************************************************************/
-void memory_write(x_uint32_t a_sec_begin,x_uint32_t a_sec_end, void* a_pdata, x_uint16_t a_u32_cnt)
+x_bool_t memory_write(
+    x_uint32_t a_sec_begin
+    ,x_uint32_t a_sec_end
+    ,x_uint32_t a_addr_shift
+    , void* a_pdata
+    , x_uint32_t a_u32_cnt)
 {
     uint32_t error = 0;
     char dbg[64];
     int i = 0;
-    int ipage = 0;
-    x_uint32_t a_addr = 0;
+    x_uint32_t ipage = 0;
+    x_uint32_t sec_size = 0;
+    x_uint32_t sec_shift = 0;
+    x_uint32_t addr = 0;
+    x_uint32_t addr_shift = 0;
     
-    error = u32IAP_PrepareSectors(a_sec_begin,a_sec_end);
+    //PAGE SIZE AFTER 16 sector = 32768 bytes!
+    if(a_sec_begin>=16) 
+        sec_size = MEMORY_SECTOR_16_29_SIZE;
+    else 
+        sec_size = MEMORY_SECTOR_0_15_SIZE;
+    
+    //calculate shift sector
+    sec_shift = a_addr_shift/sec_size;
+    a_sec_begin += sec_shift;
+    
+    //calculate shift addr
+    addr_shift = a_addr_shift%sec_size;
+    
+    /*error = u32IAP_PrepareSectors(a_sec_begin,a_sec_end);
     if(error!= IAP_STA_CMD_SUCCESS) {
         DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"PrepareSectors error %u\n\r",error);
         goto fail;
@@ -38,7 +59,7 @@ void memory_write(x_uint32_t a_sec_begin,x_uint32_t a_sec_end, void* a_pdata, x_
     if(error!= IAP_STA_CMD_SUCCESS) {
         DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"EraseSectors error %u\n\r",error);
         goto fail;
-    }
+    }*/
     
     error = u32IAP_PrepareSectors(a_sec_begin,a_sec_end);
     if(error!= IAP_STA_CMD_SUCCESS) {
@@ -49,123 +70,123 @@ void memory_write(x_uint32_t a_sec_begin,x_uint32_t a_sec_end, void* a_pdata, x_
     //get address by page
     switch(a_sec_begin){
         case 0:
-            a_addr = FLASH_SECTOR_0;
+            addr = FLASH_SECTOR_0;
             break;
         
         case 1:
-            a_addr = FLASH_SECTOR_1;
+            addr = FLASH_SECTOR_1;
             break;
         
         case 2:
-            a_addr = FLASH_SECTOR_2;
+            addr = FLASH_SECTOR_2;
             break;
         
         case 3:
-            a_addr = FLASH_SECTOR_3;
+            addr = FLASH_SECTOR_3;
             break;
         
         case 4:
-            a_addr = FLASH_SECTOR_4;
+            addr = FLASH_SECTOR_4;
             break;
         
         case 5:
-            a_addr = FLASH_SECTOR_5;
+            addr = FLASH_SECTOR_5;
             break;
         
         case 6:
-            a_addr = FLASH_SECTOR_6;
+            addr = FLASH_SECTOR_6;
             break;
         
         case 7:
-            a_addr = FLASH_SECTOR_7;
+            addr = FLASH_SECTOR_7;
             break;
         
         case 8:
-            a_addr = FLASH_SECTOR_8;
+            addr = FLASH_SECTOR_8;
             break;
         
         case 9:
-            a_addr = FLASH_SECTOR_9;
+            addr = FLASH_SECTOR_9;
             break;
         
         case 10:
-            a_addr = FLASH_SECTOR_10;
+            addr = FLASH_SECTOR_10;
             break;
         
         case 11:
-            a_addr = FLASH_SECTOR_11;
+            addr = FLASH_SECTOR_11;
             break;
         
         case 12:
-            a_addr = FLASH_SECTOR_12;
+            addr = FLASH_SECTOR_12;
             break;
         
         case 13:
-            a_addr = FLASH_SECTOR_13;
+            addr = FLASH_SECTOR_13;
             break;
         
         case 14:
-            a_addr = FLASH_SECTOR_14;
+            addr = FLASH_SECTOR_14;
             break;
         
         case 15:
-            a_addr = FLASH_SECTOR_15;
+            addr = FLASH_SECTOR_15;
             break;
         
         case 16:
-            a_addr = FLASH_SECTOR_16;
+            addr = FLASH_SECTOR_16;
             break;
         
         case 17:
-            a_addr = FLASH_SECTOR_17;
+            addr = FLASH_SECTOR_17;
             break;
         
         case 18:
-            a_addr = FLASH_SECTOR_18;
+            addr = FLASH_SECTOR_18;
             break;
         
         case 19:
-            a_addr = FLASH_SECTOR_19;
+            addr = FLASH_SECTOR_19;
             break;
         
         case 20:
-            a_addr = FLASH_SECTOR_20;
+            addr = FLASH_SECTOR_20;
             break;
         
         case 21:
-            a_addr = FLASH_SECTOR_21;
+            addr = FLASH_SECTOR_21;
             break;
         
         case 22:
-            a_addr = FLASH_SECTOR_22;
+            addr = FLASH_SECTOR_22;
             break;
         
         case 23:
-            a_addr = FLASH_SECTOR_23;
+            addr = FLASH_SECTOR_23;
             break;
         
         case 24:
-            a_addr = FLASH_SECTOR_24;
+            addr = FLASH_SECTOR_24;
             break;
         
         case 25:
-            a_addr = FLASH_SECTOR_25;
+            addr = FLASH_SECTOR_25;
             break;
         
         case 26:
-            a_addr = FLASH_SECTOR_26;
+            addr = FLASH_SECTOR_26;
             break;
         
         case 27:
-            a_addr = FLASH_SECTOR_27;
+            addr = FLASH_SECTOR_27;
             break;
         
         case 28:
-            a_addr = FLASH_SECTOR_28;
+            addr = FLASH_SECTOR_28;
             break;
         
         case 29:
-            a_addr = FLASH_SECTOR_29;
+            addr = FLASH_SECTOR_29;
             break;
         
         default:
@@ -173,19 +194,24 @@ void memory_write(x_uint32_t a_sec_begin,x_uint32_t a_sec_end, void* a_pdata, x_
     }
     
     //check how much page we need
-    ipage = (a_u32_cnt*4) / IAP_FLASH_PAGE_SIZE_BYTES;
-    if(((a_u32_cnt*4) % IAP_FLASH_PAGE_SIZE_BYTES)>0 ) ipage++;
-    while(ipage%2 != 0) ipage++;
+    //ipage = (a_u32_cnt*4) / IAP_FLASH_PAGE_SIZE_BYTES;
+    //if(((a_u32_cnt*4) % IAP_FLASH_PAGE_SIZE_BYTES)>0 ) ipage++;
+    //while(ipage%2 != 0) ipage++;
     
-    error = u32IAP_CopyRAMToFlash(a_addr,  (uint32_t)(a_pdata) , IAP_FLASH_PAGE_SIZE_BYTES*(ipage));
+    ipage = MEMORY_PAGE_SIZE ;
+    
+    error = u32IAP_CopyRAMToFlash(addr + addr_shift,  (uint32_t)(a_pdata) , ipage);
     if(error!= IAP_STA_CMD_SUCCESS)  {
-        DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"CopyRAMToFlash error %u",error);
+        DBG1(&g_gld.cmd.dbg.ring_out,dbg,64
+        ,"CopyRAMToFlash error %u"
+            ,error
+        );
         goto fail;
     }
     
-    return;
+    return _x_true;
 fail:
-    return;
+    return _x_false;
 }
 /******************************************************************************/
 void memory_erase(x_uint32_t a_sec_begin, x_uint16_t a_sec_end)

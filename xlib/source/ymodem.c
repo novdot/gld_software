@@ -277,20 +277,40 @@ static x_int32_t Receive_Packet (x_ymodem_setups setups,x_uint8_t *data, x_int32
 #include "hardware/hardware.h"
 x_int32_t x_Ymodem_Receive (x_ymodem_setups setups, x_uint8_t *buf)
 {
-    int i_=0;
-    char dbg[64];
     //x_uint32_t timeout = NAK_TIMEOUT;
-    x_uint32_t buffer_length = 0;
-    x_uint8_t buf_data[1024];
+    static x_uint32_t buffer_length = 0;
+    static x_uint32_t buffer_overflow = 0;
+    static x_uint32_t buffer_sector = 0;
+    static x_uint8_t buf_data[MEMORY_PAGE_SIZE];
+    static x_uint8_t initialize = 0;
     
-    x_uint8_t packet_data[PACKET_1K_SIZE + PACKET_OVERHEAD], file_size[FILE_SIZE_LENGTH], *file_ptr, *buf_ptr;
-    x_int32_t i, j, packet_length, session_done, file_done, packets_received, errors, session_begin, size = 0;
+    static x_uint8_t packet_data[PACKET_1K_SIZE + PACKET_OVERHEAD], file_size[FILE_SIZE_LENGTH], *file_ptr, *buf_ptr;
+    static x_int32_t i, j, packet_length, session_done, file_done, packets_received, errors, session_begin, size = 0;
 
-    /* Initialize FlashDestination variable */
-    //FlashDestination = ApplicationAddress;
+    if(initialize==0){
+        initialize = 1;
+        
+        packet_length = 0;
+        session_done = 0;
+        file_done = 0;
+        packets_received = 0;
+        errors = 0;
+        session_begin = 0;
+        size = 0;
+        buf_ptr = buf;
+        
+        buffer_length = 0;
+        buffer_overflow = 0;
+        buffer_sector = 0;
+        for(i=0;i<MEMORY_PAGE_SIZE;i++){
+            buf_data[i] = 0xFF;
+        }
+    }
 
-    for (session_done = 0, errors = 0, session_begin = 0; ;) {
-        for (packets_received = 0, file_done = 0, buf_ptr = buf; ;) {
+    //for (session_done = 0, errors = 0, session_begin = 0; ;) {
+        //for (packets_received = 0, file_done = 0, buf_ptr = buf; ;) {
+    
+    
             switch (Receive_Packet(setups, packet_data, &packet_length, NAK_TIMEOUT)) {
             /* normally return */
             case 0:
@@ -299,27 +319,27 @@ x_int32_t x_Ymodem_Receive (x_ymodem_setups setups, x_uint8_t *buf)
                 /* Abort by sender */
                 case - 1:
                     Send_Byte(setups,ACK);
-                    return 0;
+                    goto abort_by_sender;
+                
                 /* End of transmission */ 
                 case 0:
-                    Send_Byte(setups,ACK);
                     file_done = 1;
-                    buffer_length = 1;
                     if(
                         setups.mem_write(
                             file_name
                             ,buffer_length
                             ,buf_data
-                            , 0
+                            ,buffer_sector*MEMORY_PAGE_SIZE
                             )==_x_true){
-                        //Send_Byte(setups,ACK);
+                        Send_Byte(setups,ACK);
                     }else{
                         // End session
-                        //Send_Byte(setups,CA);
-                        //Send_Byte(setups,CA);
-                        return -2;
+                        Send_Byte(setups,CA);
+                        Send_Byte(setups,CA);
+                        goto end_session;
                     }
                     break;
+                    
                 /* Normal packet */
                 default:
                     if ((packet_data[PACKET_SEQNO_INDEX] & 0xff) != (packets_received & 0xff)){
@@ -327,7 +347,6 @@ x_int32_t x_Ymodem_Receive (x_ymodem_setups setups, x_uint8_t *buf)
                     }else {
                         //Recieve #0
                         if (packets_received == 0){
-                            //timeout = 0;
                             /* Filename packet */
                             if (packet_data[PACKET_HEADER] != 0){
                                 /* Filename packet has valid data */
@@ -341,41 +360,26 @@ x_int32_t x_Ymodem_Receive (x_ymodem_setups setups, x_uint8_t *buf)
                                 file_size[i++] = '\0';
                                 Str2Int(file_size, &size);
                                 
-                                //buf_data = (x_uint8_t*)malloc(size);
-
                                 /* Test the size of the image to be sent */
-                                /* Image size is greater than Flash size *
-                                if (size > (FLASH_SIZE - 1)){
-                                    /* End session *
-                                    Send_Byte(setups,CA);
-                                    Send_Byte(setups,CA);
-                                    return -1;
-                                }
-
+                                /* Image size is greater than Flash size */
                                 /* Erase the needed pages where the user application will be loaded */
                                 /* Define the number of page to be erased */
-                                //NbrOfPage = FLASH_PagesMask(size);
-
-                                /* Erase the FLASH pages *
-                                for (EraseCounter = 0; (EraseCounter < NbrOfPage) && (FLASHStatus == FLASH_COMPLETE); EraseCounter++){
-                                    FLASHStatus = FLASH_ErasePage(FlashDestination + (PageSize * EraseCounter));
-                                }*/
-                                
+                                /* Erase the FLASH pages */
                                 if(setups.mem_erase(file_name,size)==_x_true){
                                     Send_Byte(setups,ACK);
                                     Send_Byte(setups,CRC16);
-                                    //return 255;
                                 }else{
                                     // End session
                                     Send_Byte(setups,CA);
                                     Send_Byte(setups,CA);
-                                    return -1;
+                                    goto end_session;
                                 }
                             }else{
                                 /* Filename packet is empty, end session */
                                 Send_Byte(setups,ACK);
                                 file_done = 1;
                                 session_done = 1;
+                                goto succsess;
                                 break;
                             }
                         }
@@ -383,52 +387,60 @@ x_int32_t x_Ymodem_Receive (x_ymodem_setups setups, x_uint8_t *buf)
                         else{
                             /* Data packet */
                             memcpy(buf_ptr, packet_data + PACKET_HEADER, packet_length);
-                            buffer_length +=packet_length;
-                            memcpy(buf_data + buffer_length - packet_length, buf_ptr, packet_length);
                             
-                            Send_Byte(setups,ACK);
-                            /*
-                            RamSource = (x_uint32_t)buf;
-                            for (j = 0;(j < packet_length) && (FlashDestination <  ApplicationAddress + size);j += 4) {
-                                /* Program the data received into STM32F10x Flash */
-                                /*FLASH_ProgramWord(FlashDestination, *(x_uint32_t*)RamSource);
-
-                                if (*(x_uint32_t*)FlashDestination != *(x_uint32_t*)RamSource) {
-                                    // End session *
+                            /*too much data to buffer*/
+                            if(
+                                (buffer_length+packet_length) >= MEMORY_PAGE_SIZE
+                            ){
+                                buffer_overflow = (buffer_length+packet_length) - MEMORY_PAGE_SIZE;
+                                //fill buffer
+                                memcpy(buf_data + buffer_length, buf_ptr, (packet_length-buffer_overflow));
+                            
+                                //write current buffer to flash page
+                                if(
+                                    setups.mem_write(
+                                        file_name
+                                        ,MEMORY_PAGE_SIZE
+                                        ,buf_data
+                                        ,buffer_sector*MEMORY_PAGE_SIZE
+                                        )==_x_true){
+                                }else{
+                                    // End session
                                     Send_Byte(setups,CA);
                                     Send_Byte(setups,CA);
-                                    return -2;
+                                    goto end_session;
                                 }
-                                FlashDestination += 4;
-                                RamSource += 4;
+                                //incr page
+                                buffer_sector++;
+                                
+                                //clear buffer
+                                buffer_length = 0;
+                                for(i=0;i<MEMORY_PAGE_SIZE;i++){
+                                    buf_data[i] = 0xFF;
+                                }
+                                
+                                //memorize overflow
+                                memcpy(buf_data + buffer_length, buf_ptr + (packet_length-buffer_overflow), buffer_overflow);
+                                buffer_length = buffer_overflow;
+                            }else
+                            {
+                                buffer_length += packet_length;
+                                //collect data to buffer
+                                memcpy(buf_data + buffer_length - packet_length, buf_ptr, packet_length);
                             }
-                            */
-                            /*if(
-                                setups.mem_write(
-                                    file_name
-                                    ,packet_length
-                                    ,buf_ptr
-                                    , 0
-                                    )==_x_true){
-                                Send_Byte(setups,ACK);
-                            }else{
-                                // End session
-                                Send_Byte(setups,CA);
-                                Send_Byte(setups,CA);
-                                return -2;
-                            }*/
+                            Send_Byte(setups,ACK);
                         }
                         packets_received ++;
                         session_begin = 1;
-                    }
-                }
+                    }//Normal packet
+                }//Switch Recieve packet_length 
                 break;
              
             /* abort by user */   
             case 1:
                 Send_Byte(setups,CA);
                 Send_Byte(setups,CA);
-                return -3;
+                goto abort_by_user;
             
             /* timeout or packet error */ 
             default:
@@ -438,21 +450,44 @@ x_int32_t x_Ymodem_Receive (x_ymodem_setups setups, x_uint8_t *buf)
                 if (errors > MAX_ERRORS) {
                     Send_Byte(setups,CA);
                     Send_Byte(setups,CA);
-                    return 0;
+                    goto timeout;
                 }
                 Send_Byte(setups,CRC16);
-                //return 255;
                 break;
             }
-            if (file_done != 0) {
+            /*if (file_done != 0) {
                 break;
-            }
-        }
-        if (session_done != 0) {
+            }*/
+        //}
+        /*if (session_done != 0) {
             break;
-        }
-    }
-    return (x_int32_t)size;
+        }*/
+    //}
+   
+    //return (x_int32_t)size;\
+            
+    if(session_begin!=0) 
+        goto process;
+            
+wait:
+    return 0;
+process:
+    return 1;
+end_session:
+    initialize = 0;
+    return -2;
+timeout:
+    initialize = 0;
+    return -1;
+abort_by_sender:
+    initialize = 0;
+    return -4;
+abort_by_user:
+    initialize = 0;
+    return -3;
+succsess:
+    initialize = 0;
+    return 2;
 }
 
 /******************************************************************************/

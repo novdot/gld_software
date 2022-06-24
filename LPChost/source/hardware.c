@@ -242,12 +242,12 @@ x_bool_t hardware_flash_read(x_uint32_t a_sector,x_uint32_t* a_pmemory, x_uint32
     switch(a_sector){
         case MEMORY_BOOT_SEC_NUM:
             start = MEMORY_BOOT_MEM_START;
-            end = MEMORY_BOOT_MEM_SIZE;
+            //end = MEMORY_BOOT_MEM_SIZE;
             break;
         
         case MEMORY_MAIN_SEC_NUM:
             start = MEMORY_MAIN_MEM_START;
-            end = MEMORY_MAIN_MEM_SIZE;
+            //end = MEMORY_MAIN_MEM_SIZE;
             break;
         
         case MEMORY_FPGA_SEC_NUM:
@@ -255,7 +255,7 @@ x_bool_t hardware_flash_read(x_uint32_t a_sector,x_uint32_t* a_pmemory, x_uint32
         
         case MEMORY_COEF_SEC_NUM:
             start = MEMORY_COEF_MEM_START;
-            end = a_cnt;
+            //end = a_cnt;
             break;
         
         default:
@@ -267,54 +267,61 @@ x_bool_t hardware_flash_read(x_uint32_t a_sector,x_uint32_t* a_pmemory, x_uint32
 /******************************************************************************/
 x_bool_t hardware_flash_write_f(
     x_uint8_t* a_file
-    , x_uint16_t a_size
+    , x_uint32_t a_size
     , x_uint8_t *buf
-    , x_uint16_t shift)
+    , x_uint32_t shift)
 {
     x_uint32_t a_sector=0;
     hardware_flash_convert_name2sector(a_file,&a_sector);
     
-    if(a_sector==MEMORY_VOID_SEC_NUM) return _x_false;
+    if(a_sector==MEMORY_VOID_SEC_NUM) {
+        return _x_false;
+    }
     return hardware_flash_write(a_sector,buf,a_size,shift);
 }
 
 x_bool_t hardware_flash_write(
     x_uint32_t a_sector
     , x_uint8_t* a_pmemory
-    , x_uint16_t a_size
-    , x_uint16_t shift)
+    , x_uint32_t a_size
+    , x_uint32_t a_shift_memory
+)
 {
     int sec_start,sec_end = 0;
-    x_uint32_t addr = 0;
-    x_uint16_t size = 0;
+    //x_uint32_t addr = 0;
+    //x_uint16_t size = 0;
     
     switch(a_sector){
-        case MEMORY_BOOT_SEC_NUM:
-            break;
-        
         case MEMORY_MAIN_SEC_NUM:
             sec_start = MEMORY_MAIN_SEC_START;
             sec_end = MEMORY_MAIN_SEC_END;
-            addr = MEMORY_MAIN_MEM_START;
-            size = (x_uint16_t)MEMORY_MAIN_MEM_SIZE;
-            break;
-        
-        case MEMORY_FPGA_SEC_NUM:
+            //addr = MEMORY_MAIN_MEM_START + a_shift_sector*MEMORY_PAGE_SIZE;
+            //size = (x_uint16_t)MEMORY_MAIN_MEM_SIZE;
             break;
         
         case MEMORY_COEF_SEC_NUM:
             sec_start = MEMORY_COEF_SEC_START;
             sec_end = MEMORY_COEF_SEC_END;
-            addr = MEMORY_COEF_MEM_START;
-            size = (x_uint16_t)MEMORY_COEF_MEM_SIZE;
+            //addr = MEMORY_COEF_MEM_START + a_shift_sector*MEMORY_PAGE_SIZE;
+            //size = (x_uint16_t)MEMORY_COEF_MEM_SIZE;
             break;
         
+        case MEMORY_BOOT_SEC_NUM:
+        case MEMORY_FPGA_SEC_NUM:
         default:
-            break;
+            return _x_false;
     }
-    if(size<a_size) return _x_false;
-    memory_write(sec_start,sec_end,a_pmemory,a_size);
-    return _x_true;
+    //check overflow sectors mapping
+    //if( (sec_start+a_shift_sector) >= sec_end ) 
+    //    return _x_false;
+    
+    return memory_write(
+            sec_start 
+            , sec_end
+            , a_shift_memory
+            , a_pmemory
+            , a_size/4 + (a_size%4==0?0:1) 
+        );
 }
 /******************************************************************************/
 x_bool_t hardware_flash_erase_f(x_uint8_t* a_file, x_uint16_t a_size)
@@ -328,7 +335,9 @@ x_bool_t hardware_flash_erase_f(x_uint8_t* a_file, x_uint16_t a_size)
 x_bool_t hardware_flash_erase(x_uint32_t a_sector, x_uint16_t a_size)
 {
     int start,end = 0;
-    x_uint16_t size = 0;
+    //x_uint16_t size = 0;
+    
+    if(a_sector==MEMORY_VOID_SEC_NUM) return _x_false;
     
     switch(a_sector){
         case MEMORY_BOOT_SEC_NUM:
@@ -339,7 +348,7 @@ x_bool_t hardware_flash_erase(x_uint32_t a_sector, x_uint16_t a_size)
         case MEMORY_MAIN_SEC_NUM:
             start = MEMORY_MAIN_SEC_START;
             end = MEMORY_MAIN_SEC_END;
-            size = (x_uint16_t)MEMORY_MAIN_MEM_SIZE;
+            //size = (x_uint16_t)MEMORY_MAIN_MEM_SIZE;
             break;
         
         case MEMORY_FPGA_SEC_NUM:
@@ -348,7 +357,7 @@ x_bool_t hardware_flash_erase(x_uint32_t a_sector, x_uint16_t a_size)
         case MEMORY_COEF_SEC_NUM:
             start = MEMORY_COEF_SEC_START;
             end = MEMORY_COEF_SEC_END;
-            size = (x_uint16_t)MEMORY_COEF_MEM_SIZE;
+            //size = (x_uint16_t)MEMORY_COEF_MEM_SIZE;
             break;
         
         default:
@@ -357,7 +366,6 @@ x_bool_t hardware_flash_erase(x_uint32_t a_sector, x_uint16_t a_size)
             end = MEMORY_COEF_SEC_END;
             break;
     }
-    if(a_sector==MEMORY_VOID_SEC_NUM) return _x_false;
     memory_erase(start,end);
     return _x_true;
 }

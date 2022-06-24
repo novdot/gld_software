@@ -25,7 +25,7 @@ typedef struct gld_cplcDef{
     int WP_DelaySin_Array[21];
 }gld_cplc;
 
-#define GLD_RINGBUFFER_SIZE (2048)
+#define GLD_RINGBUFFER_SIZE (1024)
 #define GLD_BUF_SIZE (512)
 typedef struct gld_cmdDef{
     x_uint8_t trm_cycl; //is cyclic bit from cmd
