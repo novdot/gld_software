@@ -84,6 +84,7 @@ void loop()
 {
     int i=0;
     char dbg[64];
+    static int bNeedLoad = 1;
     
     //uart_recieve_unblocked(0,&g_gld.cmd.dbg.ring_in);
     UART_DBG_SEND(&g_gld.cmd.dbg.ring_out);
@@ -99,6 +100,7 @@ void loop()
 
     /***/
     ret_val = x_Ymodem_Receive(g_bootloader.setups,&tab_1024[0]);
+    if(ret_val >= _x_ymodem_rec_process) bNeedLoad = 0;
     /**
     if (ret_val == 255) {
         //skip
@@ -126,7 +128,7 @@ void loop()
     
     //если прибор не введен в режим монитора, то проверим, что прошло время 
     //ожидания и запустим основную программу
-    if(g_bootloader.bMonitorMode == 0) {
+    if( (g_bootloader.bMonitorMode == 0) && (bNeedLoad==1)) {
         if(g_bootloader.nTimerCnt>5000) {
             hardware_tim_stop();
             //hardware_flash_load_main();

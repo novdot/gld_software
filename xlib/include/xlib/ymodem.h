@@ -60,6 +60,16 @@
 /****/
 #define YM_MAX_FILESIZE         (10*1024*1024)
 
+typedef enum{
+    _x_ymodem_rec_abort_by_sender = -4
+    , _x_ymodem_rec_abort_by_user = -3
+    , _x_ymodem_rec_end_session = -2
+    , _x_ymodem_rec_timeout = -1
+    , _x_ymodem_rec_wait = 0
+    , _x_ymodem_rec_process = 1
+    , _x_ymodem_rec_succsess = 2
+}x_ymodem_rec_code;
+
 typedef x_uint32_t (*recieve_byte_t)(x_uint8_t *key);
 typedef void (*send_byte_t)(x_uint8_t c);
 typedef x_bool_t (*mem_write_t)(x_uint8_t* file,x_uint32_t size,x_uint8_t *buf,x_uint32_t shift);
