@@ -7,6 +7,7 @@
 #include "math.h" 
 
 int32_t	temp22=0;
+int32_t	Dif_Curr_32 = 0;
 /******************************************************************************/
 void ResetBitsOfWord(int * x32, int truncate_bits)
 {
@@ -55,7 +56,7 @@ void clc_Pulses()
     static int32_t Cnt_Pls = 0;
     static int32_t Cnt_Mns = 0;
     static int32_t preLast_Cnt_Plus = 0;
-    
+    static short int sign_accum = 0;
     static uint32_t	Old_Cnt_Vib = 0;
     static uint32_t Old_Cnt = 0;
     static int32_t RefMeand_Cnt_Dif;
@@ -64,7 +65,7 @@ void clc_Pulses()
     static int32_t dif_Curr_32_Ext = 0; //e. difference(number) for the external latch mode 
     static int32_t dif_Curr_32_previous = 0; //e. Previous (in comparison with Dif_Curr_32) number 
     
-    static int32_t	Dif_Curr_32 = 0;//e. current difference without dithering for dithering control
+   // static int32_t	Dif_Curr_32 = 0;//e. current difference without dithering for dithering control
     
     //read pulses
     g_gld.pulses.Curr_Cnt_Vib = qei_get_position();
@@ -108,7 +109,7 @@ void clc_Pulses()
 	}
     g_gld.thermo.TermoCompens_Sum = (1)<< 14;
     //g_gld.thermo.TermoCompens_Sum << SHIFT_TO_FRACT;
- 
+	
     //e. selecting display mode in the Rate mode
     switch (g_gld.RgConB.word) {
    		case RATE_VIBRO_1:
@@ -122,7 +123,7 @@ void clc_Pulses()
 	
 				//e. preparing number for output
 				//e. substract the accumulated termocompensational part from the accumulated number 			
-                Output.Str.BINS_dif = PSdif_sum_Vib_32 - g_gld.thermo.TermoCompens_Sum;	 
+                Output.Str.BINS_dif = PSdif_sum_Vib_32;// - g_gld.thermo.TermoCompens_Sum;	 
                 Output.Str.PS_dif = Output.Str.BINS_dif >> 16;	
 				LatchPhase = INT32_MAX;	 //in Latch_Event it's indicator of latch appearing
 				Output.Str.SF_dif = PSdif_sum_Vib_64; 
@@ -159,40 +160,13 @@ void clc_Pulses()
         //e. calculate Cnt_Mns or Cnt_Pls
     
         g_gld.pulses.reper_meandr.cnt_iter++;
-    
-        /*if( 
-            (LPC_MCPWM->TC0>g_gld.pulses.reper_meandr.cnt_tc_prev) 
-            &&(g_gld.pulses.reper_meandr.flags.bit.get_zero==0)
-        ){
-            g_gld.pulses.reper_meandr.flags.bit.get_zero = 1;
-            g_gld.pulses.reper_meandr.flags.bit.get_peak = 0;
-            
-            g_gld.pulses.reper_meandr.cnt_curr = qei_get_position();
-            g_gld.pulses.reper_meandr.cnt_dif = 
-                (g_gld.pulses.reper_meandr.cnt_curr - g_gld.pulses.reper_meandr.cnt_prev); 
-            g_gld.pulses.reper_meandr.cnt_prev = g_gld.pulses.reper_meandr.cnt_curr;
-            Cnt_Overload(g_gld.pulses.reper_meandr.cnt_dif, INT32MAX_DIV2, INT32MIN_DIV2);
-            g_gld.pulses.reper_meandr.cnt_pls = abs(g_gld.pulses.reper_meandr.cnt_dif);
-        }
-        
-        //check MAT2 interrupt
-        if( 
-            (LPC_MCPWM->TC0<g_gld.pulses.reper_meandr.cnt_tc_prev) 
-            &&(g_gld.pulses.reper_meandr.flags.bit.get_peak==0)
-        ){
-            g_gld.pulses.reper_meandr.flags.bit.get_zero = 0;
-            g_gld.pulses.reper_meandr.flags.bit.get_peak = 1;
-            
-            g_gld.pulses.reper_meandr.cnt_curr = qei_get_position();
-            g_gld.pulses.reper_meandr.cnt_dif = 
-                (g_gld.pulses.reper_meandr.cnt_curr - g_gld.pulses.reper_meandr.cnt_prev); 
-            g_gld.pulses.reper_meandr.cnt_prev = g_gld.pulses.reper_meandr.cnt_curr;
-            Cnt_Overload(g_gld.pulses.reper_meandr.cnt_dif, INT32MAX_DIV2, INT32MIN_DIV2);
-            g_gld.pulses.reper_meandr.cnt_mns = abs(g_gld.pulses.reper_meandr.cnt_dif);
-            g_gld.pulses.reper_meandr.cnt_delta +=
-                    ( g_gld.pulses.reper_meandr.cnt_pls - g_gld.pulses.reper_meandr.cnt_mns);
-        }
-        g_gld.pulses.reper_meandr.cnt_tc_prev = LPC_MCPWM->TC0;*/
+		
+				if (qei_get_direction()==_x_plus)
+					  --sign_accum;
+				else
+					  ++sign_accum;
+				
+        Output.Str.WP_scope2 = sign_accum;
         
         /////////////////////////////////////////////////
         if (data_Rdy & HALF_PERIOD) {
@@ -210,55 +184,37 @@ void clc_Pulses()
             
             //e. "+" direction 
             if (qei_get_direction()==_x_plus) {
-                //sumCnt_Mns += -RefMeand_Cnt_Dif;
-                //Cnt_Mns = RefMeand_Cnt_Dif;
-                //Cnt_Pls = (RefMeand_Cnt_Dif);
                 g_gld.pulses.reper_meandr.cnt_pls =L_abs(g_gld.pulses.reper_meandr.cnt_dif);
             } else {										
-                //e. "-" direction 
-                //sumCnt_Pls += RefMeand_Cnt_Dif;
-                //Cnt_Pls = -RefMeand_Cnt_Dif;
-                //Cnt_Mns = (RefMeand_Cnt_Dif);
                 g_gld.pulses.reper_meandr.cnt_mns = L_abs(g_gld.pulses.reper_meandr.cnt_dif);
             }
-
+						sign_accum = 0;
             //e. period of vibro elapsed
             if (data_Rdy & WHOLE_PERIOD) {
-                // LPC_GPIO2->FIOSET = 0x10;
-                //last_Cnt_Plus = Cnt_Pls;	
-                //dif_sum_32 += (Cnt_Pls - Cnt_Mns);
-                
-                g_gld.pulses.reper_meandr.cnt_delta +=
-                    ( g_gld.pulses.reper_meandr.cnt_pls - g_gld.pulses.reper_meandr.cnt_mns);
-                
-                /*if( (g_gld.dbg_buffers.iteration<50)&&(g_gld.pulses.reper_meandr.cnt_delta>100) ){
-                    //DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%d\n\r",Output.Str.WP_Phase_Det_Array[0]);
-                    //DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%d\n\r",g_input.word.wp_sel);
-                    DBG3(&g_gld.cmd.dbg.ring_out,dbg,64,"%d %d = %d\n\r"
-                        ,g_gld.pulses.reper_meandr.cnt_pls
-                        ,g_gld.pulses.reper_meandr.cnt_mns
-                        ,g_gld.pulses.reper_meandr.cnt_delta
-                    );
-                    g_gld.dbg_buffers.iteration++;
-                }*/
-            }
-            data_Rdy &= ~RESET_PERIOD;//reset bits
+							last_Cnt_Plus = g_gld.pulses.reper_meandr.cnt_pls;
+							dif_sum_32 += g_gld.pulses.reper_meandr.cnt_pls - g_gld.pulses.reper_meandr.cnt_mns;                
+
+							if (g_gld.internal_latch.work_period == 0){ //для Rate2
+									Latch_Rdy = 1;										
+							}	                            
+						}
+					
+				data_Rdy &= ~RESET_PERIOD;//reset bits  
         }
+
         //e it's time for output 
 		if (Latch_Rdy) {
             LatchPhase = INT32_MAX;
             
-            //cntPls_sum_32 += last_Cnt_Plus - preLast_Cnt_Plus;
-            //preLast_Cnt_Plus = last_Cnt_Plus;	 //e. current last sample became previous
-
-            //Output.Str.Cnt_Dif = dif_sum_32; 
-            //g_gld.pulses.Cnt_curr = 0;            
-            //Output.Str.Cnt_Dif += cntPls_sum_32 >> 1;
-            //dif_sum_32 = 0;				    //e. reset accumulators 
+							cntPls_sum_32 += last_Cnt_Plus - preLast_Cnt_Plus;             
+							g_gld.pulses.reper_meandr.cnt_delta = dif_sum_32 + (cntPls_sum_32>>1);     			
+						  ResetBitsOfWord(&cntPls_sum_32, 1); 
+							dif_sum_32 = 0;												
+							preLast_Cnt_Plus = last_Cnt_Plus;	
+			
             Output.Str.Cnt_Dif = g_gld.pulses.reper_meandr.cnt_delta;
             g_gld.pulses.reper_meandr.cnt_delta = 0;            
 
-            //ResetBitsOfWord(&cntPls_sum_32, 1); 
 
             /*Output.Str.Cnt_Mns = Cnt_Mns;//sumCnt_Mns;	   
             //e. rewrite accumulated data to output
@@ -282,6 +238,6 @@ void clc_Pulses()
         break;
     }	 
     //e. WP_scope1, WP_scope2 - variables for control in the Rate3 mode 
- 	Output.Str.WP_scope1 = g_gld.pulses.Dif_Curr_Vib;  
- 	Output.Str.WP_scope2 = (Dif_Curr_32 >> (SHIFT_TO_FRACT-2)); 
+ 	//Output.Str.WP_scope1 = g_gld.pulses.Dif_Curr_Vib;  
+ 	//Output.Str.WP_scope2 = (Dif_Curr_32 >> (SHIFT_TO_FRACT-2)); 
 } // clc_Pulses

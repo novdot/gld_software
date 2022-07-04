@@ -239,7 +239,7 @@ void command_cmd_DELTA_PS_EXEC()
 {
     static void * paramTable[11] = {
         &(Output.Str.F_ras) 
-        , &(Output.Str.HF_reg)
+        , &(Output.Str.AD_value)
         , &(Output.Str.T_Vibro)
         , &(Output.Str.L_Vibro)
         , &(Output.Str.WP_reg)
@@ -371,21 +371,21 @@ void command_subcmd_M_STIMUL()
     //HFO_reg - 3, PLC_reg - 0
 	chan = (int)rcv_buf[3] & 0x0007; 
 	//chan = CMD_Code & 0x0007;     
-    data = ( (rcv_buf[4]<<8) | rcv_buf[5] ) >>4 ;
+    data =  (rcv_buf[4]<<8) | rcv_buf[5];
     //Output.ArrayOut[chan] = (((int)rcv_buf[4] << 8) | (int)rcv_buf[5])-0x8000;
     switch(chan) {
         case 0:
             //PLC_reg - 0
             //преобразов до доп кода и сдвиг
-            Output.Str.WP_reg = (data-2048)<<4;
+            Output.Str.WP_reg = data - INT16_MAX;
             break;
         case 2:
             //Dither - 2 DS regulator ДУП
             //Output.Str. = data;
             break;
         case 3:
-            //HFO_reg - 3
-            Output.Str.HF_reg = (data-2048)<<4;
+            //CURR_reg - 3
+            Output.Str.CURR_reg = data - INT16_MAX;
             break;
         default:
             //check flags bit in stimul cmd
@@ -843,7 +843,7 @@ void command_ans_M_ADC_R()
     //фотоприемник Б
 	COMMAND_UTILITY_ANSWER_FIELD(1,(void*)&(g_input.word.in2),2);
     //ВЧ АМ-детектора
-	COMMAND_UTILITY_ANSWER_FIELD(2,(void*)&(g_input.word.hf_out),2);
+	COMMAND_UTILITY_ANSWER_FIELD(2,(void*)&(g_input.word.ad_out),2);
     //НЧ АМ-детектора
 	COMMAND_UTILITY_ANSWER_FIELD(3,(void*)&(g_input.word.wp_sel),2);
 	trm_ena = 1;
@@ -940,12 +940,12 @@ void command_ans_M_RATE1()
     COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint16_t*)&(Output.Str.Cnt_Mns),2); //4-5
     COMMAND_UTILITY_ANSWER_FIELD(2,(x_uint16_t*)&(Output.Str.Cnt_Dif),2); //6-7
     COMMAND_UTILITY_ANSWER_FIELD(3,(x_uint16_t*)&(Output.Str.F_ras),2); //частота расщепления //8-9
-    COMMAND_UTILITY_ANSWER_FIELD(4,(x_uint16_t*)&(Output.Str.HF_reg),2); //выход регулятора ГВЧ //10-11
-    COMMAND_UTILITY_ANSWER_FIELD(5,(x_uint16_t*)&(/*Output.Str.HF_dif*/g_input.word.hf_out),2); //сигнал ошибки регулятора ГВЧ //12-13
+	COMMAND_UTILITY_ANSWER_FIELD(4,(x_uint16_t*)&(Output.Str.CURR_reg),2); //установленный ток //10-11
+    COMMAND_UTILITY_ANSWER_FIELD(5,(x_uint16_t*)&(Output.Str.AD_value),2); //сигнал ошибки регулятора ГВЧ //12-13
     COMMAND_UTILITY_ANSWER_FIELD(6,(void*)&(Output.Str.T_Vibro),2); //period //14-15
     COMMAND_UTILITY_ANSWER_FIELD(7,(void*)&(Output.Str.T_VB_pll),2); //ФД регулятора периода вибропривода //16-17
     COMMAND_UTILITY_ANSWER_FIELD(8,(void*)&(Output.Str.L_Vibro),2); //pulse
-    COMMAND_UTILITY_ANSWER_FIELD(9,(x_uint16_t*)&(g_input.word.hf_out),2); //hfo volt
+    COMMAND_UTILITY_ANSWER_FIELD(9,(x_uint16_t*)&(Output.Str.AD_value),2); //AD volt
     COMMAND_UTILITY_ANSWER_FIELD(10,(x_uint16_t*)&(Output.Str.WP_reg),2); //cplc volt
     COMMAND_UTILITY_ANSWER_FIELD(11,(x_uint16_t*)&(Output.Str.WP_pll),2); //phase detector 22-23
     COMMAND_UTILITY_ANSWER_FIELD(12,(x_uint16_t*)(Output.Str.Tmp_Out),12); //темпер; 24-25 26-27 28-29 30-31
@@ -966,10 +966,10 @@ void command_ans_M_RATE2()
 /******************************************************************************/
 void command_ans_M_RATE3()
 {
-    num_of_par = 2;     //e. 2 parameters output
+    num_of_par = 1;     //e. 2 parameters output
 			
-    COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint16_t*)&(Output.Str.WP_scope1),2);
-    COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint16_t*)&(Output.Str.WP_scope2),2);
+    COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint16_t*)&(Output.Str.WP_scope2),2);
+    //COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint16_t*)&(Output.Str.WP_scope2),2);
     
     trm_ena = 1;        //e. allow operation of the transmitter
 } 
@@ -981,7 +981,7 @@ void command_ans_M_RATE4()
 			
     COMMAND_UTILITY_ANSWER_FIELD(0,0,16);
     COMMAND_UTILITY_ANSWER_FIELD(1,0,32);
-    COMMAND_UTILITY_ANSWER_FIELD(2,(x_uint16_t*)&(Output.Str.HF_reg),2);
+    COMMAND_UTILITY_ANSWER_FIELD(2,(x_uint16_t*)&(Output.Str.CURR_reg),2);
     COMMAND_UTILITY_ANSWER_FIELD(3,(x_uint16_t*)&(Output.Str.WP_reg),2);
     
     //e. allow operation of the transmitter
@@ -997,7 +997,7 @@ void command_ans_M_RATE7()
     COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint16_t*)&(Output.Str.WP_sin_Array),16);
     COMMAND_UTILITY_ANSWER_FIELD(2,(x_uint16_t*)&(Output.Str.WP_reg),2);
     COMMAND_UTILITY_ANSWER_FIELD(3,(x_uint16_t*)&(Output.Str.WP_pll),2);
-    COMMAND_UTILITY_ANSWER_FIELD(4,(x_uint16_t*)&(Output.Str.HF_reg),2);
+    COMMAND_UTILITY_ANSWER_FIELD(4,(x_uint16_t*)&(Output.Str.CURR_reg),2);
     
     trm_ena = 1;
 } 

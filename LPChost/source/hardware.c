@@ -44,43 +44,15 @@ void hardware_backlight_off()
 /******************************************************************************/
 void hardware_modulator(x_int32_t a_data)
 {
-    //float v_ampl = 0;
-    //float v_ampl_mult = 0;
-    x_uint32_t udata = 0;
-    //float v_delta_range = 0;
-    
-    //множитель амплитуды
-    //1.0 = 100% (max)
-    //float v_amp_mult = 0.1;
-    //коэффициент смещения. подобран вручную из-за нелинейной вых хар-ки ЦАП
-    //float v_amp_shift = -(v_amp_mult-3.11)/9.84 ;//0.24;
-    
-    //приводим к 10 разрядам ЦАП 
-    a_data /= 64;
+    //x_uint32_t udata = 0;
+       
     //поднимем 0
-    a_data += 512;
+    //a_data += INT16_MAX;
     //приведем к регистру
-    udata = (x_uint32_t)a_data;
-    
-    //приводим к 10 разрядам ЦАП
-    //udata = udata*0x3FF/0xFFFF;
-    
-    //a_data += 31000;
-    /*
-    // amplitude = макс диапазон*коэф
-    v_ampl = LPC_DAC_SIN_AMP_MAX*v_amp_mult;
-    v_ampl_mult = (float)v_ampl/(float)(LPC_DAC_VOLT_MAX-0);
-    //сжали характеристику по амплитуде
-    a_data = (int)a_data*(v_ampl_mult);
-    
-    //вычислим на сколько нужно поднять(опустить) 
-    //характеристику чтобы сответствовать опорному напряжению
-    v_delta_range = (LPC_DAC_VOLT_MAX - v_ampl)/2 + v_amp_shift;
-    delta_ref = MOD_CONVERT_VOLT2VAL(v_delta_range);
-    a_data += delta_ref;
-    */
+    //udata = (x_uint32_t)(a_data); 
+
     //запишем значение в ЦАП
-    hardware_dac_send(udata);
+    hardware_dac_send(a_data + INT16_MAX);
 }
 
 /******************************************************************************/

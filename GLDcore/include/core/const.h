@@ -35,11 +35,11 @@
 //e. =============== parameters of HF regulator     
 #define	HF_REF_CONST	(-9264)	//e. 1 - value of the reference 
 #define	HF_SCL_CONST	(1)	    // 0x64 //e. 2 - the gain factor (1.15)         
-#define	HF_MIN_CONST	(-32668)  //e. 3 - minimum of the output value on the regulator DAC (appropriate to maximal voltage on the HFO) 
-#define	HF_MAX_CONST    (32480)	//e. 4 - maximum of the output value on the regulator DAC (appropriate to minimal voltage on the HFO) 
+#define	HF_MIN_CONST	(-9022)  //e. 3 - minimum of the output value on the regulator DAC (appropriate to maximal voltage on the HFO) 
+#define	HF_MAX_CONST    (-2041)	//e. 4 - maximum of the output value on the regulator DAC (appropriate to minimal voltage on the HFO) 
 
 //e. =============== parameters of the CPLC regulator
-#define	WP_REF_CONST	5       //e. 7 -  value of the reference                                              
+#define	WP_REF_CONST	2       //e. 7 -  value of the reference                                              
 #define	WP_SCL_CONST	5	    //e. 8 - the gain factor (1.15) 
 #define	WP_MDY_CONST	30		//e. 9 - value of the reset delay                                      
 #define	WP_RUP_CONST	31936	//e. 10 - lower value of DAC adjustment (appropriate to minimal voltage on the heater)                                     
@@ -47,16 +47,16 @@
 
 //e. =============== parameters of the dither drive regulator of the GLD
 #define	VB_PHS_CONST	4     	//e. 12 - the phase delay parameter of the dither drive PLL 
-#define	VB_SCL_CONST	1024	//e. 13 - the gain factor (1.15) of the dither drive PLL
-#define	T_VIB_START     18916   //16600	//e. 14 - divider for dither drive period (defines dither period)
+#define	VB_SCL_CONST	256	//e. 13 - the gain factor (1.15) of the dither drive PLL
+#define	T_VIB_START     20534   //16600	//e. 14 - divider for dither drive period (defines dither period)
                                 //e. _VB_N - the initial value of the oscillation period of the dither drive (406Hz-18916, 17067 - 450Hz)
 #define	T_VIB_DELTA	    1000	    //e. the range of the oscillation period of the dither drive (~ +/- 10 Hz)
 
-#define	VB_NMIN_CONST   12080	    //e. 15 - minimum of the output value of the oscillation period regulator 
-#define	VB_NMAX_CONST   64000	    //e. 16 - maximum of the output value of the oscillation period regulator 
+#define	VB_NMIN_CONST   19948	    //e. 15 - minimum of the output value of the oscillation period regulator 
+#define	VB_NMAX_CONST   21041	    //e. 16 - maximum of the output value of the oscillation period regulator 
 #define	VB_FDF_HI_CONST	3	    //e. 17 - adjusted output frequency (H)                     
 #define	VB_FDF_LO_CONST	0  		//e. 18 - (L) (double precision)                    
-#define	VB_FSC_CONST	-1000	//e. 19 - the gain factor of the output frequency regulator 
+#define	VB_FSC_CONST	-256	//e. 19 - the gain factor of the output frequency regulator 
 #define	VB_TMIN_CONST	100	//e. 20 - minimum of the output value of the Tau regulator 
 #define	VB_TMAX_CONST	14332	//e. 21 - maximum of the output value of the Tau regulator 
 #define	L_VIB_START     5120	//e. 22 - pulse width of the dither drive (before noiseness)
@@ -121,18 +121,18 @@
 
 	//e. constants for the piecewise-linear thermocompensation 
 #define TERMO_FUNC_SIZE		14 	//e. amount of the points of the table function of thermocompensation 
-#define MAX_ORDER			9   //e. maximal value of order for the thermocompensation coefficients 
 #define	VALID_START_4SEC		3 //e. time after start, when temperature came authentic 
 
-#define	N_START_MAX     	1 // 4       //e. count of attempts of device starting 
-#define	LIGHT_UP_PULSE_WDTH 5000 //1000 //e. width of light-up pulse = 100 msec
+#define	N_START_MAX     	6 // 4       //e. count of attempts of device starting 
+#define	LIGHT_UP_PULSE_WDTH 30000 //1000 //e. width of light-up pulse = 3000 msec
 #define	LIGHT_UP_PAUSE		1000 //e. pause after light-up = 100 msec
-#define	LIGHT_UP_POLLING	10000 //e. time of waiting laser generation = 1 sec
+#define	LIGHT_UP_POLLING	8192 //e. time of waiting laser generation = 0.8192 sec
 
-#define	TS_MIN				-2500 	// minimal temperature for our thermal sensors
-#define	TS_MAX				+13000  // maximal temperature for our thermal sensors
-#define	TS_DIFF_MAX			1300	// maximal difference between 2 thermal sensors
-
+#define	TS_MIN				-6000 	// minimal temperature for our thermal sensors
+#define	TS_MAX				+8500  // maximal temperature for our thermal sensors
+#define	TS_DIFF_MAX			300	// maximal difference between 2 thermal sensors
+#define AD_MIN 					7500	// min AD signal
+#define AD_MAX 					31500 // max AD signal
 /////////////////////////////////////////////
 #define		DITH_VBN_SHIFT			2 
 
@@ -141,20 +141,20 @@
 	// Status word errors bits
 #define	OUT_FREQ_ERROR		(0x8000)
 #define	DITH_FREQ_ERROR		(0x4000)
-#define	HFO_VOLT_ERROR		(0x2000)
+#define	AD_ERROR					 (0x2000)
 #define	THERMO_RANGE_ERROR	(0x1000)
 #define	THERMO_DIFF_ERROR	(0x0800)
 
 ////////////////////////////////////////////
 //Loops bits
-#define  LASER_ON        (0x0001)  		//< switch on/off laser-up
-#define  HF_REG_ON       (0x0002)  		//< switch on/off the HFO regulator
-#define  RI_REG_ON       (0x0004)  		//< switch on/off the DS power regulator
-#define  WP_REG_ON       (0x0008)  		//< a mask of switch on/off of the CPLC regulator
-#define  WP_SIN_ON       (0x0010)  		//< switch on/off search signal of the CPLC
-#define  VB_TAU_ON       (0x0020)  		//< switch on/off amplitude regulator of the dither drive
-#define  VB_FREQ_ON      (0x0040)  		//< switch on/off frequency regulator of the dither drive
-#define  GLD_ON          (0x0080)  		//< switch on/off all GLD
+#define  LASER_ON        	 (0x0001)  		//< switch on/off laser-up
+#define  CURR_REG_ON       (0x0002)  		//< switch on/off the HFO regulator
+#define  RI_REG_ON       	 (0x0004)  		//< switch on/off the DS power regulator
+#define  WP_REG_ON       	 (0x0008)  		//< a mask of switch on/off of the CPLC regulator
+#define  WP_SIN_ON       	 (0x0010)  		//< switch on/off search signal of the CPLC
+#define  VB_TAU_ON       	 (0x0020)  		//< switch on/off amplitude regulator of the dither drive
+#define  VB_FREQ_ON      	 (0x0040)  		//< switch on/off frequency regulator of the dither drive
+#define  GLD_ON          	 (0x0080)  		//< switch on/off all GLD
 /******************************************************************************/
 //e.   device operation modes
 #define  DM_INT_10KHZ_LATCH				1		//e. mode of internal latch 10 kHz 		

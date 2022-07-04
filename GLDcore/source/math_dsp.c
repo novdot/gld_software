@@ -15,7 +15,6 @@
 #define L_PLC   (3)
 #define L_DUP   (3)
 #define DIV_CONST	(768)
-#define DIV_CONST2	(384)
 
 #define	HALFINT	(0x40000000) //for 16 bit 16384
 
@@ -32,14 +31,17 @@ int aDUP_2[L_DUP] = {A0_HP, A1_HP, 0}, bDUP_2[L_DUP] = {0, B1_HP, 0};
 /******************************************************************************/
 void init_VibroReduce()
 {
-    unsigned int i = 0; 
+    unsigned int sup = 0; 
+	  unsigned int inf = 0;
+		unsigned int i = 0;
     __int64 coeff = 0;
 
     //e. real expression is DEVICE_SAMPLE_RATE_HZ*Device_blk.Str.VB_N/7680000
     g_gld.Vibro_Filter_Aperture = Device_blk.Str.VB_N/DIV_CONST;		
     //e. add rounding to nearest integer	
-    i = L_mult(g_gld.Vibro_Filter_Aperture,DIV_CONST2);	
-    if ((Device_blk.Str.VB_N - i)>DIV_CONST2) g_gld.Vibro_Filter_Aperture++;  
+    inf = L_mult(g_gld.Vibro_Filter_Aperture+1,DIV_CONST);	
+	  sup = L_mult(g_gld.Vibro_Filter_Aperture,DIV_CONST);	
+	  g_gld.Vibro_Filter_Aperture = ((inf-Device_blk.Str.VB_N)>(Device_blk.Str.VB_N-sup))? g_gld.Vibro_Filter_Aperture:++g_gld.Vibro_Filter_Aperture;  
 
     coeff = 0x7FFFFFFF/g_gld.Vibro_Filter_Aperture;
 

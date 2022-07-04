@@ -24,8 +24,6 @@
 #include "core/sip.h"
 
 uint32_t	num;
-
-
 uint32_t	Delay_UART_Enbl = DELAY_UART_ENBL;
 //uint32_t	Delay_UART_Disbl = DELAY_UART_ENBL;
 
@@ -81,9 +79,12 @@ void Latch_Event()
 #include "core/math_dsp.h"
 #include <math.h>
 #include <stdlib.h>
+
+ uint32_t halfQEIPeriod = 0;
+
  __irq void QEI_IRQHandler (void) 
 {
-    static uint32_t halfQEIPeriod = 0;
+    //static uint32_t halfQEIPeriod = 0;
     //static x_direction_t direction_pos = _x_unk;
     
     //check int flag position on
@@ -151,6 +152,9 @@ void SwitchRefMeandInt(uint32_t s)
         LPC_QEI->IEC = 0x1fff; //e.  disable direction changing interrupt
         break;
     case RATE_REPER_OR_REFMEANDR:
+			  g_gld.pulses.reper_meandr.cnt_prev = qei_get_position();
+				halfQEIPeriod = 0;
+				data_Rdy = 0;
         LPC_QEI->IES = 0x0008; //e.  enable direction changing interrupt
         break;
     }
@@ -262,7 +266,6 @@ int SwitchMode()
 ******************************************************************************/
  void ServiceTime(void)
 {
-    static x_uint8_t isStarted = 0;
     if(g_gld.time_1_Sec<PrevPeriod){
         g_gld.time_1_Sec = 0;
     }else{
@@ -274,10 +277,7 @@ int SwitchMode()
         g_gld.time_1_Sec = DEVICE_SAMPLE_RATE_uks;
         g_gld.time_Seconds++;
 	}
-	if ( (g_gld.time_Seconds==3) && (isStarted==0)) { 
-        isStarted = 1; 
-        close_all_loops();
-    }	
+
 	Sys_Clock++; //e. increment of the system clock register 
    
     PrevPeriod = LPC_PWM1->MR0;
@@ -285,7 +285,9 @@ int SwitchMode()
 	PrevPeriod = DEVICE_SAMPLE_RATE_HZ;
 #endif
 } // ServiceTime
-
+ void TimeFunctions(void){
+	 
+ }
 /******************************************************************************
 ** Function name:		WDTFeed
 **

@@ -137,7 +137,7 @@ void thermo_init()
 //r.x	TermoCompCoolingDelta = +0.001000; //r. коэфф., при котором за 1 сек накапливается 10 импульс
 	
     //test
-    Device_blk.Str.TermoMode = TERMO_ON;
+    
     for (i = 1; i < TERMO_FUNC_SIZE; i++)  {
         Device_blk.Str.TermoFunc[i] = 100*i;
         Device_blk.Str.ThermoHeatDelta[i] = 100*i;
@@ -321,8 +321,7 @@ void thermo_clc_ThermoSensors(void)
 		if (TenSeconds > VALID_START_4SEC){
 			StartRdy = _x_false;	
 			//TempOfReset = Temp_Aver;
-			Device_blk.Str.WP_scl >>= 1;
-			Device_blk.Str.HF_scl >>= 1;
+
 
 			//e. static thermocompensation is enable
 			if ((Device_blk.Str.TermoMode != TERMO_OFF) && \
@@ -339,19 +338,19 @@ void thermo_clc_ThermoSensors(void)
 			//DithFreqRangeCalc();
 
 			//e. voltage of reset at heating 
-			g_gld.thermo.WP_reset_heating = CPL_reset_calc(
+/*			g_gld.thermo.WP_reset_heating = CPL_reset_calc(
 					Device_blk.Str.WP_reset
 					, Device_blk.Str.K_WP_rst_heating
 					, g_gld.thermo.Temp_Aver
 					, Device_blk.Str.TemperNormal
-					);
+					);*/
 			//e. voltage of reset at cooling 
-			g_gld.thermo.WP_reset_cooling = CPL_reset_calc(
+/*			g_gld.thermo.WP_reset_cooling = CPL_reset_calc(
 					Device_blk.Str.WP_reset2
 					, Device_blk.Str.K_WP_rst_cooling
 					, g_gld.thermo.Temp_Aver
 					, Device_blk.Str.TemperNormal
-					);		
+					);	*/	
 		}
 	}	
 

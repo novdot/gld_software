@@ -77,14 +77,14 @@ typedef union {
         x_int32_t My_Addres;      //e. 0 - device own address 
  
         //e. parameters of HFO regulator    
-        x_int32_t HF_ref;    		//e. 1 - value of the reference 
-        x_int32_t HF_scl;         //e. 2 - the gain factor (1.15)    
-        x_int32_t HF_min;         //e. 3 - minimum of the output value on the regulator DAC (appropriate to maximal voltage on the HFO)
-        x_int32_t HF_max;         //e. 4 - maximum of the output value on the regulator DAC (appropriate to minimal voltage on the HFO)
+        x_int32_t reserved0;    		//e. 1 - reserved0 
+        x_int32_t reserved1;        //e. 2 - reserved1    
+        x_int32_t Curr_work;        //e. 3 - work current
+        x_int32_t Curr_start;       //e. 4 - start current
 
         //e. parameters of the regulator of the DS power regulator 
-        x_int32_t RI_ref;         //e. 5 - value of the reference 
-        x_int32_t RI_scl;         //e. 6 - the gain factor (1.15) 
+        x_int32_t reserved2;         //e. 5 - reserved2 
+        x_int32_t reserved3;         //e. 6 - reserved3 
 
         //e. parameters of the CPLC regulator 
         x_int32_t WP_ref;         //e. 7 -  value of the reference
@@ -178,10 +178,10 @@ typedef union {
         int	WP_reg; //e. PLC output voltage
         int WP_sin; //e. the signal of CPLC search - sine 250 Hz  
         int	WP_pll; //e. the XOR output of the PD of the CPLC regulator (phase detector)
-        int HF_reg; //e. HFO output voltage
-        int HF_dif;
-        int WP_Phase_Det_Array[8]; //e. arrays for "worms" output
-        int WP_sin_Array[8];
+        int CURR_reg; //e. current output DAC voltage
+        int AD_value; //e. AD signal
+        x_int16_t WP_Phase_Det_Array[8]; //e. arrays for "worms" output
+        x_int16_t WP_sin_Array[8];
         int	WP_scope1;
         int WP_scope2; //e. temporary variables for Rate3 monitoring
         x_uint32_t F_ras; //e. really output frequency, divided by 16  (for transmission) 		    
@@ -217,7 +217,7 @@ typedef union {
         int in1;//< currency PhA
         int in2;//< currency PhB	
         int delta_t;//< termo2 + uterm
-        int hf_out; //< signal value AmL
+        int ad_out; //< signal value AmL
         int wp_sel;	//< signal value AmH		       	
     }word;
 } inputData;

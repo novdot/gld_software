@@ -37,6 +37,7 @@ int32_t accum_error_old = 0;
 int32_t PhaseShift;
 int32_t temp2;
 int32_t temp3;
+extern  int32_t	Dif_Curr_32;
 /******************************************************************************/
 void dither_init()
 {
@@ -68,11 +69,14 @@ void dither_noise_regulator(void)
     int temp;
 	static x_uint32_t Flag = 0;
 	static int PeriodCount = 0, Tnoise = 0;
-
+		static short int rando;
 	if ( PeriodCount >= Tnoise ){
 		PeriodCount = 0;
-		srand(Device_blk.Str.VB_N);
-		Tnoise = add( Device_blk.Str.VBN_Tzd, mult_r(Device_blk.Str.VBN_Ran, rand())); 
+		srand(LPC_MCPWM->TC0);
+		rando = rand()&0x7fff;
+		//rando = (x_uint16_t)((rand()+32768)>>1);
+		Tnoise = add( Device_blk.Str.VBN_Tzd, mult_r(Device_blk.Str.VBN_Ran, rando)); 
+		Output.Str.WP_scope1 = rando;
 		//e. calculation +dF/-dF 
         if ( Flag ) {
 			temp = Device_blk.Str.VBN_k;
@@ -94,11 +98,15 @@ void clc_OutFreq_regulator(void)
     static int out_freq_sum = 0;
     static int temp = 0;
     static int temp_pure = 0;
+		x_int32_t input;
+	
 
-    if(g_gld.pulses.Dif_Curr_Vib>0)
-        out_freq_sum += g_gld.pulses.Dif_Curr_Vib;
+	input = g_gld.pulses.Dif_Curr_Vib - (Dif_Curr_32>>SHIFT_TO_FRACT);
+  //  if(g_gld.pulses.Dif_Curr_Vib>0)
+	  if (input > 0)
+        out_freq_sum += input;//g_gld.pulses.Dif_Curr_Vib;
     else
-        out_freq_sum -= g_gld.pulses.Dif_Curr_Vib;
+        out_freq_sum -= input;//g_gld.pulses.Dif_Curr_Vib;
 
     //e. second has elapsed, fix the output frequency value 
     if (g_gld.time_1_Sec == DEVICE_SAMPLE_RATE_uks) {

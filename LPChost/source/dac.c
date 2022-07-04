@@ -22,6 +22,6 @@ void hardware_dac_init()
 void hardware_dac_send(x_uint32_t a_data)
 {
     //data 15..6
-    LPC_DAC->CR = (a_data<<6);
+    LPC_DAC->CR = (a_data & 0xFFC0); //e. reset lower 6 bits and high 16 bits
 }
 /******************************************************************************/

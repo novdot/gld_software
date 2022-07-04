@@ -9,6 +9,8 @@
 
 x_bool_t g_bIsStartRequested = _x_false; //start
 x_bool_t g_bIsStopRequested = _x_false;
+extern uint32_t delay_output;
+
 /******************************************************************************/
 x_bool_t ignit_is_start_request(void)
 {
@@ -84,7 +86,6 @@ void gld_status(void)
 void gld_output(void)
 {
     x_uint8_t dbg[64];
-    int i;
     //latch appeared
     if (Latch_Rdy) {
         //enable packet generation
@@ -93,7 +94,7 @@ void gld_output(void)
         switch (CMD_Mode) {
             case 1: //e. Delta _PS mode
                 command_cmd_DELTA_PS_EXEC();
-                break;
+            break;
 
             case 5: //rate mode
                 //e. reset bits of current command code settings of periodicity and transfer rate
@@ -101,12 +102,12 @@ void gld_output(void)
                 CMD_Code &= 0xff1f;
                 //e. is it the Rate2 mode?
                 //r. это режим Rate2?
-                if (CMD_Code == SUBCMD_M_RATE2)	 {
-                    if (data_Rdy & WHOLE_PERIOD)  {
-                        trm_ena = 1;
-                    } else trm_ena = 0;
-                }   	
-                break;	
+                if (CMD_Code == SUBCMD_M_RATE2){
+										trm_ena = 1;  
+
+								}									
+									               	
+            break;	
         }
     }
 }

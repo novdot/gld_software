@@ -110,7 +110,7 @@ void init()
     
     open_all_loops();
     
-    Output.Str.HF_reg = Device_blk.Str.HF_ref;
+		currentReg_init();
     cplc_init();
     dither_init();
     g_gld.RgConB.word = RATE_VIBRO_1;
@@ -136,6 +136,7 @@ void loop()
     command_decode();
     
     if (! (LPC_PWM1->IR & 0x0001) ) return;
+	//	hardware_lightup_on();
     //delay();
     //WDTFeed();
     nSwitch++;
@@ -167,7 +168,7 @@ void loop()
     exchange_regul_data_write();
     
     thermo_clc_ThermoSensors();	 
-    clc_HFO();
+    clc_AD();
     cplc_regulator();
     clc_Dith_regulator(); 
     clc_OutFreq_regulator();
@@ -191,9 +192,11 @@ void loop()
 int main(void)
 {
     init();
-    
+  
     do {
+
         loop();
+			//hardware_lightup_off();
         //loop();
     } while(1);	    // main infinie loop            
 }

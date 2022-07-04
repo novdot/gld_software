@@ -49,4 +49,6 @@ x_bool_t ignit_is_started(void);
 */
 x_bool_t ignit_is_busy(void);
 
+extern inputData g_input;
+
 #endif //__GLD_IGNIT_H_INCLUDED

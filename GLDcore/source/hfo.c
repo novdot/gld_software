@@ -3,43 +3,24 @@
 #include "core/math_dsp.h"
 #include "core/global.h"
 
-#define HFO_NEG_MIN (8738) // -4.5 V
-#define HFO_NEG_MAX (HF_MAX_CONST) // -10.5 V
-#define HFO_POZ_MIN (HF_MIN_CONST) // +10.5 V
-#define HFO_POZ_MAX (-15837) // +4.5 V
-
-#define	HFO_SHIFT (16) //e. number of digits of fractional part in 32-bit variable of the hf_reg32 varaible 
-
 /******************************************************************************/
-void clc_HFO()
+void currentReg_init()
 {
-	static int  hf_reg = 0; //e. the value of the integrator in the HFO regulator 
+    Output.Str.CURR_reg = Device_blk.Str.Curr_start;
+}
 
+void clc_AD()
+{
     
-	//e. filtration of an output of the amplitude detector before transfer to the HFO regulator
-    g_input.word.hf_out = dsp_MovAverFilt(g_input.word.hf_out);
+	//e. filtration of an output of the amplitude detector
+    Output.Str.AD_value = (dsp_MovAverFilt(g_input.word.ad_out)*9830)>>15;
     
     //signal amplitude
     // HF_dif	= HF_out - Device_blk.Str.HF_ref;
-	Output.Str.HF_dif = L_sub(Device_blk.Str.HF_ref, g_input.word.hf_out); 
+	//Output.Str.HF_dif = L_sub(Device_blk.Str.HF_ref, g_input.word.hf_out); 
     
-    /* #NDA comment temporarly
-    //e. the regulator loop is closed 
-	if ( loop_is_closed(HF_REG_ON) ){
-        // hf_reg32 += HFO_error * Device_blk.Str.HF_scl;
-		hf_reg = L_mac( hf_reg, Output.Str.HF_dif, Device_blk.Str.HF_scl );
-        //e. checking range         
-		Saturation(hf_reg, Device_blk.Str.HF_max << HFO_SHIFT, Device_blk.Str.HF_min << HFO_SHIFT); 
-		Output.Str.HF_reg = (hf_reg >> HFO_SHIFT);
-	} else {
-        //e. assign to the integrator the previous value of the HF_reg
-		hf_reg = Output.Str.HF_reg << HFO_SHIFT;	
-	}
-    */
 	// cyclic built-in test
-	if ( ! ( ((Output.Str.HF_reg < HFO_NEG_MAX) && (Output.Str.HF_reg > HFO_NEG_MIN)) 
-		|| ((Output.Str.HF_reg < HFO_POZ_MAX) && (Output.Str.HF_reg > HFO_POZ_MIN))) )
-	{
-		Valid_Data |= HFO_VOLT_ERROR;
+	if  ((g_input.word.ad_out < AD_MIN) || (g_input.word.ad_out > AD_MAX)){
+		  Valid_Data |= AD_ERROR;
 	}
 }

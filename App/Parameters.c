@@ -56,14 +56,14 @@ void params_load_default(void)
 
     Device_blk.Str.My_Addres = MY_ADDR_CONST; 
 
-    Device_blk.Str.HF_ref = HF_REF_CONST;
-    Device_blk.Str.HF_scl = HF_SCL_CONST; 
-    Device_blk.Str.HF_scl_2 = Device_blk.Str.HF_scl;
-    Device_blk.Str.HF_max = HF_MAX_CONST; 
-    Device_blk.Str.HF_min = HF_MIN_CONST; 
+    Device_blk.Str.reserved0 = HF_REF_CONST;
+    Device_blk.Str.reserved1 = HF_SCL_CONST; 
+    Device_blk.Str.HF_scl_2 = HF_SCL_CONST;
+    Device_blk.Str.Curr_start = HF_MAX_CONST; 
+    Device_blk.Str.Curr_work = HF_MIN_CONST; 
     
-    Device_blk.Str.RI_ref= RI_REF_CONST; 
-    Device_blk.Str.RI_scl= RI_SCL_CONST; 
+    Device_blk.Str.reserved2= RI_REF_CONST; 
+    Device_blk.Str.reserved3= RI_SCL_CONST; 
 
     Device_blk.Str.WP_ref = WP_REF_CONST; 
     Device_blk.Str.WP_scl = WP_SCL_CONST; 

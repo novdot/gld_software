@@ -2,9 +2,9 @@
 #define __HFO_H_INCLUDED
 
 /**
-    @brief Procedure of the HFO regulator 
+    @brief Procedure of the current regulator 
     @return
 */
-void clc_HFO(void);
-
+void clc_AD(void);
+void currentReg_init(void);
 #endif

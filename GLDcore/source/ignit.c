@@ -3,9 +3,9 @@
 **/
 
 #include "core/ignit.h"
+#include "core/gld.h"
+#include "core/global.h"
 #include "hardware/hardware.h"
-
-#define IGNIT_MAX_ITERATIONS (4)
 
 gld_error_t handle_pulse(void);
 gld_error_t handle_pause(void);
@@ -18,9 +18,11 @@ x_bool_t g_bIsStarted = _x_false; //on start procedure
 x_bool_t g_bIsRequested = _x_false; //single ignit
 x_bool_t g_bIsBusy = _x_false; //on single ingnit procedure
 
-#define	IGNIT_PULSE_TIME    (1000) //e. width of light-up pulse = 100 msec
-#define	IGNIT_PAUSE_TIME    (1000) //e. pause after light-up = 100 msec
-#define	IGNIT_POLLING_TIME	(10000) //e. time of waiting laser generation = 1 sec
+extern OUTPUT Output;
+extern TDEVICE_BLK Device_blk; 
+
+#define	IGNIT_POLLING_TIME_SHIFT	(13) //e. time of waiting laser generation = 0.8192 sec (1<<IGNIT_POLLING_TIME_SHIFT)
+#define CONVERT_CURR(x) ((((x*15305)>>15)-713))
 int g_nStatusTime = 0;
 
 /******************************************************************************/
@@ -59,7 +61,7 @@ gld_error_t handle_pulse(void)
 {
     //first time
     if(ignit_is_busy()==_x_false) {
-        g_nStatusTime = IGNIT_PULSE_TIME;
+        g_nStatusTime = LIGHT_UP_PULSE_WDTH;
         hardware_lightup_on();
     }
     
@@ -79,7 +81,7 @@ gld_error_t handle_pulse(void)
 gld_error_t handle_pause(void)
 {
     if(ignit_is_busy()==_x_false) {
-        g_nStatusTime = IGNIT_PAUSE_TIME;
+        g_nStatusTime = LIGHT_UP_PAUSE;
     }
     
     g_nStatusTime--;
@@ -96,18 +98,25 @@ gld_error_t handle_pause(void)
 /******************************************************************************/
 gld_error_t handle_polling(void)
 {
+	static int Curr_average = 0;
     if(ignit_is_busy()==_x_false) {
-        g_nStatusTime = IGNIT_POLLING_TIME;
+			  Curr_average = 0;
+        g_nStatusTime = LIGHT_UP_POLLING;
     }
     
     g_nStatusTime--;
     if(g_nStatusTime>0) {
+			  Curr_average += g_input.word.in2;
         ignit_set_busy(_x_true);
         return _gld_wrg_wait;
     }
-    
-    //end
-    ignit_set_busy(_x_false);
+		
+		ignit_set_busy(_x_false);
+    if((Curr_average>>IGNIT_POLLING_TIME_SHIFT) > CONVERT_CURR(Device_blk.Str.Curr_work)){
+			Curr_average = 0;
+			  return	_gld_error_ok;
+		}
+			Curr_average = 0;
     return _gld_error_no_ignit;
 }
 
@@ -115,6 +124,8 @@ gld_error_t handle_polling(void)
 gld_error_t ignit_start(void)
 {
     static x_uint8_t nIteration = 0;
+	  static x_bool_t first_ignition = _x_true;
+	
     gld_error_t nErrorIteration = _gld_error_no_ignit;
     
     //if no request to light-up go away
@@ -138,21 +149,29 @@ gld_error_t ignit_start(void)
             goto skip;
         case _gld_error_no_ignit:
         default :
+					if (first_ignition){					
             nIteration++;
-            if(nIteration>(IGNIT_MAX_ITERATIONS-1)) {
+            if(nIteration>(N_START_MAX-1)) {
                 nErrorIteration = _gld_error_no_ignit;
                 goto failing;
             } else {
                 nErrorIteration = _gld_wrg_wait;
                 goto skip;
             }
+					}else
+						    nErrorIteration = _gld_error_no_ignit;
     }
 failing:   
 finishing:
     ignit_set_request(_x_false);
     ignit_set_started(_x_false);
     ignit_set_busy(_x_false);
-    nIteration = 0;
+		if (first_ignition == _x_true){
+					Output.Str.CURR_reg = Device_blk.Str.Curr_work;
+					close_all_loops();
+					open_loop(CURR_REG_ON);
+		}
+		first_ignition = _x_false;
     hardware_backlight_off();
 skip:
     return nErrorIteration;

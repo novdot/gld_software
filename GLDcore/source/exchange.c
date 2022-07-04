@@ -8,10 +8,11 @@
 #include "math.h"
 
 int ExchangeErr = 0;
-int g_ChInd = 0; //< индекс канала ЦАП
+
 /******************************************************************************/
-void exchange_regul_data_write()
+/*void exchange_regul_data_write()
 {
+	WP_reg32 = 0;
     static int reg, sign  = 0;
     if(g_ChInd==1) {
         g_ChInd = 0;
@@ -20,7 +21,7 @@ void exchange_regul_data_write()
         
     }else{
         g_ChInd = 1;
-        reg = (Output.Str.HF_reg>>4);
+        reg = (Output.Str.CURR_reg>>4);
     }
     //TODO maybe move into hardware module
     if(reg>=0) sign = 0;
@@ -40,6 +41,21 @@ void exchange_regul_data_write()
             , &ExchangeErr
             , reg
         );
+}*/
+void exchange_regul_data_write()
+{
+	static int g_ChInd = 0; //< индекс канала ЦАП
+	
+	//g_gld.nDACData[0] = ((Output.Str.WP_reg*19661) >> 19)+0x08F0;
+	  g_gld.nDACData[0] = (((Output.Str.WP_reg+61013)*19661) >> 19);
+	  g_gld.nDACData[1] = (((Output.Str.CURR_reg+61013)*19661) >> 19);
+	
+    g_ChInd = (g_ChInd == 0) ? 1:0;
+    hardware_regul_data_write(
+            g_ChInd
+            , &ExchangeErr
+            , g_gld.nDACData[g_ChInd]
+        );
 }
 /******************************************************************************/
 void exchange_regul_data_read()
@@ -56,15 +72,17 @@ void exchange_regul_data_read()
     g_input.word.temp1 = g_gld.nADCData[5];
     **/
     if(g_gld.nADCData[0] > hf_out_max){
-        g_input.word.hf_out = 0;
+        g_input.word.ad_out = 0;
     }else{
-        g_input.word.hf_out = (hf_out_max - g_gld.nADCData[0])*6/5;
+        g_input.word.ad_out = (hf_out_max - g_gld.nADCData[0])*6/5;
     }
-    if(g_input.word.hf_out>0x7FFF) g_input.word.hf_out = 0x7FFF;
+    if(g_input.word.ad_out>0x7FFF) g_input.word.ad_out = 0x7FFF;
     
     g_input.word.wp_sel = g_gld.nADCData[1];
-    g_input.word.in2 = -16495 + g_gld.nADCData[2]*423/1000;
-    g_input.word.in1 = -16495 + g_gld.nADCData[3]*423/1000;
+   // g_input.word.in2 = -16495 + g_gld.nADCData[2]*423/1000;
+   // g_input.word.in1 = -16495 + g_gld.nADCData[3]*423/1000;
+    g_input.word.in2 = -16381 + ((g_gld.nADCData[2]*13098)>>15);
+    g_input.word.in1 = -16381 + ((g_gld.nADCData[3]*13098)>>15);		
     g_input.word.temp1 = g_gld.nADCData[4];
     g_input.word.delta_t = 0;
     
