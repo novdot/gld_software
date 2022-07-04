@@ -57,11 +57,13 @@ void hardware_photo_set(x_uint32_t Ph_A, x_uint32_t Ph_B);
     @brief управление памятью
     @attention перед вызовом остановить все прерывания
 */
-void hardware_flash_read(x_uint32_t a_sector,x_uint32_t* a_pmemory, x_uint32_t a_cnt);
-void hardware_flash_write(x_uint32_t a_sector,x_uint8_t* a_pmemory);
-void hardware_flash_erase(x_uint32_t a_sector);
+x_bool_t hardware_flash_read(x_uint32_t a_sector,x_uint32_t* a_pmemory, x_uint32_t a_cnt);
+x_bool_t hardware_flash_write(x_uint32_t a_sector,x_uint8_t* a_pmemory, x_uint32_t a_size,x_uint32_t shift);
+x_bool_t hardware_flash_erase(x_uint32_t a_sector, x_uint16_t a_size);
 void hardware_flash_load_main();
 
+x_bool_t hardware_flash_erase_f(x_uint8_t* a_file, x_uint16_t a_size);
+x_bool_t hardware_flash_write_f(x_uint8_t* a_file, x_uint32_t a_size, x_uint8_t *buf, x_uint32_t shift);
 /**
     @brief таймер
 */

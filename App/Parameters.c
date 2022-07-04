@@ -156,6 +156,7 @@ void params_save2flash()
     memory_write(
         MEMORY_COEF_SEC_START
         ,MEMORY_COEF_SEC_END
+        ,0
         ,Device_blk.Array
         ,VARIABLE_COUNT
         );

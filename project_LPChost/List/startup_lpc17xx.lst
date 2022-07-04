@@ -409,11 +409,12 @@ ARM Macro Assembler    Page 7
               00000000 
               00002000 
               00000000 
-Command Line: --debug --xref --cpu=Cortex-M3 --apcs=interwork --depend=.\obj\st
-artup_lpc17xx.d -o.\obj\startup_lpc17xx.o -IC:\Keil_v5\ARM\RV31\INC -IC:\Keil_v
-5\ARM\PACK\ARM\CMSIS\3.20.4\CMSIS\Include -IC:\Keil_v5\ARM\Inc\NXP\LPC17xx --pr
-edefine="NO_CRP SETA 1" --list=.\list\startup_lpc17xx.lst Source\CMSIS\CM3\Devi
-ceSupport\NXP\LPC17xx\startup\arm\startup_LPC17xx.s
+Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M3 --apcs=interw
+ork --depend=.\obj\startup_lpc17xx.d -o.\obj\startup_lpc17xx.o -IC:\Keil_v5\ARM
+\RV31\INC -IC:\Keil_v5\ARM\CMSIS\Include -IC:\Keil_v5\ARM\INC\NXP\LPC17xx --pre
+define="__EVAL SETA 1" --predefine="__UVISION_VERSION SETA 534" --predefine="NO
+_CRP SETA 1" --list=.\list\startup_lpc17xx.lst Source\CMSIS\CM3\DeviceSupport\N
+XP\LPC17xx\startup\arm\startup_LPC17xx.s
 
 
 
@@ -1196,4 +1197,4 @@ m\startup_LPC17xx.s
       None
 Comment: __use_two_region_memory unused
 3 symbols
-395 symbols in table
+397 symbols in table

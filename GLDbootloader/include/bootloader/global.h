@@ -2,6 +2,7 @@
 #define __BOOTLOADER_GLOBAL_H_INCLUDED__
 
 #include "xlib/types.h"
+#include "xlib/ymodem.h"
 
 #define BOOTLOADER_PTR_CODE_JUMP 0 //< код указателя перехода (указатель передачи управления)
 #define BOOTLOADER_PTR_CODE_BUF 1 //< код указателя буфера (указатель RAM-буфера пересылок в операциях с ним)
@@ -14,6 +15,8 @@
 
 #define GET_OFFSET_FROM_PTR(ptr)    ((ptr&0x3)<<14)+(((ptr&0x00FF00)>>8)<<0)+(((ptr&0x3F0000)>>16)<<8)
 #define GET_SECTOR_FROM_PTR(ptr)    ((ptr&0xFF)>>2)
+
+#define BOOTLOADER_BUF_SIZE (64) 
 
 typedef union bootloader_paramsFieldDef{
     struct{
@@ -50,10 +53,13 @@ typedef struct bootloader_prevCmdBufDef{
 typedef struct bootloader_globalDef{
     bootloader_ptr ptr;
     bootloader_cmd cmd;
+    x_uint8_t buf128[BOOTLOADER_BUF_SIZE];
     x_bool_t bMonitorMode;
     x_uint32_t nTimerCnt; //<счетчик времени автоматической загрузки основной программы
     bootloader_prevCmdBuf prevCmd; //< предыдущая команда буффер
     x_uint8_t buf_sector[1024]; //< буфер сектора
+    
+    x_ymodem_setups setups;
 }bootloader_global;
 
 extern bootloader_global g_bootloader;

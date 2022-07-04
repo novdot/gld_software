@@ -210,6 +210,9 @@ int getFractionValues(int pclk, int baudRate, int *dlEst, float *divAddVal, floa
 }
 
 
+
+/******************************************************************************/
+/******************************************************************************/
 /******************************************************************************/
 void UART_Init(x_uint32_t baudrate)
 {
@@ -371,6 +374,9 @@ void UART2_Init(x_uint32_t baudrate)
 }
 
 
+
+/******************************************************************************/
+/******************************************************************************/
 /******************************************************************************/
 void UART_DBG_SendString(char* ucData,int size)
 {
@@ -406,22 +412,6 @@ int UART_SendByte(char ucData)
 }
 
 /******************************************************************************/
-void uart_send_unblocked(int a_ch, x_ring_buffer_t*a_pbuf)
-{
-    switch(a_ch){
-        case 0:
-            if(!(LPC_UART0->LSR & 0x20)) return;
-            if(x_ring_get_count(a_pbuf)<=0) return;
-            LPC_UART0->THR = x_ring_pop(a_pbuf);
-            break;
-        case 1:
-            if(!(LPC_UART1->LSR & 0x20)) return;
-            if(x_ring_get_count(a_pbuf)<=0) return;
-            LPC_UART1->THR = x_ring_pop(a_pbuf);
-            break;
-    }
-}
-/******************************************************************************/
 int UART0_SendByte(int ucData)
 {
 	while (!(LPC_UART0->LSR & 0x20));
@@ -441,14 +431,21 @@ int UART1_SendByte(int ucData)
 	while (!(LPC_UART1->LSR & 0x20));
     return (LPC_UART1->THR = ucData);
 }
-void UART1_SendString(char* ucData,int size){}
+void UART1_SendString(char* ucData,int size)
+{
+}
 /******************************************************************************/
 int UART2_SendByte(int ucData)
 {
 	while (!(LPC_UART2->LSR & 0x20));
     return (LPC_UART2->THR = ucData);
 }
-void UART2_SendString(char* ucData,int size){}
+void UART2_SendString(char* ucData,int size)
+{
+}
+
+/******************************************************************************/
+/******************************************************************************/
 /******************************************************************************/
 void DMA_Init( void )
 {
@@ -503,6 +500,79 @@ void uart_dma_init(x_uint8_t*a_pBufferTransm)
 	LPC_GPDMACH2->CConfig |= MaskTCInt |MaskErrInt |GPDMACH2_CCONFIG|(M2P << 11);
     //e. linked list is empty
 	LPC_GPDMACH2->CLLI = 0;
+}
+/******************************************************************************/
+
+/******************************************************************************/
+/******************************************************************************/
+/******************************************************************************/
+/******************************************************************************/
+/******************************************************************************/
+x_uint32_t uart_recieve_byte(x_uint8_t *key)
+{
+ #if defined UART1REC
+    if ((LPC_UART1->LSR & RecievBufEmpty) != 0) { 
+        *key = LPC_UART1->RBR;
+        //TODO temp for tests
+        UART0_SendByte(*key);
+        return 1;
+    }else
+#elif defined UART0REC
+    if ((LPC_UART0->LSR & RecievBufEmpty) != 0){ 
+        *key = LPC_UART0->RBR;
+        return 1;
+    }else
+#endif
+    {
+        *key = 0;
+        return 0;
+    }
+}
+
+/******************************************************************************/
+void uart_send_byte(x_uint8_t c)
+{
+    UART_SendByte(c);
+}
+
+/******************************************************************************/
+/******************************************************************************/
+/******************************************************************************/
+/******************************************************************************/
+void uart_send_unblocked(int a_ch, x_ring_buffer_t*a_pbuf)
+{
+    switch(a_ch){
+        case 0:
+            if(!(LPC_UART0->LSR & 0x20)) return;
+            if(x_ring_get_count(a_pbuf)<=0) return;
+            LPC_UART0->THR = x_ring_pop(a_pbuf);
+            break;
+        case 1:
+            if(!(LPC_UART1->LSR & 0x20)) return;
+            if(x_ring_get_count(a_pbuf)<=0) return;
+            LPC_UART1->THR = x_ring_pop(a_pbuf);
+            break;
+    }
+}
+/******************************************************************************/
+void uart_send_blocked(int a_ch, x_ring_buffer_t*a_pbuf)
+{
+    switch(a_ch){
+        case 0:
+            //if(!(LPC_UART0->LSR & 0x20)) return;
+            while(x_ring_get_count(a_pbuf)>0){
+                while (!(LPC_UART0->LSR & 0x20));
+                LPC_UART0->THR = x_ring_pop(a_pbuf);
+            }
+            break;
+        case 1:
+            //if(!(LPC_UART1->LSR & 0x20)) return;
+            while(x_ring_get_count(a_pbuf)>0){
+                while (!(LPC_UART1->LSR & 0x20));
+                LPC_UART1->THR = x_ring_pop(a_pbuf);
+            }
+            break;
+    }
 }
 /******************************************************************************/
 void uart_recieve(x_uint8_t*a_pBuffer,x_uint32_t*a_uCount)                  

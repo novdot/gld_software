@@ -15,48 +15,57 @@ void command_handle()
 	x_uint32_t uCmdCode = 0;
     x_uint32_t uCmdCodeLong = 0;
     char dbg[64];
+    char dbg1[64];
     int i = 0;
+    int iCRC_calc = 0;
 
-    uCmdCode = (rcv_buf[2] & 0xFF) << 8;
-    CMD_Code = uCmdCode | (rcv_buf[3] & 0xFF);
+    uCmdCode = (g_gld.cmd.recieve_cmd[2] & 0xFF) << 8;
+    CMD_Code = uCmdCode | (g_gld.cmd.recieve_cmd[3] & 0xFF);
     
     //e. initialization of the flag of copying of receiving buffer
-	rx_buf_copy = 1;
-    
+	g_gld.cmd.flags.bit.rx_cpy = 1;
     
     switch(uCmdCode){
 	case  CMD_M_PTR_R    : 
         DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_M_PTR_R\n\r");  
         command_cmd_M_PTR_R();  
         return;
+    
 	case  CMD_M_PTR_W    : 
         DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_M_PTR_W\n\r");  
         command_cmd_M_PTR_W();  
         return;
+    
 	case  CMD_M_DAT_R    :  
         DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_M_DAT_R\n\r"); 
         command_cmd_M_DAT_R();  
         return;
+    
 	case  CMD_M_DAT_W    :   
         DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_M_DAT_W\n\r");
         command_cmd_M_DAT_W();  
         return;
+    
     case  CMD_M_BUF_R    :   
         DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_M_BUF_R\n\r");
         command_cmd_M_BUF_R();  
         return;
+    
     case  CMD_M_BUF_W    :   
         DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_M_BUF_W\n\r");
         command_cmd_M_BUF_W();  
-        return;         
+        return;      
+    
     case  CMD_M_CTL_R    :  
         DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_M_CTL_R\n\r"); 
         command_cmd_M_CTL_R();  
         return;
+    
     case  CMD_M_CTL_M    :   
         DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_M_CTL_M\n\r");
         command_cmd_M_CTL_M();  
         return;
+    
     case  CMD_M_FME_E    :   
         DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_M_FME_E\n\r");
         command_cmd_M_FME_E();  
@@ -66,65 +75,85 @@ void command_handle()
     case  0x9900    :  
     case  CMD_M_SUBCMD1    :  
     case  CMD_M_SUBCMD2    :  
-        uCmdCodeLong = uCmdCode | (rcv_buf[3] & 0xFF);
+        uCmdCodeLong = uCmdCode | (g_gld.cmd.recieve_cmd[3] & 0xFF);
         break;
-
+    
     default:
-        line_sts = line_sts | CODE_ERR;
+        //DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"ERR CODE\n\r");
+        line_sts = line_sts | MODE_ERR;
         return;
 	}
+    
 	switch(uCmdCodeLong){
-		case  CMD_WRK_PC     :   
+    case  CMD_WRK_PC     :   
         DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_WRK_PC\n\r");
-            command_cmd_WRK_PC();   
-            return;
-		case  CMD_MAINT      :   
+        command_cmd_WRK_PC();   
+        return;
+    
+    case  CMD_MAINT      :   
         DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_MAINT\n\r");
-            command_cmd_MAINT();    
-            return;
-		case  CMD_M_JUMP     :   
+        command_cmd_MAINT();    
+        return;
+    
+    case  CMD_M_JUMP     :   
         DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_M_JUMP\n\r");
-            command_cmd_M_JUMP();   
-            return;
-		case  CMD_M_LOAD     :   
+        command_cmd_M_JUMP();   
+        return;
+    
+    case  CMD_M_LOAD     :   
         DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_M_LOAD\n\r");
-            command_cmd_M_LOAD();   
-            return;
-		case  CMD_M_CONF     :   
+        command_cmd_M_LOAD();   
+        return;
+    
+    case  CMD_M_CONF     :   
         DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_M_CONF\n\r");
-            command_cmd_M_CONF();   
-            return;
-		case  CMD_M_DCNF     :   
+        command_cmd_M_CONF();   
+        return;
+    
+    case  CMD_M_DCNF     :   
         DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_M_DCNF\n\r");
-            command_cmd_M_DCNF();   
-            return;
-		case  CMD_M_CLEAR    :   
+        command_cmd_M_DCNF();   
+        return;
+    
+    case  CMD_M_CLEAR    :   
         DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_M_CLEAR\n\r");
-            command_cmd_M_CLEAR();  
-            return;
-		case  CMD_M_MIRR     :   
+        command_cmd_M_CLEAR();  
+        return;
+    
+    case  CMD_M_MIRR     :   
         DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_M_MIRR\n\r");
-            command_cmd_M_MIRR();   
-            return;
-		case  CMD_M_TSIV1    :   
+        command_cmd_M_MIRR();   
+        return;
+    
+    case  CMD_M_TSIV1    :   
         DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_M_TSIV1\n\r");
-            command_cmd_M_TSIV1();  
-            return;
-		case  CMD_M_TSOV2    :	 
+        command_cmd_M_TSIV1();  
+        return;
+    
+    case  CMD_M_TSOV2    :	 
         DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"CMD_M_TSOV2\n\r");
-            command_cmd_M_TSOV2();	 
-            return;
-		
-		default:
-            line_sts = line_sts | MODE_ERR;
-			return;
+        command_cmd_M_TSOV2();	 
+        return;
+    
+    default:
+        //DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"ERR CODE\n\r");
+        line_sts = line_sts | MODE_ERR;
+        return;
 	}
+    /***
+    for (iCRC_calc = 0; iCRC_calc < (g_gld.cmd.recieve_cmd_size); iCRC_calc++){
+            sprintf(dbg1,"%s%x",dbg1,g_gld.cmd.recieve_cmd[iCRC_calc]);
+    }
+    DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"%s'\n\r",dbg1);  
+    /***/
+    
+    return;
 }
 
 void command_save_prevCmd()
 {
-    memcpy(g_bootloader.prevCmd.buf, rcv_buf, rcv_num_byt);
-    g_bootloader.prevCmd.size = rcv_num_byt;
+    memcpy(g_bootloader.prevCmd.buf, g_gld.cmd.recieve_cmd, g_gld.cmd.recieve_cmd_size);
+    g_bootloader.prevCmd.size = g_gld.cmd.recieve_cmd_size;
 }
 
 /******************************************************************************/
@@ -236,7 +265,7 @@ void command_cmd_M_PTR_R()
     command_SwitchSpeed();
     
     //читаем что за указатель к нам пришел
-    params.word = rcv_buf[3]&0x1F;
+    params.word = g_gld.cmd.recieve_cmd[3]&0x1F;
     
     //запишем в нужный контейнер
     switch(params.bit.code) {
@@ -285,10 +314,10 @@ void command_cmd_M_PTR_W()
     command_SwitchSpeed();
     
     //читаем что за указатель к нам пришел
-    params.word = rcv_buf[3]&0x1F;
+    params.word = g_gld.cmd.recieve_cmd[3]&0x1F;
     
     //read param value
-    data = (rcv_buf[4]<<16) + (rcv_buf[5]<<8) + (rcv_buf[6]<<0);
+    data = (g_gld.cmd.recieve_cmd[4]<<16) + (g_gld.cmd.recieve_cmd[5]<<8) + (g_gld.cmd.recieve_cmd[6]<<0);
     //save in g_bootloader
     switch(params.bit.code) {
         case BOOTLOADER_PTR_CODE_JUMP : 
@@ -331,7 +360,9 @@ void command_cmd_M_DAT_R()
     command_utility_read_param();
     command_SwitchSpeed();
     
-    //чтение блока данных из буфера у-ва.
+    //чтение блока данных из буфера у-ва. 128byte
+    //формируем ответ
+    command_ans_M_DAT_R();
 }
 
 /******************************************************************************/
@@ -355,16 +386,16 @@ void command_cmd_M_DAT_W()
 void command_cmd_M_BUF_R()
 {
     command_save_prevCmd();
-	//
-    
+	//TODO from flash
+    command_ans_M_BUF_R();
 }
 
 /******************************************************************************/
 void command_cmd_M_BUF_W()
 {
     command_save_prevCmd();
-	//
-    
+	//TODO to flash
+    command_ans_M_BUF_W();
 }
 
 /******************************************************************************/
@@ -375,8 +406,8 @@ void command_cmd_M_CTL_R()
     
     command_save_prevCmd();
     
-    g_bootloader.cmd.nCmdCodeH = (rcv_buf[2]&0xFF);
-    g_bootloader.cmd.nCmdCodeL = (rcv_buf[3]&0xFF);
+    g_bootloader.cmd.nCmdCodeH = (g_gld.cmd.recieve_cmd[2]&0xFF);
+    g_bootloader.cmd.nCmdCodeL = (g_gld.cmd.recieve_cmd[3]&0xFF);
     
     //бит выбора регистра
     regType = (g_bootloader.cmd.nCmdCodeL>>4) & 0x1 ;
@@ -401,8 +432,8 @@ void command_cmd_M_CTL_M()
     
     command_save_prevCmd();
     
-    g_bootloader.cmd.nCmdCodeH = (rcv_buf[2]&0xFF);
-    g_bootloader.cmd.nCmdCodeL = (rcv_buf[3]&0xFF);
+    g_bootloader.cmd.nCmdCodeH = (g_gld.cmd.recieve_cmd[2]&0xFF);
+    g_bootloader.cmd.nCmdCodeL = (g_gld.cmd.recieve_cmd[3]&0xFF);
     
     //бит выбора регистра
     regType = (g_bootloader.cmd.nCmdCodeL>>4) & 0x1 ;
@@ -460,8 +491,8 @@ void command_ans_common1()
 {
     char dbg[64];
     //take cmd 
-    g_bootloader.cmd.nCmdCodeH = (rcv_buf[2]&0xFF);
-    g_bootloader.cmd.nCmdCodeL = (rcv_buf[3]&0xFF);
+    g_bootloader.cmd.nCmdCodeH = (g_gld.cmd.recieve_cmd[2]&0xFF);
+    g_bootloader.cmd.nCmdCodeL = (g_gld.cmd.recieve_cmd[3]&0xFF);
     //clear error code
     g_bootloader.cmd.nCmdCodeL &= 0x1F;//TODO add error code
     
@@ -549,7 +580,7 @@ void command_ans_M_TSOV2()
 /******************************************************************************/
 void command_ans_M_PTR_R(x_uint32_t data)
 {
-    g_bootloader.cmd.nCmdCodeH = (rcv_buf[2]&0xFF);
+    g_bootloader.cmd.nCmdCodeH = (g_gld.cmd.recieve_cmd[2]&0xFF);
     g_bootloader.cmd.send_data_ptr[0] = (data>>0)&0xff;
     g_bootloader.cmd.send_data_ptr[1] = (data>>8)&0xff;
     g_bootloader.cmd.send_data_ptr[2] = (data>>16)&0xff;
@@ -571,7 +602,17 @@ void command_ans_M_PTR_W()
 /******************************************************************************/
 void command_ans_M_DAT_R()
 {
-	
+    int i = 0;
+    g_bootloader.cmd.nCmdCodeH = (g_gld.cmd.recieve_cmd[2]&0xFF);
+    
+    for(i=0;i<BOOTLOADER_BUF_SIZE;i++){
+        g_bootloader.buf128[i] = i;
+    }
+    
+    num_of_par = 2;
+	COMMAND_UTILITY_ANSWER_FIELD(0,(x_uint16_t*)&(g_bootloader.cmd.nCmdCodeH),1);
+	COMMAND_UTILITY_ANSWER_FIELD(1,(x_uint16_t*)&(g_bootloader.buf128),BOOTLOADER_BUF_SIZE);
+	trm_ena = 1;
 }
 
 /******************************************************************************/
@@ -583,7 +624,7 @@ void command_ans_M_DAT_W()
 /******************************************************************************/
 void command_ans_M_BUF_R()
 {
-	
+	command_ans_common1();
 }
 
 /******************************************************************************/

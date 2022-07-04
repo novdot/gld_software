@@ -93,25 +93,37 @@
 #define     FLASH_SECTOR_28      0x00070000
 #define     FLASH_SECTOR_29      0x00078000
 
+#define MEMORY_VOID_SEC_NUM (0xFF)
+
+#define MEMORY_SECTOR_0_15_SIZE (0x1000)
+#define MEMORY_SECTOR_16_29_SIZE (0x8000)
+
+//memory buffer minimum size/ byte boundary 256 addr 
+#define MEMORY_PAGE_SIZE (1024)
+
+#define MEMORY_BOOT_SEC_NUM (0)
 #define MEMORY_BOOT_SEC_START (0)
-#define MEMORY_BOOT_SEC_END (16)
+#define MEMORY_BOOT_SEC_END (4)
 #define MEMORY_BOOT_MEM_START (FLASH_SECTOR_0)
-#define MEMORY_BOOT_MEM_SIZE (FLASH_SECTOR_16-FLASH_SECTOR_0)
+//#define MEMORY_BOOT_MEM_SIZE (FLASH_SECTOR_5-FLASH_SECTOR_0)
                     
+#define MEMORY_MAIN_SEC_NUM (1)
 #define MEMORY_MAIN_SEC_START (16)
-#define MEMORY_MAIN_SEC_END (22)
+#define MEMORY_MAIN_SEC_END (29)
 #define MEMORY_MAIN_MEM_START (FLASH_SECTOR_16)
-#define MEMORY_MAIN_MEM_SIZE (FLASH_SECTOR_22-FLASH_SECTOR_16)
+//#define MEMORY_MAIN_MEM_SIZE (FLASH_SECTOR_12-FLASH_SECTOR_6)
                     
+#define MEMORY_FPGA_SEC_NUM (2)
 #define MEMORY_FPGA_SEC_START (0)
 #define MEMORY_FPGA_END_START (0)
 #define MEMORY_FPGA_MEM_START (0)
-#define MEMORY_FPGA_MEM_SIZE (0)
+//#define MEMORY_FPGA_MEM_SIZE (0)
                     
-#define MEMORY_COEF_SEC_START (26)
-#define MEMORY_COEF_SEC_END (29)
-#define MEMORY_COEF_MEM_START (FLASH_SECTOR_26)
-#define MEMORY_COEF_MEM_SIZE (FLASH_SECTOR_29-FLASH_SECTOR_26)
+#define MEMORY_COEF_SEC_NUM (4)
+#define MEMORY_COEF_SEC_START (5)
+#define MEMORY_COEF_SEC_END (10)
+#define MEMORY_COEF_MEM_START (FLASH_SECTOR_5)
+//#define MEMORY_COEF_MEM_SIZE (FLASH_SECTOR_29-FLASH_SECTOR_15)
 
 /**
     @brief чтение из памяти ПЗУ по адресу (копирпование из ПЗУ в ОЗУ)
@@ -128,11 +140,12 @@ void memory_read(x_uint32_t a_addr, x_int32_t* a_pdata, x_uint32_t a_u32_cnt);
     @param a_pdata указатель на начало данных откуда необходимо скопировать данные в ПЗУ
     @param a_u32_cnt кол-во 32х разрядных слов
 */
-void memory_write(
+x_bool_t memory_write(
     x_uint32_t a_sec_begin
     , x_uint32_t a_sec_end
+    , x_uint32_t a_addr_shift
     , void* a_pdata
-    , x_uint16_t a_u32_cnt);
+    , x_uint32_t a_u32_cnt);
 
 /**
     @brief очистка памяти ПЗУ

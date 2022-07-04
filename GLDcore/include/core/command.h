@@ -72,8 +72,8 @@ typedef enum{
 /**
     @brief чтение пакета информации из периферии и сохранение в буффер
     @param flag 
-        0 - логика ГЛД
-        1 - логика загрузчика
+        0 - логика ГЛД _command_recieve_flag_gld
+        1 - логика загрузчика _command_recieve_flag_bootloader
     @return 
 */
 void command_recieve(command_recieve_flag flag);
