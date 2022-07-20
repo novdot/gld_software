@@ -58,7 +58,7 @@ x_bool_t command_check_lcc(x_uint8_t* a_pBuffer,x_uint32_t a_uCount)
 /******************************************************************************/
 void command_recieve_gld()
 {
-    /*****************
+    /*****************/
     static int ToWaitEnd, ErrReg ;
     int iCRC_calc = 0;
     int ibyte = 0;
@@ -88,7 +88,7 @@ void command_recieve_gld()
         return;
 	}
     //try to move buffer for header sign
-    /************
+    /************/
     if (rcv_buf[0] != 0xCC) {
         //try to find header
         for(ibyte=0;ibyte<rcv_num_byt;ibyte++){
@@ -110,7 +110,7 @@ void command_recieve_gld()
         }
         rcv_num_byt -= ibyte_head;
     }
-    /************
+    /************/
 	rcv_num_byt_old = rcv_num_byt;
     
 	//e. we received less than 6 bytes or no parity bytes
@@ -120,7 +120,7 @@ void command_recieve_gld()
     }
     
     //e. the header of packet has not recieved
-    /*********
+    /*********/
     if ((!ToWaitEnd) && (rcv_num_byt > 1)){
         if (
                 (rcv_buf[0] != 0xCC) 
@@ -131,7 +131,7 @@ void command_recieve_gld()
             return;
         }
     }
-    /********
+    /********/
         
     //check packet lenght
     if (rcv_num_byt == 6) {	 
@@ -158,6 +158,7 @@ void command_recieve_gld()
         ToWaitEnd++;
         return;
 	} else {
+        DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"rcv_Rdy\n\r");
 		rcv_Rdy = 1;
 	}
 	ToWaitEnd = 0;
@@ -170,6 +171,8 @@ void command_recieve_reset()
 }
 void command_recieve_bootloader()
 {
+
+#if 0
     char dbg[256];
     int i =0;
     int rcv_num_byt = 0;
@@ -301,12 +304,16 @@ void command_recieve_bootloader()
 	}
 	ToWaitEnd = 0;
     */
+#endif
 }
 /******************************************************************************/
 void command_recieve(command_recieve_flag flag)
 { 
     x_uint32_t num;
-	//uart_recieve(rcv_buf,&rcv_num_byt);
+#ifdef UART_RING
+#else
+	uart_recieve(rcv_buf,&rcv_num_byt);
+#endif
     
     switch(flag){
     case _command_recieve_flag_gld:
@@ -314,7 +321,7 @@ void command_recieve(command_recieve_flag flag)
         break;
         
     case _command_recieve_flag_bootloader:
-        command_recieve_bootloader();
+        //command_recieve_bootloader();
         break;
     
     default:
@@ -379,10 +386,13 @@ void command_transm(void)
 
     trm_num_byt += 2;
     
-    //uart_transm( trm_num_byt, Device_Mode, trm_buf);
+#ifdef UART_RING
     for(i=0;i<trm_num_byt;i++){
         x_ring_put(trm_buf[i],&g_gld.cmd.ask.ring_out);
     }
+#else
+    uart_transm( trm_num_byt, Device_Mode, trm_buf);
+#endif
     
     /******
     for (iCRC_calc = 0; iCRC_calc < (trm_num_byt); iCRC_calc++){
@@ -415,7 +425,7 @@ void command_decode(void)
         if (g_gld.cmd.recieve_cmd[0] == COMMAND_PREFIX) {
             //e. reset the flag of transmission allowing 
             trm_ena = 0;
-            //DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"command_handle\n\r");
+            DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"command_handle\n\r");
             command_handle();  
             //e. check up presence of errors in operation of this procedure 						
             if ( ((line_sts & CODE_ERR) == CODE_ERR) || ((line_sts & PARAM_ERR) == PARAM_ERR) ) {

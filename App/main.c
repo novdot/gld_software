@@ -139,7 +139,7 @@ void loop()
 	//	hardware_lightup_on();
     //delay();
     //WDTFeed();
-    nSwitch++;
+    /*nSwitch++;
     if(nSwitch>10000){
         nSwitch = 0;
         DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"nADCData:%d \n\r",g_gld.nADCData[4]);

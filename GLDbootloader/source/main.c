@@ -72,12 +72,13 @@ void init()
     DBG2(&g_gld.cmd.dbg.ring_out,dbg,64,"Build in:%s %s\n\r",__DATE__, __TIME__);
          
     //for(i=0;i<64;i++){x_ring_put(dbg[i],&g_gld.cmd.ask.ring_out);}
+    
+    hardware_tim_start();
 }
 
 /******************************************************************************/
 //основной цикл. ждем подключения, если нет - переключаемся на основную программу
 uint8_t tab_1024[1024] = { 0 };
-x_int32_t ret_val = 0;
 int max_fsize = 128*1024;
 char orig_name[256] = {'\0'};
 void loop()
@@ -85,6 +86,7 @@ void loop()
     int i=0;
     char dbg[64];
     static int bNeedLoad = 1;
+    static int ret_val = _x_ymodem_rec_wait;
     
     //uart_recieve_unblocked(0,&g_gld.cmd.dbg.ring_in);
     UART_DBG_SEND(&g_gld.cmd.dbg.ring_out);
@@ -100,7 +102,8 @@ void loop()
 
     /***/
     ret_val = x_Ymodem_Receive(g_bootloader.setups,&tab_1024[0]);
-    if(ret_val >= _x_ymodem_rec_process) bNeedLoad = 0;
+    if( (ret_val==_x_ymodem_rec_process)||(ret_val==_x_ymodem_rec_succsess) ) 
+        g_bootloader.bMonitorMode = 1;
     /**
     if (ret_val == 255) {
         //skip
@@ -128,10 +131,10 @@ void loop()
     
     //если прибор не введен в режим монитора, то проверим, что прошло время 
     //ожидания и запустим основную программу
-    if( (g_bootloader.bMonitorMode == 0) && (bNeedLoad==1)) {
+    if( (g_bootloader.bMonitorMode == 0) ) {
         if(g_bootloader.nTimerCnt>5000) {
             hardware_tim_stop();
-            //hardware_flash_load_main();
+            hardware_flash_load_main();
         }
     }
 }

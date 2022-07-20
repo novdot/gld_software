@@ -175,24 +175,19 @@ x_uint32_t Str2Int(x_uint8_t *inputstr, x_int32_t *intnum)
   * @retval 0: Byte received
   *         -1: Timeout
   */
+enum{
+    _rec_byte_ok = 0
+    , _rec_byte_timeout = 1
+};
 static x_int32_t Receive_Byte(x_ymodem_setups setups, x_uint8_t *c, x_uint32_t timeout)
 {
-    //x_uint8_t bInfFlag = 0;
-    //if(timeout==0) bInfFlag = 1;
-    while (timeout-- > 0)
-    {
-        /*if(bInfFlag==0) {
-            timeout--;
-            if(timeout<=0) goto end;
-        }*/
-        //if (SerialKeyPressed(c) == 1)
-        if(setups.recieve_byte(c) == 1)
-        {
-            return 0;
+    while (timeout-- > 0){
+        if(setups.recieve_byte(c) == 1) {
+            return _rec_byte_ok;
         }
     }
 end:;
-    return -1;
+    return _rec_byte_timeout;
 }
 
 /******************************************************************************/
@@ -213,21 +208,29 @@ static x_uint32_t Send_Byte(x_ymodem_setups setups, x_uint8_t c)
   * @brief  Receive a packet from sender
   * @param  data
   * @param  length
-  * @param  timeout
   *     0: end of transmission
   *    -1: abort by sender
   *    >0: packet length
+  * @param  timeout
   * @retval 0: normally return
   *        -1: timeout or packet error
   *         1: abort by user
   */
+enum{
+    _rec_packet_ok = 0
+    ,_rec_packet_timeout = 1
+    ,_rec_packet_abort_by_user = 2
+};
 static x_int32_t Receive_Packet (x_ymodem_setups setups,x_uint8_t *data, x_int32_t *length, x_uint32_t timeout)
 {
     x_uint16_t i, packet_size;
     x_uint8_t c;
     *length = 0;
-    if (Receive_Byte(setups,&c, timeout) != 0) {
-        return -1;
+    
+    //recieve first byte
+    if (Receive_Byte(setups,&c, timeout) != _rec_byte_ok) {
+        //timeout
+        return _rec_packet_timeout;
     }
     switch (c) {
     case SOH:
@@ -239,33 +242,37 @@ static x_int32_t Receive_Packet (x_ymodem_setups setups,x_uint8_t *data, x_int32
     case EOT:
       return 0;
     case CA:
-      if ((Receive_Byte(setups,&c, timeout) == 0) && (c == CA))
-      {
-        *length = -1;
-        return 0;
-      }
-      else
-      {
-        return -1;
-      }
+        //two of these in succession aborts transfer
+        if ((Receive_Byte(setups,&c, timeout) == _rec_byte_ok) && (c == CA)) {
+            //aborts transfer by sender
+            *length = -1;
+            return _rec_packet_ok;
+        } else {
+            //timeout
+            return _rec_packet_timeout;
+        }
     case ABORT1:
     case ABORT2:
-      return 1;
+      return _rec_packet_abort_by_user;
     default:
-      return -1;
+        //unknown symbol - timeout
+      return _rec_packet_timeout;
     }
+    
+    //recieve packet body
     *data = c;
     for (i = 1; i < (packet_size + PACKET_OVERHEAD); i ++) {
-        if (Receive_Byte(setups,data + i, timeout) != 0) {
-            return -1;
+        if (Receive_Byte(setups,data + i, timeout) != _rec_byte_ok) {
+            return _rec_packet_timeout;
         }
     }
-    if (data[PACKET_SEQNO_INDEX] != ((data[PACKET_SEQNO_COMP_INDEX] ^ 0xff) & 0xff))
-    {
-    return -1;
+    
+    //check sequence
+    if (data[PACKET_SEQNO_INDEX] != ((data[PACKET_SEQNO_COMP_INDEX] ^ 0xff) & 0xff)){
+        return _rec_packet_timeout;
     }
     *length = packet_size;
-    return 0;
+    return _rec_packet_ok;
 }
 
 /******************************************************************************/
@@ -290,6 +297,8 @@ x_int32_t x_Ymodem_Receive (x_ymodem_setups setups, x_uint8_t *buf)
     if(initialize==0){
         initialize = 1;
         
+        i =0;
+        j = 0;
         packet_length = 0;
         session_done = 0;
         file_done = 0;
@@ -313,7 +322,7 @@ x_int32_t x_Ymodem_Receive (x_ymodem_setups setups, x_uint8_t *buf)
     
             switch (Receive_Packet(setups, packet_data, &packet_length, NAK_TIMEOUT)) {
             /* normally return */
-            case 0:
+            case _rec_packet_ok:
                 errors = 0;
                 switch (packet_length)  {
                 /* Abort by sender */
@@ -332,6 +341,7 @@ x_int32_t x_Ymodem_Receive (x_ymodem_setups setups, x_uint8_t *buf)
                             ,buffer_sector*MEMORY_PAGE_SIZE
                             )==_x_true){
                         Send_Byte(setups,ACK);
+                        goto succsess;
                     }else{
                         // End session
                         Send_Byte(setups,CA);
@@ -437,7 +447,7 @@ x_int32_t x_Ymodem_Receive (x_ymodem_setups setups, x_uint8_t *buf)
                 break;
              
             /* abort by user */   
-            case 1:
+            case _rec_packet_abort_by_user:
                 Send_Byte(setups,CA);
                 Send_Byte(setups,CA);
                 goto abort_by_user;
@@ -470,24 +480,24 @@ x_int32_t x_Ymodem_Receive (x_ymodem_setups setups, x_uint8_t *buf)
         goto process;
             
 wait:
-    return 0;
+    return _x_ymodem_rec_wait;
 process:
-    return 1;
+    return _x_ymodem_rec_process;
 end_session:
     initialize = 0;
-    return -2;
+    return _x_ymodem_rec_end_session;
 timeout:
     initialize = 0;
-    return -1;
+    return _x_ymodem_rec_timeout;
 abort_by_sender:
     initialize = 0;
-    return -4;
+    return _x_ymodem_rec_abort_by_sender;
 abort_by_user:
     initialize = 0;
-    return -3;
+    return _x_ymodem_rec_abort_by_user;
 succsess:
     initialize = 0;
-    return 2;
+    return _x_ymodem_rec_succsess;
 }
 
 /******************************************************************************/
