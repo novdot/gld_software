@@ -878,7 +878,12 @@ void command_ans_M_PARAM_W()
 /******************************************************************************/
 void command_ans_M_PARAM_R()
 {
+    int i = 0;
 	num_of_par = 1;	
+    
+    /*for (i = 0; i <VARIABLE_COUNT ; i++) {
+        Device_blk.Array[i] = i;
+    }*/
 	COMMAND_UTILITY_ANSWER_FIELD(0,(void*)(&Device_blk.Str.My_Addres + rcv_buf[3]),2);
 	trm_ena = 1; 
 }

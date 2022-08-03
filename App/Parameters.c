@@ -10,6 +10,8 @@
 #include "core/gld.h"
 
 #define INT_ERR_TC		0x00000008
+
+void params_wr2flash_unsafe();
 /******************************************************************************/
 void params_load(unsigned source) 
 {
@@ -35,11 +37,15 @@ void params_load(unsigned source)
                 return;
             }*/
             params_load_flash();
-            if (Device_blk.Str.Header_Word == HEADER_WORD_CONST) {	       
+            if ( (Device_blk.Str.Header_Word&0xFFFF) == HEADER_WORD_CONST) {	       
                 return;
             }else{
-                DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"Header_Word error %u",Device_blk.Str.Header_Word);
+                DBG2(&g_gld.cmd.dbg.ring_out,dbg,64,"Header_Word error read:%u must be:%u"
+                    ,(Device_blk.Str.Header_Word&0xFFFF)
+                    ,HEADER_WORD_CONST
+                );
                 params_load_default();
+                //params_wr2flash_unsafe();
             }
             break;
             
@@ -53,7 +59,13 @@ void params_load(unsigned source)
 void params_load_default(void)      
 {
 	int i;
+    
+    //init all params by 0
+    for (i = 0; i <VARIABLE_COUNT ; i++) {
+        Device_blk.Array[i] = 0;
+    }
 
+    //set const values
     Device_blk.Str.My_Addres = MY_ADDR_CONST; 
 
     Device_blk.Str.reserved0 = HF_REF_CONST;
@@ -70,7 +82,7 @@ void params_load_default(void)
     Device_blk.Str.WP_rup = WP_RUP_CONST; 
     Device_blk.Str.WP_rdw = WP_RDW_CONST; 
     Device_blk.Str.WP_mdy = WP_MDY_CONST; 
-    Device_blk.Str.WP_start = 0;
+    //Device_blk.Str.WP_start = WP_start_CONST;
 
     Device_blk.Str.VB_phs = VB_PHS_CONST;
     Device_blk.Str.VB_scl = VB_SCL_CONST;
@@ -119,6 +131,16 @@ void params_load_default(void)
     Device_blk.Str.Gain_Ph_B = G_PHOTO_STRB_CONST;
 
     Device_blk.Str.Device_SerialNumber = DEVICE_SN_CONST;
+    
+    Device_blk.Str.WP_start = WP_start_CONST;       //e. 61 - start position for CPLC regulation
+    Device_blk.Str.TermoMode = TermoMode_CONST;
+    
+    for (i = 0; i <TERMO_FUNC_SIZE ; i++) {
+       Device_blk.Str.TemperIntDyn[i] = TemperIntDyn_CONST;
+       Device_blk.Str.ThermoHeatDelta[i] = TemperIntDyn_CONST;
+       Device_blk.Str.TemperCoolIntDyn[i] = TemperIntDyn_CONST;
+       Device_blk.Str.ThermoCoolDelta[i] = TemperIntDyn_CONST;
+    }
 
 } // init_DefaultParam
 /******************************************************************************/
@@ -153,6 +175,17 @@ void params_save2flash()
     LPC_PWM1->TCR = 0;
     Device_blk.Str.Header_Word = HEADER_WORD_CONST;
     //write to flash
+    memory_write(
+        MEMORY_COEF_SEC_START
+        ,MEMORY_COEF_SEC_END
+        ,0
+        ,Device_blk.Array
+        ,VARIABLE_COUNT
+        );
+}
+void params_wr2flash_unsafe()
+{
+    Device_blk.Str.Header_Word = HEADER_WORD_CONST;
     memory_write(
         MEMORY_COEF_SEC_START
         ,MEMORY_COEF_SEC_END

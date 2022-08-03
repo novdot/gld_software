@@ -407,7 +407,8 @@ void command_decode(void)
     int size;
     int i = 0;
     char dbg[64];	
-    
+
+#ifdef UART_RING    
     //e. is data in receive buffer?
     if (g_gld.cmd.recieve_cmd_size==0) return;
     
@@ -453,8 +454,9 @@ end:
             , 0x0
             , g_gld.cmd.recieve_cmd_size);
     g_gld.cmd.recieve_cmd_size = 0;
-    
-    /*************
+
+#else    
+    /*************/
     //e. is data in receive buffer?
 	if (!rcv_Rdy) return;
 	
@@ -509,12 +511,14 @@ end:
     //e. allow further data reception
     rcv_Rdy = 0;
     /*************/
+#endif
 }
 
 /******************************************************************************/
 //e procedure of set of rate and periodicity of answer 
 void command_utility_read_param(void)
 {
+#ifdef UART_RING   
 	//e. is periodic data transmission needed? 
 	if ((g_gld.cmd.recieve_cmd[3] & 0x0080) != 0)  {
         //e. yes, set present flag 
@@ -530,6 +534,25 @@ void command_utility_read_param(void)
 	SRgR |= g_gld.cmd.trm_rate;
     //уберем 4 разряда чтобы получить полноценный код
     g_gld.cmd.trm_rate = g_gld.cmd.trm_rate>>4;
+    
+#else   
+    int trm_rate = 0;
+	//e. is periodic data transmission needed? 
+	if ((rcv_buf[3] & 0x0080) != 0)  {
+        //e. yes, set present flag 
+		trm_cycl = 1;
+	} else {
+        //e. no, reset present flag
+		trm_cycl = 0; 
+	}
+	//e. clear the bit of transfer rate
+	SRgR &= 0xffcf;
+	trm_rate = (rcv_buf[3] >> 1) & 0x0030;
+    //e. set present transfer rate
+	SRgR |= trm_rate;
+    //уберем 4 разряда чтобы получить полноценный код
+    g_gld.cmd.trm_rate = trm_rate>>4;
+#endif
 } // SetSpeedPeriod
 
 /******************************************************************************/

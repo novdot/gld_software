@@ -12,10 +12,10 @@
 void memory_read(x_uint32_t a_addr, x_int32_t* a_pdata, x_uint32_t a_u32_cnt)
 {
     int i = 0;
-    x_int16_t *p = (x_int16_t *)MEMORY_COEF_MEM_START;
+    x_int32_t *p = (x_int32_t *)MEMORY_COEF_MEM_START;
     
     for(i=0;i<a_u32_cnt;i++){
-        a_pdata[i] = (x_int16_t)p[i];
+        a_pdata[i] = (x_int32_t)p[i];
     }
     return;
 }

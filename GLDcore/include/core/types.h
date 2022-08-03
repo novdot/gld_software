@@ -148,6 +148,7 @@ typedef union {
         x_int32_t Device_SerialNumber;		//e. 60 - serial number of the device
         x_int32_t WP_start;       //e. 61 - start position for CPLC regulation
         x_int32_t TermoMode;	//e  62 - device operation mode (with thermocompenstion, without it, debug )
+        
         //e. addition for the piecewise-linear termocorrection 
         x_int32_t TemperInt[TERMO_FUNC_SIZE];	//e. 63 
         x_int32_t TermoFunc[TERMO_FUNC_SIZE];	//e. 77
@@ -161,11 +162,11 @@ typedef union {
         x_int32_t WP_transition_step; //e. 98 - step of change of a heater voltage at resetting 
         x_int32_t Reserved3;          //e. 99 -not used
         x_int32_t HF_scl_2;           //e. 100 -
-        x_int32_t TemperIntDyn[TERMO_FUNC_SIZE]; //e. 114 - точки температуры
-        x_int32_t ThermoHeatDelta[TERMO_FUNC_SIZE]; //e. 128 - смещение
-        x_int32_t DeltaTempRecalc;    //e. temperature delta for dynamic thermocompensation recalculation(in relative units)
-        x_int32_t TemperCoolIntDyn[TERMO_FUNC_SIZE]; // e. 143 - точки температуры скорости
-        x_int32_t ThermoCoolDelta[TERMO_FUNC_SIZE];  //e. 157 - скорость смещение
+        x_int32_t TemperIntDyn[TERMO_FUNC_SIZE]; //e. 101-114 - точки температуры
+        x_int32_t ThermoHeatDelta[TERMO_FUNC_SIZE]; //e. 115-128 - смещение
+        x_int32_t DeltaTempRecalc;    //e. 129 temperature delta for dynamic thermocompensation recalculation(in relative units)
+        x_int32_t TemperCoolIntDyn[TERMO_FUNC_SIZE]; // e. 130-143 - точки температуры скорости
+        x_int32_t ThermoCoolDelta[TERMO_FUNC_SIZE];  //e. 144-157 - скорость смещение
     } Str;
 } TDEVICE_BLK;
 

@@ -29,7 +29,7 @@
 /////////////////////////////////////////////
 
 //e. *** Default device parameters
-#define	DEVICE_SN_CONST		(0xFFFF)		//e. device serial number = 01
+#define	DEVICE_SN_CONST		(0xFFFF)		//e. 60 device serial number = 01
 #define	MY_ADDR_CONST		0	      //e.    - device own address
 ////////////////////////////////////////////////
 //e. =============== parameters of HF regulator     
@@ -38,6 +38,10 @@
 #define	HF_MIN_CONST	(-9022)  //e. 3 - minimum of the output value on the regulator DAC (appropriate to maximal voltage on the HFO) 
 #define	HF_MAX_CONST    (-2041)	//e. 4 - maximum of the output value on the regulator DAC (appropriate to minimal voltage on the HFO) 
 
+//e. =============== parameters of DS power regulator
+#define	RI_REF_CONST	(25600)	//e. 5 - value of the reference                                             
+#define	RI_SCL_CONST	(0)	    //e. 6 - the gain factor (1.15) 
+       
 //e. =============== parameters of the CPLC regulator
 #define	WP_REF_CONST	2       //e. 7 -  value of the reference                                              
 #define	WP_SCL_CONST	5	    //e. 8 - the gain factor (1.15) 
@@ -47,8 +51,8 @@
 
 //e. =============== parameters of the dither drive regulator of the GLD
 #define	VB_PHS_CONST	4     	//e. 12 - the phase delay parameter of the dither drive PLL 
-#define	VB_SCL_CONST	256	//e. 13 - the gain factor (1.15) of the dither drive PLL
-#define	T_VIB_START     20534   //16600	//e. 14 - divider for dither drive period (defines dither period)
+#define	VB_SCL_CONST	256	    //e. 13 - the gain factor (1.15) of the dither drive PLL
+#define	T_VIB_START     20534   //e. 14 - divider for dither drive period (defines dither period)
                                 //e. _VB_N - the initial value of the oscillation period of the dither drive (406Hz-18916, 17067 - 450Hz)
 #define	T_VIB_DELTA	    1000	    //e. the range of the oscillation period of the dither drive (~ +/- 10 Hz)
 
@@ -66,14 +70,10 @@
 #define	VBN_RAN_CONST	(400)   //e. 24 - range of the random component of noiseness 
 #define	VBN_K_CONST  	(7000)	//e. 25 - adjusted noise constant (user`s constant) 
 
-//e. =============== parameters of DS power regulator
-#define	RI_REF_CONST	(25600)	//e. 5 - value of the reference                                             
-#define	RI_SCL_CONST	(0)	    //e. 6 - the gain factor (1.15) 
-       
 //e. =============== parameters of processing of accurate data
-#define	PI_FSC_CONST	(128)	    //e.  26 - the S_ds scale parameter 
+#define	PI_FSC_CONST	(128)	//e.  26 - the S_ds scale parameter 
 #define	PI_FB0_CONST	(0)	    //e.  27 - the B_ds zero shift of the DS 
-#define	PI_SCL_CONST	(256)	    //e.  28 - the Scale scale coefficient of the gyro 
+#define	PI_SCL_CONST	(256)	//e.  28 - the Scale scale coefficient of the gyro 
 #define	PI_BIA_CONST	(0)	    //e.  29 - the Bias zero shift of the gyro 
 
 //e. ===============  coefficients of the temperature correction 
@@ -104,11 +104,18 @@
 //e. ================ initial gain factor of photodetector channels
 #define	G_PHOTO_STR_MIN	    0
 #define	G_PHOTO_STR_MAX	    255
-#define	G_PHOTO_STRA_CONST	60     // 56 
-#define	G_PHOTO_STRB_CONST  60		// 57
+#define	G_PHOTO_STRA_CONST	60      // 56 
+#define	G_PHOTO_STRB_CONST  60	    // 57
 
 //e. =============== switch of the source of loading GLD variables block 
-#define HEADER_WORD_CONST	0x55aa	//e. 58 - magic number flash validity 
+#define HEADER_WORD_CONST	0x55aa	//e. 58 - magic number flash validity
+
+
+#define WP_start_CONST	0	//e. 61 - magic number flash validity
+#define TermoMode_CONST	0	//e. 62 - magic number flash validity
+#define TemperIntDyn_CONST	0	//e. 101-114 - точки температуры
+
+
 ////////////////////////////////////////////////////////
 
 #define DITHER_REG_PERIOD		40	//e. period of dither regulator (in periods of dither frequency) 
