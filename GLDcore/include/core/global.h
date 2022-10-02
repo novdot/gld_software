@@ -159,7 +159,7 @@ void gld_global_init(void);
 extern x_uint32_t trm_num_byt;
 extern x_uint32_t rcv_num_byt;
 extern x_uint32_t rcv_Rdy;
-extern x_uint32_t trm_cycl;
+//extern x_uint32_t trm_cycl;
 
 extern x_uint8_t trm_buf[GLD_BUF_SIZE];//64
 extern x_uint8_t rcv_buf[GLD_BUF_SIZE];
