@@ -48,7 +48,7 @@ typedef enum _TERMO_MODE
 {
 	TERMO_OFF = 0						//e. thermocompensation is switched off  
 	,TERMO_ON = 1					    //e. thermocompensation is switched on  
-    ,TERMO_ON_NUMB_OFF = 2	//10b		    //e. thermocompensation is switched on, number resets (debug mode) 
+  ,TERMO_ON_NUMB_OFF = 2	//10b		    //e. thermocompensation is switched on, number resets (debug mode) 
 	,TERMO_ON_STATIC_ONLY = 3 //11b		    //e. only static thermocompensation is switched on  
 	,TERMO_ON_DYNAMIC_ONLY = 4		    //e. only dynamic thermocompensation is switched on  
 	,TERMO_ON_STATIC_ONLY_NUMB_OFF = 5	//e. static thermocompensation is switched on, number resets (debug mode) 
@@ -148,7 +148,6 @@ typedef union {
         x_int32_t Device_SerialNumber;		//e. 60 - serial number of the device
         x_int32_t WP_start;       //e. 61 - start position for CPLC regulation
         x_int32_t TermoMode;	//e  62 - device operation mode (with thermocompenstion, without it, debug )
-        
         //e. addition for the piecewise-linear termocorrection 
         x_int32_t TemperInt[TERMO_FUNC_SIZE];	//e. 63 
         x_int32_t TermoFunc[TERMO_FUNC_SIZE];	//e. 77

@@ -8,7 +8,7 @@
 
 
 /******************************************************************************/
-
+/*
 typedef struct gld_thermoDef{
     int	TermoCompens_Sum;//< накопление термокомпенсации
 	int	StartTermoCompens; //начальная термокомпенсация
@@ -20,7 +20,7 @@ typedef struct gld_thermoDef{
     int WP_reset_heating;	//e. voltage of reset at heating
     int WP_reset_cooling;	//e. voltage of reset at cooling
 }gld_thermo;
-
+*/
 typedef struct gld_cplcDef{
     int WP_DelaySin_Array[21];
 }gld_cplc;
@@ -105,7 +105,7 @@ typedef struct gld_globalDef{
     x_uint32_t nADCData[6];
     x_uint32_t nDACData[2];
     
-    gld_thermo thermo;
+//    gld_thermo thermo;
     gld_cplc cplc;
     
     //sip
@@ -155,25 +155,23 @@ void gld_global_init(void);
 
 /******************************************************************************/
 //TODO
-/******************/
 extern x_uint32_t trm_num_byt;
 extern x_uint32_t rcv_num_byt;
 extern x_uint32_t rcv_Rdy;
 //extern x_uint32_t trm_cycl;
 
-extern x_uint8_t trm_buf[GLD_BUF_SIZE];//64
-extern x_uint8_t rcv_buf[GLD_BUF_SIZE];
-extern x_uint8_t rcv_copy[GLD_BUF_SIZE];
+extern x_uint8_t trm_buf[256];//64
+extern x_uint8_t rcv_buf[256];
+extern x_uint8_t rcv_copy[256];
 
-extern x_int32_t rcv_byt_copy;
-extern x_int32_t rx_buf_copy; //e. is copying of present received packet needed
-/*****************/
 extern x_uint32_t num_of_par;
 extern x_uint16_t* addr_param[16]; //void*
 extern x_uint32_t size_param[16];
 
 extern x_uint32_t rcv_num_byt_old;
+extern x_int32_t rcv_byt_copy;
 extern x_uint32_t trm_ena;
+extern x_int32_t rx_buf_copy; //e. is copying of present received packet needed
 
 //command
 extern x_uint32_t blt_in_test;

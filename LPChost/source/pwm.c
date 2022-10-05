@@ -1,6 +1,6 @@
 #include "hardware/pwm.h"
 #include "lpc17xx.h"
-
+#include "hardware/hardware.h"
 #include "math.h"
 #include "float.h"
 /******************************************************************************/
@@ -64,13 +64,23 @@ void pwm_init(int a_VB_N,int a_VB_tau)
     //LPC_MCPWM->CON_SET |= 1<<29;
     //start PWM channel 0,1,2
     LPC_MCPWM->CON_SET |= 1 |(1<<8) |(1<<16);
+#ifdef HOST4
     //CENTER0 POLA0
     LPC_MCPWM->CON_SET |= (1<<1) | (1<<2);
     //POLA1 CENTER1
     LPC_MCPWM->CON_SET |= (1<<10) | (1<<9);
     //POLA2 CENTER2
     LPC_MCPWM->CON_SET |= (0<<18) | (1<<17);
-    
+
+#else
+    //CENTER0 POLA0
+			LPC_MCPWM->CON_SET |= (1<<1);
+    //POLA1 CENTER1
+		 LPC_MCPWM->CON_SET |= (1<<9);
+    //POLA2 CENTER2
+		  LPC_MCPWM->CON_SET |= (1<<18) |(1<<17);
+#endif
+   
     NVIC_EnableIRQ(MCPWM_IRQn);
 }
 

@@ -7,39 +7,68 @@
 /******************************************************************************/
 void hardware_configure_lightup()
 {
+#ifdef HOST4
     LPC_PINCON->PINSEL0 &= ~(3<<8);		//e. P0.4 is GPIO pin
     LPC_PINCON->PINMODE0 |= (3<<8);		//e. P0.4 is GPIO pin
     LPC_GPIO0->FIODIR |= (1<<4);		//e. P0.4 is output
+#else
+    LPC_PINCON->PINSEL4 &= ~(3<<4);		//e. P2.2 is GPIO pin
+    LPC_PINCON->PINMODE4 |= (3<<4);		//e. P2.2 is GPIO pin
+    LPC_GPIO2->FIODIR |= (1<<2);		//e. P2.2 is output	
+#endif
     hardware_lightup_off();
 }
 /******************************************************************************/
 void hardware_lightup_on()
 {
+#ifdef HOST4
     LPC_GPIO0->FIOSET = (1<<4);
+#else
+	  LPC_GPIO2->FIOSET = (1<<2);
+#endif
 }
 /******************************************************************************/
 void hardware_lightup_off()
 {
+#ifdef HOST4
     LPC_GPIO0->FIOCLR = (1<<4);
+#else
+	  LPC_GPIO2->FIOCLR = (1<<2);
+#endif
 }
 /******************************************************************************/
 void hardware_configure_backlight()
 {
-    LPC_PINCON->PINSEL2 &= ~(0x00<<24); 
-    LPC_PINCON->PINSEL2 |= (0x00<<24); //e. P2.12 is GPIO pin
+#ifdef HOST4
+    LPC_PINCON->PINSEL2 &= ~(0x00<<24); //??????????????????????????????
+    LPC_PINCON->PINSEL2 |= (0x00<<24); //e. P2.12 is GPIO pin?????????????????????
     LPC_PINCON->PINMODE3 |= (3<<24); //e. P1.28 is GPIO pin (запись ( 11 ) в бит PINMODE0  "для включения подтягивающего резистора")
     LPC_GPIO2->FIODIR |= (1<<12); //e. P1.28 is output   (запись ( 1 ) в  5  бит FIODIR    выбор P0.5 как выход)
-    hardware_backlight_off();
+#else
+   LPC_PINCON->PINSEL4 &= ~(0x00<<6); 
+    LPC_PINCON->PINSEL4 |= (0x00<<6); //e. P2.3 is GPIO pin
+    LPC_PINCON->PINMODE4 |= (3<<6); //e. P2.3 is GPIO pin (запись ( 11 ) в бит PINMODE0  "для включения подтягивающего резистора")
+    LPC_GPIO2->FIODIR |= (1<<3); //e. P2.3 is output   (запись ( 1 ) в  5  бит FIODIR    выбор P2.3 как выход)	
+#endif
+	hardware_backlight_off();
 }
 /******************************************************************************/
 void hardware_backlight_on()
 {
+#ifdef HOST4
     LPC_GPIO2->FIOCLR  = (1<<12);
+#else
+		LPC_GPIO2->FIOSET  = (1<<3);
+#endif
 }
 /******************************************************************************/
 void hardware_backlight_off()
 {
+#ifdef HOST4
     LPC_GPIO2->FIOSET  = (1<<12);
+#else
+	  LPC_GPIO2->FIOCLR  = (1<<3);
+#endif
 }
 /******************************************************************************/
 void hardware_modulator(x_int32_t a_data)
@@ -144,22 +173,22 @@ void hardware_regul_data_read(int*a_pBuffer, int cnt, int*pExchangeErr)
 /******************************************************************************/
 void hardware_set_dac()
 {
-    spi_set_cs(PIN_DAC_CS);
+    spi_set_cs_DAC(PIN_DAC_CS);
 }
 /******************************************************************************/
 void hardware_reset_dac()
 {
-    spi_reset_cs(PIN_DAC_CS);
+    spi_reset_cs_DAC(PIN_DAC_CS);
 }
 /******************************************************************************/
 void hardware_set_adc()
 {
-    spi_set_cs(PIN_ADC_CS);
+    spi_set_cs_ADC(PIN_ADC_CS);
 }
 /******************************************************************************/
 void hardware_reset_adc()
 {
-    spi_reset_cs(PIN_ADC_CS);
+    spi_reset_cs_ADC(PIN_ADC_CS);
 }
 
 /******************************************************************************/

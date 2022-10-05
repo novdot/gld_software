@@ -147,7 +147,7 @@ int PLC_PhaseDetFilt (int input)
     return (BufOutPLC[kIn++]);
 }
 /******************************************************************************/
-void init_BandPass(double CenterFreq, double BandWidth, BAND_PASS_TYPE FiltType)
+void init_BandPass(double CenterFreq, double BandWidth, BAND_PASS_TYPE type)
 {
     char dbg[256];
     int i = 0;
@@ -158,35 +158,22 @@ void init_BandPass(double CenterFreq, double BandWidth, BAND_PASS_TYPE FiltType)
     cosIn = 2.0 * PI * CenterFreq;
     Cos_x_2 = cos(cosIn)* 2.0;
     K = (1.0 - R * Cos_x_2 + R_x_R)/(2.0 - Cos_x_2);
-    switch (FiltType){
-    case PLC:
+	
+	if (type == PLC){
         aPLC[0] = (int)((1.0 - K)*HALFINT);
         aPLC[1] = (int)(((K - R) * Cos_x_2)*HALFINT);
         aPLC[2] = (int)((R_x_R - K)*HALFINT);
         bPLC[0] = 0;
         bPLC[1] = (int)((R * Cos_x_2)*HALFINT);
         bPLC[2] = (int)((- R_x_R)*HALFINT);
-        break
-            ;
-    case DUP:
+	}else{
         aDUP[0] = (int)((1.0 - K)*HALFINT);
         aDUP[1] = (int)(((K - R) * Cos_x_2)*HALFINT);
         aDUP[2] = (int)((R_x_R - K)*HALFINT);
         bDUP[0] = 0;
         bDUP[1] = (int)((R * Cos_x_2)*HALFINT);
-        bDUP[2] = (int)((- R_x_R)*HALFINT);   
-        break;
-    }
-    
-    /*DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"K:%f\n\r",K);
-    DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"R:%f\n\r",R);
-    DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"Cos_x_2:%f\n\r",Cos_x_2);
-    DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"R_x_R:%f\n\r",R_x_R);
-    DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"BandWidth:%f\n\r",BandWidth);
-    DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"CenterFreq:%f\n\r",CenterFreq);
-    
-    DBG5(&g_gld.cmd.dbg.ring_out,dbg,64,"aDUP[0]:%d %d %d %d %d\n\r",aPLC[0],aPLC[1],aPLC[2],bPLC[1],bPLC[2]);
-    */
+        bDUP[2] = (int)((- R_x_R)*HALFINT);
+	}
 }
 
 /******************************************************************************/

@@ -45,7 +45,6 @@ void params_load(unsigned source)
                     ,HEADER_WORD_CONST
                 );
                 params_load_default();
-                //params_wr2flash_unsafe();
             }
             break;
             
@@ -82,7 +81,7 @@ void params_load_default(void)
     Device_blk.Str.WP_rup = WP_RUP_CONST; 
     Device_blk.Str.WP_rdw = WP_RDW_CONST; 
     Device_blk.Str.WP_mdy = WP_MDY_CONST; 
-    //Device_blk.Str.WP_start = WP_start_CONST;
+    Device_blk.Str.WP_start = 0;
 
     Device_blk.Str.VB_phs = VB_PHS_CONST;
     Device_blk.Str.VB_scl = VB_SCL_CONST;
@@ -119,7 +118,7 @@ void params_load_default(void)
     Device_blk.Str.PI_Fb0 = PI_FB0_CONST;
     Device_blk.Str.PI_scl = PI_SCL_CONST;
     Device_blk.Str.PI_bia = PI_BIA_CONST;
-
+		Device_blk.Str.TermoMode = 0;
     for (i = 0; i <6 ; i++) {
        Device_blk.Str.Tmp_scal[i] = TMP_SCALE;
        Device_blk.Str.Tmp_bias[i] = TMP_BIAS;

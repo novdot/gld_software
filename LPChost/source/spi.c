@@ -1,5 +1,5 @@
 #include "hardware/spi.h"
-
+#include "hardware/hardware.h"
 #include "lpc17xx.h"
 
 #define SSPCR1_SSE		 0x00000002
@@ -66,9 +66,13 @@ void spi_init()
     //all pins after reset is in GPIO mode, so CS pins needn't to configure
     LPC_GPIO0->FIODIR |= PIN_ADC_CS;		// P0.16 defined as CS for ADC
     LPC_GPIO0->FIOSET |= PIN_ADC_CS;		// set CS for ADC
-
+#ifdef HOST4
     LPC_GPIO0->FIODIR |= PIN_DAC_CS;		// P defined as CS for DAC
     LPC_GPIO0->FIOCLR |= PIN_DAC_CS;		// set CS for DAC 
+#else
+    LPC_GPIO2->FIODIR |= PIN_DAC_CS;		// P2.5 defined as CS for DAC
+    LPC_GPIO2->FIOCLR |= PIN_DAC_CS;		// set CS for DAC 		
+#endif
     /*
     while (LPC_SSP1->SR & RX_SSP_notEMPT)
         Dummy = LPC_SSP1->DR;
@@ -123,12 +127,30 @@ void spi_read(int*a_pArrayIn,int a_nCount,int*a_pExchangeErr)
 }
 
 /******************************************************************************/
-void spi_set_cs(x_uint32_t data)
+void spi_set_cs_ADC(x_uint32_t data)
 {
     LPC_GPIO0->FIOSET = data;
 }
 /******************************************************************************/
-void spi_reset_cs(x_uint32_t data)
+void spi_reset_cs_ADC(x_uint32_t data)
 {
     LPC_GPIO0->FIOCLR = data;
+}
+
+void spi_set_cs_DAC(x_uint32_t data)
+{
+#ifdef HOST4
+    LPC_GPIO0->FIOSET = data;
+#else
+		LPC_GPIO2->FIOSET = data;
+#endif
+}
+/******************************************************************************/
+void spi_reset_cs_DAC(x_uint32_t data)
+{
+	#ifdef HOST4
+    LPC_GPIO0->FIOCLR = data;
+	#else
+    LPC_GPIO2->FIOCLR = data;	
+	#endif
 }

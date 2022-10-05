@@ -210,9 +210,6 @@ int getFractionValues(int pclk, int baudRate, int *dlEst, float *divAddVal, floa
 }
 
 
-
-/******************************************************************************/
-/******************************************************************************/
 /******************************************************************************/
 void UART_Init(x_uint32_t baudrate)
 {
@@ -295,7 +292,7 @@ void UART1_Init(x_uint32_t baudrate)
     //P2.0, P2.1, P2.5, P2.7 
     LPC_PINCON->PINSEL4 |= (2 << 0); /* Pin P2.0 used as TXD0 (Com0) */
     LPC_PINCON->PINSEL4 |= (2 << 2); /* Pin P2.1 used as RXD0 (Com0) */
-    LPC_PINCON->PINSEL4 |= (2 << 10);
+    //LPC_PINCON->PINSEL4 |= (2 << 10);
     LPC_PINCON->PINSEL4 |= (2 << 14);
 
     pclk = getPclk();
@@ -324,8 +321,9 @@ void UART1_Init(x_uint32_t baudrate)
     LPC_UART1->IER = 0;//RBR_IntEnabl;
 
     //так как на этой линии используется MAX3294 доп пин TXE нужно установить в 3.3В
-	LPC_UART1->RS485CTRL = (1<<5);
-
+	//LPC_UART1->RS485CTRL = (1<<5);
+		LPC_UART1->RS485CTRL = (1<<5)|(1<<4);
+		
     //e. DMA mode select 
 #if defined(UART1DBG)
 #elif defined(UART1REC)
@@ -374,9 +372,6 @@ void UART2_Init(x_uint32_t baudrate)
 }
 
 
-
-/******************************************************************************/
-/******************************************************************************/
 /******************************************************************************/
 void UART_DBG_SendString(char* ucData,int size)
 {
@@ -431,21 +426,14 @@ int UART1_SendByte(int ucData)
 	while (!(LPC_UART1->LSR & 0x20));
     return (LPC_UART1->THR = ucData);
 }
-void UART1_SendString(char* ucData,int size)
-{
-}
+void UART1_SendString(char* ucData,int size){}
 /******************************************************************************/
 int UART2_SendByte(int ucData)
 {
 	while (!(LPC_UART2->LSR & 0x20));
     return (LPC_UART2->THR = ucData);
 }
-void UART2_SendString(char* ucData,int size)
-{
-}
-
-/******************************************************************************/
-/******************************************************************************/
+void UART2_SendString(char* ucData,int size){}
 /******************************************************************************/
 void DMA_Init( void )
 {

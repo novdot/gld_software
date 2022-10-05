@@ -11,6 +11,8 @@
 #include "hardware/i2c.h"
 #include "hardware/memory.h"
 
+//#define HOST4
+
 /**
     @brief configure light-up signal (поджиг)
     discharge

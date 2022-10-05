@@ -33,7 +33,7 @@
 /******************************************************************************
 **   Main Function  main()
 #DEFINES
-UART1REC UART0DBG __CONFIG_COMMANDS_DEFAULT BOARD_V3
+UART1REC UART0DBG __CONFIG_COMMANDS_DEFAULT HOST4
 
 *******************************************************************************/
 
@@ -110,7 +110,7 @@ void init()
     
     open_all_loops();
     
-    currentReg_init();
+		currentReg_init();
     cplc_init();
     dither_init();
     g_gld.RgConB.word = RATE_VIBRO_1;
@@ -182,7 +182,7 @@ void loop()
     command_transm();
     //command_echo();
     
-    //dbg_recieve();
+    dbg_recieve();
     
     // data_Rdy &= ~RESET_PERIOD;
     LPC_PWM1->IR = 0x0001; //e. clear interrupt flag 	

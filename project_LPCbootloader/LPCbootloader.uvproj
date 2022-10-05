@@ -86,7 +86,7 @@
             <nStopA1X>0</nStopA1X>
             <nStopA2X>0</nStopA2X>
           </AfterMake>
-          <SelectedForBatchBuild>1</SelectedForBatchBuild>
+          <SelectedForBatchBuild>0</SelectedForBatchBuild>
           <SVCSIdString></SVCSIdString>
         </TargetCommonOption>
         <CommonProperty>
@@ -369,7 +369,7 @@
             <vShortWch>0</vShortWch>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>UART1REC __CONFIG_COMMANDS_DEFAULT UART0DBG</Define>
+              <Define>UART1REC UART0DBG  __CONFIG_COMMANDS_DEFAULT</Define>
               <Undefine></Undefine>
               <IncludePath>..\App;..\xlib\include;..\GLDcore\include;..\LPChost\include;..\GLDbootloader\include</IncludePath>
             </VariousControls>
@@ -438,6 +438,11 @@
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\GLDbootloader\source\main.c</FilePath>
+            </File>
+            <File>
+              <FileName>command_bootloader.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\GLDbootloader\source\command_bootloader.c</FilePath>
             </File>
             <File>
               <FileName>global.c</FileName>
@@ -519,6 +524,11 @@
         <Group>
           <GroupName>GLDcore</GroupName>
           <Files>
+            <File>
+              <FileName>command.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\GLDcore\source\command.c</FilePath>
+            </File>
             <File>
               <FileName>global.c</FileName>
               <FileType>1</FileType>

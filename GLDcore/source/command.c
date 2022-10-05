@@ -49,16 +49,15 @@ x_bool_t command_check_lcc(x_uint8_t* a_pBuffer,x_uint32_t a_uCount)
 	if( (CRC_real - CRC_calc) == 0) {
         return _x_true;
     } else {
-        //for (iCRC_calc = 0; iCRC_calc < (a_uCount); iCRC_calc++)
-        //    sprintf(dbg_word,"%s%x",dbg_word,a_pBuffer[iCRC_calc]);
-        //DBG2(&g_gld.cmd.dbg.ring_out,dbg,64,"command_check_lcc FAILED! word:%s, cnt:%u\n\r",dbg_word,(unsigned int)a_uCount);
+        for (iCRC_calc = 0; iCRC_calc < (a_uCount); iCRC_calc++)
+            sprintf(dbg_word,"%s%x",dbg_word,a_pBuffer[iCRC_calc]);
+        DBG2(&g_gld.cmd.dbg.ring_out,dbg,64,"command_check_lcc FAILED! word:%s, cnt:%u\n\r",dbg_word,(unsigned int)a_uCount);
         return _x_false;
     }
 }
 /******************************************************************************/
 void command_recieve_gld()
 {
-    /*****************/
     static int ToWaitEnd, ErrReg ;
     int iCRC_calc = 0;
     int ibyte = 0;
@@ -88,8 +87,7 @@ void command_recieve_gld()
         return;
 	}
     //try to move buffer for header sign
-    /************/
-    if (rcv_buf[0] != 0xCC) {
+    /*if (rcv_buf[0] != 0xCC) {
         //try to find header
         for(ibyte=0;ibyte<rcv_num_byt;ibyte++){
             if (rcv_buf[ibyte] == 0xCC){
@@ -109,8 +107,7 @@ void command_recieve_gld()
             rcv_buf[ibyte] = rcv_buf[ibyte_head+ibyte];
         }
         rcv_num_byt -= ibyte_head;
-    }
-    /************/
+    }*/
 	rcv_num_byt_old = rcv_num_byt;
     
 	//e. we received less than 6 bytes or no parity bytes
@@ -120,8 +117,7 @@ void command_recieve_gld()
     }
     
     //e. the header of packet has not recieved
-    /*********/
-    if ((!ToWaitEnd) && (rcv_num_byt > 1)){
+    /*if ((!ToWaitEnd) && (rcv_num_byt > 1)){
         if (
                 (rcv_buf[0] != 0xCC) 
                 || (( rcv_buf[1] > 2) && ( rcv_buf[1] != 0x1F))
@@ -130,8 +126,7 @@ void command_recieve_gld()
             ToWaitEnd++;
             return;
         }
-    }
-    /********/
+    }*/
         
     //check packet lenght
     if (rcv_num_byt == 6) {	 
@@ -158,102 +153,13 @@ void command_recieve_gld()
         ToWaitEnd++;
         return;
 	} else {
-        DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"rcv_Rdy\n\r");
-		rcv_Rdy = 1;
+		rcv_Rdy = 1;	  	
 	}
 	ToWaitEnd = 0;
-    /**********************/
 }
 /******************************************************************************/
-void command_recieve_reset()
-{
-    g_gld.cmd.recieve_cmd_size = 0;
-}
 void command_recieve_bootloader()
 {
-
-#if 0
-    char dbg[256];
-    int i =0;
-    int rcv_num_byt = 0;
-    static int nToWaitEnd = 0;
-    x_uint8_t data = 0;
-    x_uint8_t idata = 0;
-    
-    /*uart_recieve_n(0,_rcv_buf,&_rcv_num_byt);
-    if (_rcv_num_byt == 0)
-        return;
-    
-    for(idata=0;idata<_rcv_num_byt;idata++){
-    //while(_rcv_num_byt>0){
-        //_rcv_num_byt--;
-        x_ring_put(_rcv_buf[idata],&g_gld.cmd.dbg.ring_in);
-    }
-    
-    //if (x_ring_get_count(&g_gld.cmd.ring_in) < 2)
-    //    return;
-    */
-    
-    if (( nToWaitEnd > 2500000)) {
-        nToWaitEnd = 0;
-        command_recieve_reset();
-        x_ring_clear(&g_gld.cmd.ask.ring_in);
-        DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"end part of packet is absent\n\r");
-        return;
-    }
-    
-    //check count
-    rcv_num_byt = x_ring_get_count(&g_gld.cmd.ask.ring_in);
-    if(
-        //(rcv_num_byt > 6)
-        (rcv_num_byt == 6)
-        ||(rcv_num_byt == 8)
-        ||(rcv_num_byt == 9)
-        ||(rcv_num_byt == 22)
-        ||(rcv_num_byt == 30)
-        ||(rcv_num_byt == 134)
-    ){
-        //save cmd
-    } else {
-        //ждем
-        nToWaitEnd++;
-        return;
-    }
-    if(rcv_num_byt > 134 ){
-        DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"rx overflow\n\r");
-        nToWaitEnd = 0;
-        command_recieve_reset();
-        x_ring_clear(&g_gld.cmd.ask.ring_in);
-        return;
-    }
-    
-    if(g_gld.cmd.recieve_cmd_size>=GLD_BUF_SIZE){
-        g_gld.cmd.recieve_cmd_size = 0;
-    }
-    
-    //pop from ring
-    g_gld.cmd.recieve_cmd_size = rcv_num_byt;
-    for(i=0;i<(g_gld.cmd.recieve_cmd_size);i++){
-        g_gld.cmd.recieve_cmd[i] = x_ring_get_symbol(i,&g_gld.cmd.ask.ring_in);
-    }
-    
-    //check LCC
-    if (command_check_lcc(g_gld.cmd.recieve_cmd,g_gld.cmd.recieve_cmd_size) == 
-        _x_false){
-        //LCC_Err 0x0002
-        nToWaitEnd++;
-        return;
-	} else {
-        //DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"get packet bootloader\n\r");
-        nToWaitEnd = 0;
-        for(i=0;i<(g_gld.cmd.recieve_cmd_size);i++){
-            g_gld.cmd.recieve_cmd[i] = x_ring_pop(&g_gld.cmd.ask.ring_in);
-        }        
-        return;      
-	}
-    
-    
-    /*
     static int ToWaitEnd, ErrReg ;
     char dbg[64];
     
@@ -303,17 +209,12 @@ void command_recieve_bootloader()
 		rcv_Rdy = 1;	  	
 	}
 	ToWaitEnd = 0;
-    */
-#endif
 }
 /******************************************************************************/
 void command_recieve(command_recieve_flag flag)
 { 
     x_uint32_t num;
-#ifdef UART_RING
-#else
 	uart_recieve(rcv_buf,&rcv_num_byt);
-#endif
     
     switch(flag){
     case _command_recieve_flag_gld:
@@ -321,7 +222,7 @@ void command_recieve(command_recieve_flag flag)
         break;
         
     case _command_recieve_flag_bootloader:
-        //command_recieve_bootloader();
+        command_recieve_bootloader();
         break;
     
     default:
@@ -335,18 +236,11 @@ void command_transm(void)
 {
     x_uint32_t param, param_byte, CRC; 
     x_int16_t *trans_param;	
-    //char out[512];
-    x_uint8_t trm_buf[GLD_BUF_SIZE];
-    int i = 0;
-    char dbg[64];
-    char dbg1[512];		
-    int iCRC_calc = 0;
-    int trm_num_byt = 0;
+    //char dbg[64];	
     
     //e. is transfer needed?  
     if (trm_ena == 0)										
         return;
-    
     if (uart_is_ready_transm() == _x_false)										
         return;
     
@@ -355,12 +249,8 @@ void command_transm(void)
     trm_num_byt = 2;
 
     trm_buf[0] = 0x00dd; //e. header of answering packet 
-    trm_buf[1] = Device_blk.Str.My_Addres; //e. own device address 
+    trm_buf[1] = Device_blk.Str.My_Addres; //e. own device address       
     CRC = trm_buf[1]; //e. initialization of CRC counter   
-    
-    //out[0] =  0xdd;
-    //out[1] =  Device_blk.Str.My_Addres;
-    //CRC = out[1];
     
     //e. data block creation cycle 
     for ( param = 0; param < num_of_par; param++) {		  		  	
@@ -386,79 +276,16 @@ void command_transm(void)
 
     trm_num_byt += 2;
     
-#ifdef UART_RING
-    for(i=0;i<trm_num_byt;i++){
-        x_ring_put(trm_buf[i],&g_gld.cmd.ask.ring_out);
-    }
-#else
     uart_transm( trm_num_byt, Device_Mode, trm_buf);
-#endif
-    
-    /******
-    for (iCRC_calc = 0; iCRC_calc < (trm_num_byt); iCRC_calc++){
-            sprintf(dbg1,"%s%x",dbg1,trm_buf[iCRC_calc]);
-    }
-    DBG1(&g_gld.cmd.dbg.ring_out,dbg,512,"%s\n\r",dbg1);  
-    /******/
 }
 /******************************************************************************/
 void command_decode(void)
 {
     int size;
-    int i = 0;
-    char dbg[64];	
-
-#ifdef UART_RING    
-    //e. is data in receive buffer?
-    if (g_gld.cmd.recieve_cmd_size==0) return;
-    
-    //e. Whether there were errors of receiving of start-bit?
-    if (line_sts==0){  
-        //e. there were not errors of receiving of bytes, check the device address
-        if ( (g_gld.cmd.recieve_cmd[1] != Device_blk.Str.My_Addres)
-            && (g_gld.cmd.recieve_cmd[1] != BROADCAST_ADDRESS)
-            ) {
-            DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"Wrong address\n\r");
-			goto end;
-		}//My_Addres
-            
-        //e. there is new command in the receiver buffer, stop the transfer 
-        if (g_gld.cmd.recieve_cmd[0] == COMMAND_PREFIX) {
-            //e. reset the flag of transmission allowing 
-            trm_ena = 0;
-            DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"command_handle\n\r");
-            command_handle();  
-            //e. check up presence of errors in operation of this procedure 						
-            if ( ((line_sts & CODE_ERR) == CODE_ERR) || ((line_sts & PARAM_ERR) == PARAM_ERR) ) {
-                //e. set error bits in the error register of the line 
-                line_err = line_sts;
-            }            
-        }else{
-            DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"Wrong PREFIX\n\r");
-        }//COMMAND_PREFIX
-    }else{
-        DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"Wrong line_err\n\r");
-		line_err = line_sts;
-    }//line_sts
-    //e. is copying of present received packet needed?
-	if (g_gld.cmd.flags.bit.rx_cpy) {
-        memcpy(
-            g_gld.cmd.recieve_cmd_cpy
-            , g_gld.cmd.recieve_cmd
-            , g_gld.cmd.recieve_cmd_size);
-    }
-end:   
-    //clear recieved
-    memset(
-            g_gld.cmd.recieve_cmd
-            , 0x0
-            , g_gld.cmd.recieve_cmd_size);
-    g_gld.cmd.recieve_cmd_size = 0;
-
-#else    
-    /*************/
+  
     //e. is data in receive buffer?
 	if (!rcv_Rdy) return;
+    
 	
     //e. Whether there were errors of receiving of start-bit?
 	if (!line_sts){  
@@ -510,33 +337,12 @@ end:
     line_sts = 0;
     //e. allow further data reception
     rcv_Rdy = 0;
-    /*************/
-#endif
 }
 
 /******************************************************************************/
 //e procedure of set of rate and periodicity of answer 
 void command_utility_read_param(void)
 {
-#ifdef UART_RING   
-	//e. is periodic data transmission needed? 
-	if ((g_gld.cmd.recieve_cmd[3] & 0x0080) != 0)  {
-        //e. yes, set present flag 
-		g_gld.cmd.trm_cycl = 1;
-	} else {
-        //e. no, reset present flag
-		g_gld.cmd.trm_cycl = 0; 
-	}
-	//e. clear the bit of transfer rate
-	SRgR &= 0xffcf;
-	g_gld.cmd.trm_rate = (g_gld.cmd.recieve_cmd[3] >> 1) & 0x0030;
-    //e. set present transfer rate
-	SRgR |= g_gld.cmd.trm_rate;
-    //уберем 4 разряда чтобы получить полноценный код
-    g_gld.cmd.trm_rate = g_gld.cmd.trm_rate>>4;
-    
-#else   
-    int trm_rate = 0;
 	//e. is periodic data transmission needed? 
 	if ((rcv_buf[3] & 0x0080) != 0)  {
         //e. yes, set present flag 
@@ -547,12 +353,11 @@ void command_utility_read_param(void)
 	}
 	//e. clear the bit of transfer rate
 	SRgR &= 0xffcf;
-	trm_rate = (rcv_buf[3] >> 1) & 0x0030;
+	g_gld.cmd.trm_rate = (rcv_buf[3] >> 1) & 0x0030;
     //e. set present transfer rate
-	SRgR |= trm_rate;
+	SRgR |= g_gld.cmd.trm_rate;
     //уберем 4 разряда чтобы получить полноценный код
-    g_gld.cmd.trm_rate = trm_rate>>4;
-#endif
+    g_gld.cmd.trm_rate = g_gld.cmd.trm_rate>>4;
 } // SetSpeedPeriod
 
 /******************************************************************************/

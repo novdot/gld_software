@@ -10,11 +10,11 @@
 //e. shift for converting integer to float (14.18) format 
 #define SHIFT_TO_FRACT  (18) 
 //e. conversion to the 14.18 format //r. преобразование в формат 14.18
-#define	LONG_2_FRACT_14_18(long_var)	(long_var) * ((long int)1 << SHIFT_TO_FRACT);
+#define	LONG_2_FRACT_14_18(long_var)	(long)((long_var) * (float)(((long int)1 << SHIFT_TO_FRACT)))
 
 typedef enum BAND_PASS_TYPE_{
     PLC
-    , DUP
+   ,DUP
 } BAND_PASS_TYPE;
 
 #define	Saturation(Uin, UpSat, DownSat)	if (Uin > UpSat) Uin = UpSat; \

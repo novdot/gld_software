@@ -83,7 +83,8 @@ void calc_sin_func()
      
     //e. synthesis of PLC scan signal
     for (i = 0; i<Device_blk.Str.PI_b3; i++) {
-        g_sin_func[i] = (x_int16_t)(5958*sin((float)i*2.0*PI/(float)Device_blk.Str.PI_b3));
+       // g_sin_func[i] = (x_int16_t)(5958*sin((float)i*2.0*PI/(float)Device_blk.Str.PI_b3));
+			g_sin_func[i] = (x_int16_t)(32000*sin((float)i*2.0*PI/(float)Device_blk.Str.PI_b3));
     }
 }
 

@@ -179,10 +179,13 @@ int SwitchMode()
     //disable latch sources
     SetIntLatch(0); 	   					//e. disable internal latch
     LPC_TIM3->IR = 0x0001;				//e. clear internal latch interrupt request
-
+#ifdef HOST4    // GPIO P0.1 as input
     LPC_GPIOINT->IO0IntEnR &= ~(1<<1);	//e. disable external latch
-	LPC_GPIOINT->IO0IntClr |= (1<<1);	//e. clean external latch interrupt request
-
+	  LPC_GPIOINT->IO0IntClr |= (1<<1);	//e. clean external latch interrupt request
+#else  				  // GPIO P0.7 as input
+    LPC_GPIOINT->IO0IntEnR &= ~(1<<7);	//e. disable external latch
+	  LPC_GPIOINT->IO0IntClr |= (1<<7);	//e. clean external latch interrupt request	
+#endif
     LPC_TIM0->TCR = 2;						//e. stop and reset the multidrop delay timer
     LPC_TIM0->IR = 0x03F;				//e. clear internal latch interrupt request
     //wait while UART and DMA are active									 	
@@ -242,8 +245,13 @@ int SwitchMode()
     case DM_EXT_LATCH_DELTA_BINS_PULSE:
         //от внешней Защелки
         //if(g_gld.cmd.trm_cycl==0){
+#ifdef HOST4
         LPC_GPIOINT->IO0IntEnR |= (1<<1);
         LPC_GPIOINT->IO0IntClr |= (1<<1); //e. clean external latch interrupt request
+#else
+        LPC_GPIOINT->IO0IntEnR |= (1<<7);
+        LPC_GPIOINT->IO0IntClr |= (1<<7); //e. clean external latch interrupt request		
+#endif
         //}else{
         //SetIntLatch(50000);
         //}
@@ -281,9 +289,7 @@ int SwitchMode()
 	Sys_Clock++; //e. increment of the system clock register 
    
     PrevPeriod = LPC_PWM1->MR0;
-#if defined PERFOMANCE
-	PrevPeriod = DEVICE_SAMPLE_RATE_HZ;
-#endif
+
 } // ServiceTime
  void TimeFunctions(void){
 	 
@@ -376,8 +382,11 @@ __irq void TIMER0_IRQHandler()
 ******************************************************************************/
  __irq void EINT3_IRQHandler(void) 
 {
+#ifdef HOST4
 	LPC_GPIOINT->IO0IntClr =  (1<<1);	//e. clean external latch interrupt request
-    
+#else
+	LPC_GPIOINT->IO0IntClr =  (1<<7);	//e. clean external latch interrupt request	
+#endif	
     LatchPhase = (int)LPC_PWM1->TC; //e. read moment of latch
     LPC_TIM0->TCR = 3; //e. start and reset the multidrop delay timer
     //LPC_TIM0->TCR = 1; //e. start Mltdrop delay timer
@@ -403,18 +412,26 @@ void ExtLatch_Init()
 	LPC_GPIO0->FIODIR   &= ~0x0000800;		//e. select P0.11 as input	
 	LPC_GPIOINT->IO0IntEnR &= ~0x0000800;	//e. disable external latch
 	LPC_GPIOINT->IO0IntClr |=  0x0000800;	//e. clean external latch interrupt request
-    /**/
+    */
     
     NVIC_DisableIRQ(EINT3_IRQn);
     /**/
-    // GPIO P0.1 as input.
+
+#ifdef HOST4    // GPIO P0.1 as input.
     LPC_PINCON->PINSEL0 &= ~(0x3 << 2);		
     LPC_PINCON->PINMODE0 &= ~(0x3 << 2);
     LPC_PINCON->PINMODE0 |= (0x3 << 2);
 	LPC_GPIO0->FIODIR   &= ~(1<<1);		//e. select as input	
 	LPC_GPIOINT->IO0IntEnR &= ~(1<<1);	//e. disable external latch
 	LPC_GPIOINT->IO0IntClr |= (1<<1);	//e. clean external latch interrupt request
-    
+#else
+	   LPC_PINCON->PINSEL0 &= ~(0x3 << 14);		
+     LPC_PINCON->PINMODE0 &= ~(0x3 << 14);
+     LPC_PINCON->PINMODE0 |= (0x3 << 14);
+	 LPC_GPIO0->FIODIR   &= ~(1<<7);		//e. select as input	
+	 LPC_GPIOINT->IO0IntEnR &= ~(1<<7);	//e. disable external latch
+	 LPC_GPIOINT->IO0IntClr |= (1<<7);	//e. clean external latch interrupt request
+#endif	
     //LPC_SC->EXTINT = 1<<3;
     /**/
 	NVIC_EnableIRQ(EINT3_IRQn);	
