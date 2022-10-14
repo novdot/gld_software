@@ -236,7 +236,9 @@ void command_transm(void)
 {
     x_uint32_t param, param_byte, CRC; 
     x_int16_t *trans_param;	
-    //char dbg[64];	
+    char dbg[64];	
+    char dbg_word[64];
+    int i = 0;
     
     //e. is transfer needed?  
     if (trm_ena == 0)										
@@ -276,6 +278,8 @@ void command_transm(void)
 
     trm_num_byt += 2;
     
+    sprintf(dbg_word,"%xh %xh",trm_buf[2],trm_buf[3]);
+    DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"Tr cmd:%s\n\r",dbg_word);
     uart_transm( trm_num_byt, Device_Mode, trm_buf);
 }
 /******************************************************************************/

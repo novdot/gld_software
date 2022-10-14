@@ -67,6 +67,8 @@ void init()
     x_ring_init(&g_gld.cmd.dbg.ring_in,g_gld.cmd.dbg.buf_in,GLD_RINGBUFFER_SIZE);
     x_ring_init(&g_gld.cmd.dbg.ring_out,g_gld.cmd.dbg.buf_out,GLD_RINGBUFFER_SIZE);
     
+    DBG2(&g_gld.cmd.dbg.ring_out,dbg,64,"_Build in:%s %s\n\r",__DATE__, __TIME__);
+    
     //e. clocking control initialization
     SystemInit();
     
@@ -110,10 +112,11 @@ void init()
     
     open_all_loops();
     
-		currentReg_init();
+    currentReg_init();
     cplc_init();
     dither_init();
     g_gld.RgConB.word = RATE_VIBRO_1;
+    
     
     g_gld.dbg_buffers.iteration = 100;
     __enable_irq();
@@ -139,12 +142,14 @@ void loop()
 	//	hardware_lightup_on();
     //delay();
     //WDTFeed();
-    /*nSwitch++;
+    /**/
+    nSwitch++;
     if(nSwitch>10000){
         nSwitch = 0;
-        DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"nADCData:%d \n\r",g_gld.nADCData[4]);
-        DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"Tmp_Out:%d \n\r",Output.Str.Tmp_Out[4]);
-        g_gld.dbg_buffers.counters_latch = 0;
+        //UART_SendString("123",3);
+        //DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"nADCData:%d \n\r",g_gld.nADCData[4]);
+        //DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"Tmp_Out:%d \n\r",Output.Str.Tmp_Out[4]);
+        //g_gld.dbg_buffers.counters_latch = 0;
     }
     /*if(LPC_GPIO0->FIOPIN&(1<<1)){
         g_gld.dbg_buffers.counters_latch++;

@@ -183,8 +183,8 @@ int SwitchMode()
     LPC_GPIOINT->IO0IntEnR &= ~(1<<1);	//e. disable external latch
 	  LPC_GPIOINT->IO0IntClr |= (1<<1);	//e. clean external latch interrupt request
 #else  				  // GPIO P0.7 as input
-    LPC_GPIOINT->IO0IntEnR &= ~(1<<7);	//e. disable external latch
-	  LPC_GPIOINT->IO0IntClr |= (1<<7);	//e. clean external latch interrupt request	
+    LPC_GPIOINT->IO0IntEnR &= ~(1<<8);	//e. disable external latch
+	  LPC_GPIOINT->IO0IntClr |= (1<<8);	//e. clean external latch interrupt request	
 #endif
     LPC_TIM0->TCR = 2;						//e. stop and reset the multidrop delay timer
     LPC_TIM0->IR = 0x03F;				//e. clear internal latch interrupt request
@@ -249,8 +249,8 @@ int SwitchMode()
         LPC_GPIOINT->IO0IntEnR |= (1<<1);
         LPC_GPIOINT->IO0IntClr |= (1<<1); //e. clean external latch interrupt request
 #else
-        LPC_GPIOINT->IO0IntEnR |= (1<<7);
-        LPC_GPIOINT->IO0IntClr |= (1<<7); //e. clean external latch interrupt request		
+        LPC_GPIOINT->IO0IntEnR |= (1<<8);
+        LPC_GPIOINT->IO0IntClr |= (1<<8); //e. clean external latch interrupt request		
 #endif
         //}else{
         //SetIntLatch(50000);
@@ -385,7 +385,7 @@ __irq void TIMER0_IRQHandler()
 #ifdef HOST4
 	LPC_GPIOINT->IO0IntClr =  (1<<1);	//e. clean external latch interrupt request
 #else
-	LPC_GPIOINT->IO0IntClr =  (1<<7);	//e. clean external latch interrupt request	
+	LPC_GPIOINT->IO0IntClr =  (1<<8);	//e. clean external latch interrupt request	
 #endif	
     LatchPhase = (int)LPC_PWM1->TC; //e. read moment of latch
     LPC_TIM0->TCR = 3; //e. start and reset the multidrop delay timer
@@ -425,12 +425,12 @@ void ExtLatch_Init()
 	LPC_GPIOINT->IO0IntEnR &= ~(1<<1);	//e. disable external latch
 	LPC_GPIOINT->IO0IntClr |= (1<<1);	//e. clean external latch interrupt request
 #else
-	   LPC_PINCON->PINSEL0 &= ~(0x3 << 14);		
-     LPC_PINCON->PINMODE0 &= ~(0x3 << 14);
-     LPC_PINCON->PINMODE0 |= (0x3 << 14);
-	 LPC_GPIO0->FIODIR   &= ~(1<<7);		//e. select as input	
-	 LPC_GPIOINT->IO0IntEnR &= ~(1<<7);	//e. disable external latch
-	 LPC_GPIOINT->IO0IntClr |= (1<<7);	//e. clean external latch interrupt request
+    LPC_PINCON->PINSEL0 &= ~(0x3 << 16);		
+    LPC_PINCON->PINMODE0 &= ~(0x3 << 16);
+    LPC_PINCON->PINMODE0 |= (0x3 << 16);
+    LPC_GPIO0->FIODIR   &= ~(1<<8);		//e. select as input	
+    LPC_GPIOINT->IO0IntEnR &= ~(1<<8); //7	//e. disable external latch
+    LPC_GPIOINT->IO0IntClr |= (1<<8);	//e. clean external latch interrupt request
 #endif	
     //LPC_SC->EXTINT = 1<<3;
     /**/

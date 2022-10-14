@@ -40,7 +40,7 @@ void params_load(unsigned source)
             if ( (Device_blk.Str.Header_Word&0xFFFF) == HEADER_WORD_CONST) {	       
                 return;
             }else{
-                DBG2(&g_gld.cmd.dbg.ring_out,dbg,64,"Header_Word error read:%u must be:%u"
+                DBG2(&g_gld.cmd.dbg.ring_out,dbg,64,"Header_Word error read:%u must be:%u\n\r"
                     ,(Device_blk.Str.Header_Word&0xFFFF)
                     ,HEADER_WORD_CONST
                 );
