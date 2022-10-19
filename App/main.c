@@ -67,6 +67,10 @@ void init()
     x_ring_init(&g_gld.cmd.dbg.ring_in,g_gld.cmd.dbg.buf_in,GLD_RINGBUFFER_SIZE);
     x_ring_init(&g_gld.cmd.dbg.ring_out,g_gld.cmd.dbg.buf_out,GLD_RINGBUFFER_SIZE);
     
+    g_gld.version.bit.VER = 0;
+    g_gld.version.bit.SUB = 1;
+	g_gld.version.word = ((uint32_t)FIRMWARE_VER << 8) | (Device_blk.Str.Device_SerialNumber & 0x00FF);
+    
     DBG2(&g_gld.cmd.dbg.ring_out,dbg,64,"_Build in:%s %s\n\r",__DATE__, __TIME__);
     
     //e. clocking control initialization
@@ -116,7 +120,6 @@ void init()
     cplc_init();
     dither_init();
     g_gld.RgConB.word = RATE_VIBRO_1;
-    
     
     g_gld.dbg_buffers.iteration = 100;
     __enable_irq();

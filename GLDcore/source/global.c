@@ -52,7 +52,7 @@ x_uint32_t CMD_Code; //e. full code of the last recieved command
 
 int Device_Mode = DM_INT_10KHZ_LATCH;
 
-x_uint32_t blt_in_test;
+//x_uint32_t blt_in_test;
 
 //dither
 x_uint32_t In_Flag = 0;
@@ -74,7 +74,7 @@ x_uint32_t Vibro_2_CountIn;
 x_uint32_t	Valid_Data; //e. the byte-attribute of authentic data, accumulating errors from request to request  
 
 TDEVICE_BLK Device_blk; //e. union for device constants
-x_uint32_t	ser_num; //e. device serial number
+//x_uint32_t	ser_num; //e. device serial number
 
 x_uint32_t stop_Rq = 0;
 //x_uint32_t gyro_Sts = 0;

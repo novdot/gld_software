@@ -563,7 +563,7 @@ void command_subcmd_M_LDPAR_F()
 {
 	//e. load the GLD parameters from the flash-memory
 	params_load(_params_load_fash);
-	blt_in_test = ((uint32_t)FIRMWARE_VER << 8) | (Device_blk.Str.Device_SerialNumber & 0x00FF);
+	//blt_in_test = ((uint32_t)FIRMWARE_VER << 8) | (Device_blk.Str.Device_SerialNumber & 0x00FF);
 	//Init_software();
 	g_gld.cmd.trm_cycl = 0; //e. periodic data transmission is not needed 
 	
@@ -687,10 +687,12 @@ void command_ans_device_status(void)
     //e. and set the answer transfer rate and its periodicity
 	command_utility_read_param();
 	num_of_par = 2;
+    
+    //регистра ошибок линии
 	//e. the register address of the self-testing result
-	COMMAND_UTILITY_ANSWER_FIELD(0,(void*)&blt_in_test,2);
+	COMMAND_UTILITY_ANSWER_FIELD(2,(void*)&g_gld.version.word,2);
 	//e. address of the register of errors of line
-	COMMAND_UTILITY_ANSWER_FIELD(1,(void*)&ser_num,2);
+	COMMAND_UTILITY_ANSWER_FIELD(1,(void*)&line_err,2);
 
 	g_gld.cmd.trm_rate = 0;       //e. set the transfer rate to the 38400 bauds
 	g_gld.cmd.trm_cycl = 0;       //e. forbid cyclic transmission of the parameter 

@@ -96,6 +96,15 @@ typedef struct gld_pulsesDef{
         буфферы и флаги контроля работы периферии
 */
 typedef struct gld_globalDef{
+    union{
+        struct{
+            unsigned VER:4; //firmware ver
+            unsigned SUB:4; //firmware ver
+            unsigned SN:4; //serial
+        }bit;
+        x_uint16_t word;
+    }version;
+    
     //regs
     reg_RgConA RgConA;
     reg_RgConB RgConB;
@@ -174,7 +183,7 @@ extern x_uint32_t trm_ena;
 extern x_int32_t rx_buf_copy; //e. is copying of present received packet needed
 
 //command
-extern x_uint32_t blt_in_test;
+//extern x_uint32_t blt_in_test;
 
 //regs
 extern x_uint32_t line_err;
@@ -197,7 +206,7 @@ extern TDEVICE_BLK Device_blk; //e. the BLOCK of VARIABLES, LOADED from FLASH-me
 
 extern x_uint32_t Valid_Data;
 
-extern x_uint32_t ser_num;
+//extern x_uint32_t ser_num;
 
 extern x_uint32_t BIT_number;
 extern x_uint32_t Is_BIT; 

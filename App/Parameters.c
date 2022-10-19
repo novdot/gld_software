@@ -38,7 +38,7 @@ void params_load(unsigned source)
             }*/
             params_load_flash();
             if ( (Device_blk.Str.Header_Word&0xFFFF) == HEADER_WORD_CONST) {	       
-                return;
+                break;
             }else{
                 DBG2(&g_gld.cmd.dbg.ring_out,dbg,64,"Header_Word error read:%u must be:%u\n\r"
                     ,(Device_blk.Str.Header_Word&0xFFFF)
@@ -52,7 +52,8 @@ void params_load(unsigned source)
             params_load_default();	
             break;
     }
-    blt_in_test = ((uint32_t)FIRMWARE_VER << 8) | (Device_blk.Str.Device_SerialNumber & 0x00FF);
+    g_gld.version.word = ((uint32_t)FIRMWARE_VER << 8) | (Device_blk.Str.Device_SerialNumber & 0x00FF);
+    //blt_in_test = ((uint32_t)FIRMWARE_VER << 8) | (Device_blk.Str.Device_SerialNumber & 0x00FF);
 }
 /******************************************************************************/
 void params_load_default(void)      

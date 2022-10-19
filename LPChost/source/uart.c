@@ -321,8 +321,10 @@ void UART1_Init(x_uint32_t baudrate)
     LPC_UART1->IER = 0;//RBR_IntEnabl;
 
     //так как на этой линии используется MAX3294 доп пин TXE нужно установить в 3.3В
-	//LPC_UART1->RS485CTRL = (1<<5);
-		LPC_UART1->RS485CTRL = (1<<5)|(1<<4);
+    // Enable Auto Direction Control.
+    //The direction control pin will be driven to logic ‘1’ when the transmitter has data to
+    //be sent. It will be driven to logic ‘0’ after the last bit of data has been transmitted
+	LPC_UART1->RS485CTRL = (1<<5)|(1<<4);
 		
     //e. DMA mode select 
 #if defined(UART1DBG)
