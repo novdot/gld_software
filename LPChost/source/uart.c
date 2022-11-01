@@ -685,7 +685,7 @@ void uart_transm(x_uint32_t trm_num_byt, int Device_Mode, x_uint8_t*a_pBufferTra
 
     if (Device_Mode < 4) //e. work with internal latch
     {						 	
-        LPC_TIM0->TCR = 1; //e. start timer		
+        //LPC_TIM0->TCR = 1; //e. start timer		
 
         //LPC_GPIO2->FIOSET |= 8; //turn on RS-422 driver 
 
@@ -693,9 +693,9 @@ void uart_transm(x_uint32_t trm_num_byt, int Device_Mode, x_uint8_t*a_pBufferTra
     }   
     if (Device_Mode == 4) //e. work with ext latch
     {					
-        //LPC_TIM0->TCR = 1; //e. start timer			 
-       //LPC_GPIOINT->IO0IntEnR |= (1<<1);
-       //LPC_GPIOINT->IO0IntClr |= (1<<1); //e. clean external latch interrupt request
+        //LPC_TIM0->TCR = 1; //e. start timer		//latch_start_meas        
+        //LPC_GPIOINT->IO0IntEnR |= (1<<1);
+        //LPC_GPIOINT->IO0IntClr |= (1<<1); //e. clean external latch interrupt request
         LPC_GPDMACH1->CConfig |=  DMAChannelEn;				    //e. DMA for UART transmition
     }
 

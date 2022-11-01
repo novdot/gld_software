@@ -84,7 +84,7 @@ void calc_sin_func()
     //e. synthesis of PLC scan signal
     for (i = 0; i<Device_blk.Str.PI_b3; i++) {
        // g_sin_func[i] = (x_int16_t)(5958*sin((float)i*2.0*PI/(float)Device_blk.Str.PI_b3));
-			g_sin_func[i] = (x_int16_t)(32000*sin((float)i*2.0*PI/(float)Device_blk.Str.PI_b3));
+        g_sin_func[i] = (x_int16_t)(32000*sin((float)i*2.0*PI/(float)Device_blk.Str.PI_b3));
     }
 }
 
@@ -122,18 +122,17 @@ void cplc_regulator(void)
 {
     int poz_sin_flag = 0;   	 	   
     int poz_sin_flag_delayed = 0;
-
-	
+    
     //e. output of the phase detector of the CPLC (in a digital kind)
     int WP_Phase_Det = 0; 
     int i =0;
     
     //create meandr
-		if (Output.Str.WP_sin > 0) {
-			poz_sin_flag = 0;
-		} else {
-			poz_sin_flag = 1;
-		}
+    if (Output.Str.WP_sin > 0) {
+        poz_sin_flag = 0;
+    } else {
+        poz_sin_flag = 1;
+    }
     
 	//e. band-pass filter for the CPLC regulator 
     WP_Phase_Det = PLC_PhaseDetFilt(g_input.word.wp_sel);
@@ -183,7 +182,7 @@ void cplc_regulator(void)
         //enable auto regulation
         //e. the regulator loop is closed 
         //e. we use as controlling - voltages of the integrator
-			Output.Str.WP_reg = (int)(WP_reg32 >> PLC_SHIFT);		
+		Output.Str.WP_reg = (int)(WP_reg32 >> PLC_SHIFT);		
 	} else {
         //handle regulation
         //e. the regulator loop is open
@@ -203,25 +202,30 @@ void cplc_regulator(void)
 int cplc_calc_modulator(void)
 {
 	static int index = 0;
-				 int val;  
+	int val = 0;  
+    float perc = 0.0;
 	
     //e. check modulator amplitude
     if (Device_blk.Str.PI_a4 == 0) {
-				Device_blk.Str.PI_a4 = PI_A4_CONST;
-	  }
+        Device_blk.Str.PI_a4 = PI_A4_CONST;
+    }
     if (Device_blk.Str.PI_a4 > PI_A4_MAX) {
-				Device_blk.Str.PI_a4 = PI_A4_MAX;
-	  }
+        Device_blk.Str.PI_a4 = PI_A4_MAX;
+    }
     //e. current array index
-	    index++;
+	index++;
 	if (index >= Device_blk.Str.PI_b3)
-		  index = 0;
+        index = 0;
 	
-	 //e. calculate output value
-    val = mult(g_sin_func[index], Device_blk.Str.PI_a4);
+	//e. calculate output value
+    //val = mult(g_sin_func[index], Device_blk.Str.PI_a4)+ INT16_MAX;
+    
+    perc = (float)Device_blk.Str.PI_a4/(float)PI_A4_MAX;
+    perc *= (float)g_sin_func[index];
+    val = (int)perc;
     
     //e. 
-    hardware_modulator(val);
+    hardware_modulator(val + INT16_MAX);
 		 
 	return (val);
 } 

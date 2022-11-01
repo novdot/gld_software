@@ -174,7 +174,7 @@ int SwitchMode()
 {
     x_uint8_t dbg[64];
     int i;
-    DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"SwitchMode\n\r");
+    //DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"SwitchMode\n\r");
     
     //disable latch sources
     SetIntLatch(0); 	   					//e. disable internal latch
@@ -186,14 +186,14 @@ int SwitchMode()
     LPC_GPIOINT->IO0IntEnR &= ~(1<<8);	//e. disable external latch
 	  LPC_GPIOINT->IO0IntClr |= (1<<8);	//e. clean external latch interrupt request	
 #endif
-    LPC_TIM0->TCR = 2;						//e. stop and reset the multidrop delay timer
-    LPC_TIM0->IR = 0x03F;				//e. clear internal latch interrupt request
+    //LPC_TIM0->TCR = 2;						//e. stop and reset the multidrop delay timer
+    //LPC_TIM0->IR = 0x03F;				//e. clear internal latch interrupt request
     //wait while UART and DMA are active									 	
 	if ( LPC_GPDMACH1->CConfig & DMA_BUSY)				//e. if DMA channel is busy, wait
 	  return 0;	
 	LPC_GPDMACH1->CConfig &=  ~DMAChannelEn;			//e. disable DMA for UART transmition
 	LPC_GPDMACH2->CConfig &=  ~DMAChannelEn;
-
+uart_enable_transm
 	if (!(LPC_UART1->LSR & TRANS_SHIFT_BUF_EMPTY))      //e. transmit buffer is not empty
         return 0;
 	///LPC_UART1->FCR |= 0x4;								//e. reset TX FIFO
@@ -205,6 +205,7 @@ int SwitchMode()
         LPC_TIM0->MR0 = Device_blk.Str.My_Addres*10;	
         LPC_TIM0->MR1 = Device_blk.Str.My_Addres*5000; //e. /10 = delay before enable signal (us)
         
+        DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"external latch mode enabled\n\r");
         LPC_SC->DMAREQSEL = 0x3; //0xC //e. external latch delay timer is source for DMA request
         LPC_UART1->FCR &= ~0x08;  					//e. TX FIFO is not source for DMA request
 
@@ -257,7 +258,7 @@ int SwitchMode()
         //}
         break;
     }
-   DBG2(&g_gld.cmd.dbg.ring_out,dbg,64,"SwitchMode:%d sp:%d\n\r",Device_Mode,g_gld.cmd.trm_rate);
+   //DBG2(&g_gld.cmd.dbg.ring_out,dbg,64,"SwitchMode:%d sp:%d\n\r",Device_Mode,g_gld.cmd.trm_rate);
    
    
    return 1;
@@ -344,32 +345,39 @@ void CounterIquiryCycle_Init(uint32_t cycle)
   return ;
 }
 
-/******************************************************************************
+/******************************************************************************/
 __irq void TIMER0_IRQHandler()
 {
-  int val = LPC_TIM0->IR;
-  LPC_TIM0->IR |= 3;
-
-  if (val & 1)	//MAT 1.0 interrupt
-  {
+    int val = LPC_TIM0->IR;
+    LPC_TIM0->IR = 3;
+    
+    /**
+    bit
+    0 MR0 Interrupt Interrupt flag for match channel 0. 0
+    1 MR1 Interrupt Interrupt flag for match channel 1. 0
+    2 MR2 Interrupt Interrupt flag for match channel 2. 0
+    3 MR3 Interrupt Interrupt flag for match channel 3. 0
+    4 CR0 Interrupt Interrupt flag for capture channel 0 event. 0
+    5 CR1 Interrupt Interrupt flag for capture channel 1 event. 0
+    */
+    g_gld.dbg_buffers.counters_latch++;
+    
+    //e. delay before UART transmitter loading
+    if( (val>>0)&1 ){
+        LPC_TIM0->IR = 1;
+        hardware_lightup_on();
+        return;
+    }
+    
+    //e. delay before UART transmitter start
+    if( (val>>1)&1 ){
+        LPC_TIM0->IR = 2;
+        hardware_lightup_off();
+        return;
+    }
     //LPC_GPIO2->FIOSET |= 1<<6;		// turn on the LED 	
-	LPC_TIM0->IR |= 1;
-	 return;
-  }
-  if (val & 2)	 //MAT 1.1 interrupt
-  {
-	//LPC_GPIO2->FIOCLR |= 1<<6;		// turn on the LED 	
-	LPC_TIM0->IR |= 2;
-	 return;
-  }
-  //MAT 0.2 interrupt
-  if (val & 4) {
-    //LPC_GPIO0->FIOSET2 |= 0xFF;				//set P0.23
-    //LPC_GPIO2->FIOSET |= 0x00000040;		// turn on the LED 	
-    //LPC_TIM0->IR |= 4; 
-	return;
-  }			 
- return;
+	//LPC_GPIO2->FIOCLR |= 1<<6;		// turn on the LED 		 
+    return;
 }
 /******************************************************************************
 ** Function name:		ExtLatch_IRQHandler
@@ -388,12 +396,12 @@ __irq void TIMER0_IRQHandler()
 	LPC_GPIOINT->IO0IntClr =  (1<<8);	//e. clean external latch interrupt request	
 #endif	
     LatchPhase = (int)LPC_PWM1->TC; //e. read moment of latch
-    LPC_TIM0->TCR = 3; //e. start and reset the multidrop delay timer
-    //LPC_TIM0->TCR = 1; //e. start Mltdrop delay timer
+	LPC_TIM0->IR = 0x3F;				 //e. clear all interrupt flags 
+    LPC_TIM0->TCR = 1; //e. start and reset the multidrop delay timer
     //LPC_GPIOINT->IO0IntClr |= 0x0000800; //e. clean interrupt request
     num = Sys_Clock;
     
-    g_gld.dbg_buffers.counters_latch++;
+    //g_gld.dbg_buffers.counters_latch++;
 }
 /******************************************************************************
 ** Function name:		ExtLatch_Init
@@ -413,7 +421,7 @@ void ExtLatch_Init()
 	LPC_GPIOINT->IO0IntEnR &= ~0x0000800;	//e. disable external latch
 	LPC_GPIOINT->IO0IntClr |=  0x0000800;	//e. clean external latch interrupt request
     */
-    
+    NVIC_DisableIRQ(TIMER0_IRQn);	
     NVIC_DisableIRQ(EINT3_IRQn);
     /**/
 
@@ -437,19 +445,25 @@ void ExtLatch_Init()
 	NVIC_EnableIRQ(EINT3_IRQn);	
 
     // initialization of timer for multidrop delay generation
-	//e.  TIMER0 enabled by default   
+    LPC_SC->PCONP |= 1 << 1; // Power up Timer 0
+    
 	LPC_SC->PCLKSEL0 &= ~(3<<2);		 //e. reset timer 0 input frequency 
     LPC_SC->PCLKSEL0 |= (3<<2);		 	 //e. timer 0 input frequency equal to CLCK/8
-	LPC_TIM0->PR = 0;					 //e. set timer 0 prescaler to 0
+	LPC_TIM0->PR = 1;					 //e. set timer 0 prescaler to 0
 	LPC_TIM0->IR = 0x3F;				 //e. clear all interrupt flags 
-	LPC_TIM0->MCR = 1 |(1<<3)|MR1_RESET | MR1_STOP; //e. reset and stop timer after MR1 matches TC
+    //Interrupt on MR0: an interrupt is generated when MR0 matches the value in the TC.
+    //Interrupt on MR1: an interrupt is generated when MR1 matches the value in the TC
+    //Reset on MR1: the TC will be reset if MR1 matches it
+    //Stop on MR1: the TC and PC will be stopped and TCR[0] will be set to 0 if MR1 matches the TC.
+	LPC_TIM0->MCR = (1<<0) |(1<<3)| (1<<4) | (1<<5); //e. reset and stop timer after MR1 matches TC
 	LPC_TIM0->CCR = 0; 			 		 //e. content of TC0 is loaded when rising edge of ext. latch appear
 	LPC_TIM0->CTCR = 0; 				 //e. timer1 is in timer mode
-	
+    
 	LPC_TIM0->MR0 = Device_blk.Str.My_Addres*10;	 		//e. delay before UART transmitter loading
-	LPC_TIM0->MR1 = Device_blk.Str.My_Addres*5000;		//e. delay before UART transmitter start
-									//e. set first empty) event of timer
-	NVIC_DisableIRQ(TIMER0_IRQn);		 
+	LPC_TIM0->MR1 = Device_blk.Str.My_Addres*5000;		//e. delay before UART transmitter start set first empty) event of timer
+    
+    //NVIC_DisableIRQ(TIMER0_IRQn);	
+	NVIC_EnableIRQ(TIMER0_IRQn);		 
 }
 
  /******************************************************************************

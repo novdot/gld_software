@@ -52,8 +52,6 @@ void params_load(unsigned source)
             params_load_default();	
             break;
     }
-    g_gld.version.word = ((uint32_t)FIRMWARE_VER << 8) | (Device_blk.Str.Device_SerialNumber & 0x00FF);
-    //blt_in_test = ((uint32_t)FIRMWARE_VER << 8) | (Device_blk.Str.Device_SerialNumber & 0x00FF);
 }
 /******************************************************************************/
 void params_load_default(void)      

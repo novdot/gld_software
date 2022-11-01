@@ -32,10 +32,16 @@
 #include <stdio.h>
 /******************************************************************************
 **   Main Function  main()
-#DEFINES
-UART1REC UART0DBG __CONFIG_COMMANDS_DEFAULT HOST4
+#POSSIBLE DEFINES
+UART1REC UART2REC
+UART0DBG 
+__CONFIG_COMMANDS_DEFAULT 
+HOST4 HOST5
+NO_BOOTLOADER - from memory coef sector start
 
 *******************************************************************************/
+
+
 
 /******************************************************************************
 #include	"LPC17xx.h"
@@ -67,11 +73,15 @@ void init()
     x_ring_init(&g_gld.cmd.dbg.ring_in,g_gld.cmd.dbg.buf_in,GLD_RINGBUFFER_SIZE);
     x_ring_init(&g_gld.cmd.dbg.ring_out,g_gld.cmd.dbg.buf_out,GLD_RINGBUFFER_SIZE);
     
-    g_gld.version.bit.VER = 0;
-    g_gld.version.bit.SUB = 1;
-	g_gld.version.word = ((uint32_t)FIRMWARE_VER << 8) | (Device_blk.Str.Device_SerialNumber & 0x00FF);
+    g_gld.version.bit.Lo = FIRMWARE_VER;
+    g_gld.version.bit.Hi = FIRMWARE_VER>>4;
     
-    DBG2(&g_gld.cmd.dbg.ring_out,dbg,64,"_Build in:%s %s\n\r",__DATE__, __TIME__);
+    DBG4(&g_gld.cmd.dbg.ring_out,dbg,64,"_Build in:%s %s ver:%d.%d\n\r"
+        ,__DATE__
+        , __TIME__
+        ,g_gld.version.bit.Hi
+        ,g_gld.version.bit.Lo
+    );
     
     //e. clocking control initialization
     SystemInit();
@@ -123,6 +133,8 @@ void init()
     
     g_gld.dbg_buffers.iteration = 100;
     __enable_irq();
+    
+    Device_blk.Str.My_Addres = 1;
 }
 /******************************************************************************/
 void loop_echo()
@@ -150,8 +162,9 @@ void loop()
     if(nSwitch>10000){
         nSwitch = 0;
         //UART_SendString("123",3);
-        //DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"nADCData:%d \n\r",g_gld.nADCData[4]);
-        //DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"Tmp_Out:%d \n\r",Output.Str.Tmp_Out[4]);
+        //DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"nADCData:%u \n\r",g_gld.nADCData[5]);
+        //DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"WP_reg:%u \n\r",Output.Str.WP_reg);
+        DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"cnt:%u \n\r",g_gld.dbg_buffers.counters_latch);
         //g_gld.dbg_buffers.counters_latch = 0;
     }
     /*if(LPC_GPIO0->FIOPIN&(1<<1)){

@@ -278,8 +278,8 @@ void command_transm(void)
 
     trm_num_byt += 2;
     
-    sprintf(dbg_word,"%xh %xh",trm_buf[2],trm_buf[3]);
-    DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"Tr cmd:%s\n\r",dbg_word);
+    //sprintf(dbg_word,"%xh %xh",trm_buf[2],trm_buf[3]);
+    //DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"Tr cmd:%s\n\r",dbg_word);
     uart_transm( trm_num_byt, Device_Mode, trm_buf);
 }
 /******************************************************************************/

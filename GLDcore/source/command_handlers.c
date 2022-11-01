@@ -676,7 +676,7 @@ void command_subcmd_M_RATE5K()
 void command_ans_common(void)
 {
 	//prepare of the standart answer
-	num_of_par = 1;             //e. total amount parameters in aswer - 1 
+	num_of_par = 1;             //e. total amount parameters in answer - 1 
 	COMMAND_UTILITY_ANSWER_FIELD(0,(void*)&CMD_Code,2);
 	trm_ena = 1;              	//e. allow operation of the transmitter of the device
 }
@@ -686,13 +686,17 @@ void command_ans_device_status(void)
 {
     //e. and set the answer transfer rate and its periodicity
 	command_utility_read_param();
-	num_of_par = 2;
+	num_of_par = 4;
     
-    //регистра ошибок линии
-	//e. the register address of the self-testing result
-	COMMAND_UTILITY_ANSWER_FIELD(2,(void*)&g_gld.version.word,2);
-	//e. address of the register of errors of line
-	COMMAND_UTILITY_ANSWER_FIELD(1,(void*)&line_err,2);
+    g_gld.serial.bit.Lo = (Device_blk.Str.Device_SerialNumber>>8)&0xFF;
+    g_gld.serial.bit.Hi = (Device_blk.Str.Device_SerialNumber>>0)&0xFF;
+    
+	//e. ver
+	COMMAND_UTILITY_ANSWER_FIELD(0,(void*)&g_gld.version.word,1);
+	//e. SN
+	COMMAND_UTILITY_ANSWER_FIELD(1,(void*)&g_gld.serial.word,2);
+	//e. address of the register of errors of line / регистра ошибок линии
+	COMMAND_UTILITY_ANSWER_FIELD(2,(void*)&line_err,1);
 
 	g_gld.cmd.trm_rate = 0;       //e. set the transfer rate to the 38400 bauds
 	g_gld.cmd.trm_cycl = 0;       //e. forbid cyclic transmission of the parameter 

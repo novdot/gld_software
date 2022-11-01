@@ -33,7 +33,7 @@ void hardware_lightup_off()
 #ifdef HOST4
     LPC_GPIO0->FIOCLR = (1<<4);
 #else
-	  LPC_GPIO2->FIOCLR = (1<<2);
+	LPC_GPIO2->FIOCLR = (1<<2);
 #endif
 }
 /******************************************************************************/
@@ -81,7 +81,7 @@ void hardware_modulator(x_int32_t a_data)
     //udata = (x_uint32_t)(a_data); 
 
     //запишем значение в ЦАП
-    hardware_dac_send(a_data + INT16_MAX);
+    hardware_dac_send(a_data );
 }
 
 /******************************************************************************/
@@ -431,7 +431,7 @@ void hardware_tim_init(x_uint32_t* mcs_cnt)
 {
     g_mcs_cnt = mcs_cnt;
     
-    /* Power ON Timer0,1 */
+    /* Power ON Timer1 */
     LPC_SC->PCONP |= (1<<SBIT_TIMER1);
     
     /* Clear TC on MR0 match and Generate Interrupt*/

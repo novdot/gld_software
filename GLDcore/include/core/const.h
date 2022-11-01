@@ -83,7 +83,7 @@
 #define	PI_A2_CONST		(0)	//  32
 #define	PI_A3_CONST		(0)	//  33 
 #define	PI_A4_MIN       (64)
-#define	PI_A4_MAX       (0x5999)//(0x7FFF)
+#define	PI_A4_MAX       (32000)//0x5999 //(0x7FFF)
 #define	PI_A4_CONST     (5000) //  34 PLC Mod ampl
 #define	PI_A5_CONST		(0)	//  35
 #define	PI_A6_CONST		(0)	//  36

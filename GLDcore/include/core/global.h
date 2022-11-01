@@ -98,12 +98,18 @@ typedef struct gld_pulsesDef{
 typedef struct gld_globalDef{
     union{
         struct{
-            unsigned VER:4; //firmware ver
-            unsigned SUB:4; //firmware ver
-            unsigned SN:4; //serial
+            unsigned Lo:4; //firmware ver Lo
+            unsigned Hi:4; //firmware ver Hi
+        }bit;
+        x_uint8_t word;
+    }version;
+    union{
+        struct{
+            unsigned Lo:8; //serial Lo
+            unsigned Hi:8; //serial Hi
         }bit;
         x_uint16_t word;
-    }version;
+    }serial;
     
     //regs
     reg_RgConA RgConA;
