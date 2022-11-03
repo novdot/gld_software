@@ -134,7 +134,7 @@ void init()
     g_gld.dbg_buffers.iteration = 100;
     __enable_irq();
     
-    Device_blk.Str.My_Addres = 1;
+    //Device_blk.Str.My_Addres = 2;
 }
 /******************************************************************************/
 void loop_echo()

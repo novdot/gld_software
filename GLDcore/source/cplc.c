@@ -127,6 +127,9 @@ void cplc_regulator(void)
     int WP_Phase_Det = 0; 
     int i =0;
     
+    static int cpld_scl = 0;
+    //static int cpld_phase_accum = 0;
+    
     //create meandr
     if (Output.Str.WP_sin > 0) {
         poz_sin_flag = 0;
@@ -171,9 +174,14 @@ void cplc_regulator(void)
 		WP_Phase_Det = -WP_Phase_Det; 
 		phase_Digital = -phase_Digital;
 	}  
+    
+    //cpld_phase_accum += phase_Digital;
 
-	
-    WP_reg32 = L_mac(WP_reg32, phase_Digital, Device_blk.Str.WP_scl );
+	cpld_scl++;
+    if(cpld_scl == 10){
+        WP_reg32 = L_mac(WP_reg32, phase_Digital, Device_blk.Str.WP_scl );
+        cpld_scl = 0;
+    }
     
     // e.working with the range +15 ... -15 V;
     Saturation(WP_reg32, WP_REG32MAX_SATURATION, WP_REG32MIN_SATURATION);  
