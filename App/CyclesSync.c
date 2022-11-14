@@ -205,7 +205,7 @@ int SwitchMode()
         //LPC_TIM0->MR0 = Device_blk.Str.My_Addres*10;	
         //LPC_TIM0->MR1 = Device_blk.Str.My_Addres*5000; //e. /10 = delay before enable signal (us)
         
-        //DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"external latch mode enabled\n\r");
+        DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"external latch mode enabled\n\r");
         LPC_SC->DMAREQSEL = 0x3; //0xC //e. external latch delay timer is source for DMA request
         LPC_UART1->FCR &= ~0x08;  					//e. TX FIFO is not source for DMA request
 
