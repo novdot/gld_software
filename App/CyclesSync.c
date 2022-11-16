@@ -23,11 +23,11 @@
 #include "core/global.h"
 #include "core/sip.h"
 
-uint32_t	num;
+uint32_t	latch_num;
 uint32_t	Delay_UART_Enbl = DELAY_UART_ENBL;
 //uint32_t	Delay_UART_Disbl = DELAY_UART_ENBL;
 
-
+#define EXT_LATCH_UART_DELAY (Device_blk.Str.My_Addres*1000 + 1)
 
 /******************************************************************************
 ** Function name:		Latch_Event
@@ -53,7 +53,7 @@ void Latch_Event()
             if (PreLatch){ //e. we have had delayed latch
                 //DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"PreLatch\n\r");
                 PreLatch = 0;		 	  				
-            }else if ((LatchPhase < LPC_PWM1->TC) && (num == Sys_Clock)){
+            }else if ((LatchPhase < LPC_PWM1->TC) && (latch_num == Sys_Clock)){
                 //DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"appeared in current cycle\n\r");
                 //e. latch have appeared in current cycle
                 Latch_Rdy = 0;	//e. bring it to the next cycle	
@@ -202,10 +202,11 @@ int SwitchMode()
     //---------------------configure a new exchanging parameters------------
     if (Device_Mode > 3) //e. external latch mode enabled
     {
+        LPC_TIM0->MR0 = EXT_LATCH_UART_DELAY;
         //LPC_TIM0->MR0 = Device_blk.Str.My_Addres*10;	
         //LPC_TIM0->MR1 = Device_blk.Str.My_Addres*5000; //e. /10 = delay before enable signal (us)
         
-        DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"external latch mode enabled\n\r");
+        //DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"external latch mode enabled\n\r");
         LPC_SC->DMAREQSEL = 0x3; //0xC //e. external latch delay timer is source for DMA request
         LPC_UART1->FCR &= ~0x08;  					//e. TX FIFO is not source for DMA request
 
@@ -213,6 +214,7 @@ int SwitchMode()
     }
     else //e. internal latch mode enabled
     {
+        LPC_TIM0->MR0 = EXT_LATCH_UART_DELAY;
         //LPC_TIM0->MR0 = Device_blk.Str.My_Addres*10;	
         //LPC_TIM0->MR1 = Device_blk.Str.My_Addres*5000; //e. /10 = delay before enable signal (us)
         
@@ -367,11 +369,13 @@ __irq void TIMER0_IRQHandler()
     //e. delay before UART transmitter loading
     if( (val>>0)&1 ){
         LPC_TIM0->IR = 1;
+        LPC_GPDMACH1->CConfig |=  DMAChannelEn; //e. DMA for UART transmition
+        LPC_GPDMACH2->CConfig |=  DMAChannelEn; 
         if(toggle){
-            //hardware_lightup_on();
+            hardware_lightup_on();
             toggle = 0;
         }else{
-            //hardware_lightup_off();
+            hardware_lightup_off();
             toggle = 1;
         }
         return;
@@ -407,7 +411,7 @@ __irq void TIMER0_IRQHandler()
 	LPC_TIM0->IR = 0x3F;				 //e. clear all interrupt flags 
     LPC_TIM0->TCR = 1; //e. start and reset the multidrop delay timer
     //LPC_GPIOINT->IO0IntClr |= 0x0000800; //e. clean interrupt request
-    num = Sys_Clock;
+    latch_num = Sys_Clock;
     
     //g_gld.dbg_buffers.counters_latch++;
 }
@@ -467,11 +471,11 @@ void ExtLatch_Init()
 	LPC_TIM0->CCR = 0; 			 		 //e. content of TC0 is loaded when rising edge of ext. latch appear
 	LPC_TIM0->CTCR = 0; 				 //e. timer1 is in timer mode
     
-	LPC_TIM0->MR0 = Device_blk.Str.My_Addres*5000;	 		//e. delay before UART transmitter loading
+	LPC_TIM0->MR0 = EXT_LATCH_UART_DELAY;	 		//e. delay before UART transmitter loading
 	//LPC_TIM0->MR1 = Device_blk.Str.My_Addres*5000;		//e. delay before UART transmitter start set first empty) event of timer
     
     //NVIC_DisableIRQ(TIMER0_IRQn);	
-	//NVIC_EnableIRQ(TIMER0_IRQn);		 
+	NVIC_EnableIRQ(TIMER0_IRQn);		 
 }
 
  /******************************************************************************
@@ -487,7 +491,7 @@ __irq void IntLatch_IRQHandler (void)
 {
     LatchPhase =(int)LPC_PWM1->TC;			//e. read moment of latch
     LPC_TIM3->IR = 0x0001;				//e. clear interrupt flag 
-    num = Sys_Clock;
+    latch_num = Sys_Clock;
     //	count++;
     
     //g_gld.dbg_buffers.counters_latch++;

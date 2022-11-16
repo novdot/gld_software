@@ -16,7 +16,7 @@ uint32_t EnablLength = 12;
 uint32_t LLI0_TypeDef[4];
 uint32_t LLI1_TypeDef[4];
 uint32_t EnablTx = 0x80;
-uint32_t EnablDMA = 0;
+//uint32_t EnablDMA = 0;
 
 #define FRACTIONAL_BAUD
 
@@ -463,7 +463,7 @@ void uart_dma_init(x_uint8_t*a_pBufferTransm)
     LPC_GPDMACH1->CConfig |= MaskTCInt |MaskErrInt|DMA_MEMORY |GPDMACH1_CCONFIG |(M2P << 11);
 
     //save register content for DMA starting in multidrop mode
-	EnablDMA = (LPC_GPDMACH1->CConfig)|DMAChannelEn; 
+	//EnablDMA = (LPC_GPDMACH1->CConfig)|DMAChannelEn; 
 
     //for Rate mode output
     LLI1_TypeDef[0] = (uint32_t)&a_pBufferTransm[32];
@@ -690,16 +690,16 @@ void uart_transm(x_uint32_t trm_num_byt, int Device_Mode, x_uint8_t*a_pBufferTra
         //LPC_GPIO2->FIOSET |= 8; //turn on RS-422 driver 
 
         LPC_GPDMACH1->CConfig |=  DMAChannelEn;				    //e. DMA for UART transmition
+        LPC_GPDMACH2->CConfig |=  DMAChannelEn;                   //e. DMA for enable signal 
     }   
     if (Device_Mode == 4) //e. work with ext latch
     {					
         //LPC_TIM0->TCR = 1; //e. start timer		//latch_start_meas        
         //LPC_GPIOINT->IO0IntEnR |= (1<<1);
         //LPC_GPIOINT->IO0IntClr |= (1<<1); //e. clean external latch interrupt request
-        LPC_GPDMACH1->CConfig |=  DMAChannelEn;				    //e. DMA for UART transmition
+        //LPC_GPDMACH1->CConfig |=  DMAChannelEn;				    //e. DMA for UART transmition
     }
-
-    LPC_GPDMACH2->CConfig |=  DMAChannelEn;                   //e. DMA for enable signal 	  	                          	   
+	  	                          	   
     return;	
 }	  
 
