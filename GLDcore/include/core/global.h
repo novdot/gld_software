@@ -29,6 +29,7 @@ typedef struct gld_cplcDef{
 #define GLD_BUF_SIZE (512)
 typedef struct gld_cmdDef{
     x_uint8_t trm_cycl; //is cyclic bit from cmd
+    x_uint8_t trm_cycl_sync; //бит для синхронизации выдаваемого первого пакета данных
     x_uint32_t trm_rate; //rate value from cmd
     x_uint32_t trm_rate_prev; //set rate to uart
     struct{
@@ -56,6 +57,7 @@ typedef struct gld_cmdDef{
     x_uint16_t recieve_cmd_size;
 }gld_cmd;
 
+#define REPER_MEANDR_CNT_PLS_MIN_INIT (0xFFFFFFFF)
 typedef struct gld_pulsesDef{
     x_uint32_t Cnt_curr; //< value from qei. Only for RATE_REPER_OR_REFMEANDR
     x_uint32_t Curr_Cnt_Vib; //< value_Vib = diff between curent value and old
@@ -72,6 +74,25 @@ typedef struct gld_pulsesDef{
         x_int32_t cnt_dif;
         x_uint32_t cnt_pls;
         x_uint32_t cnt_mns;
+        
+        struct{
+            union{
+                x_int8_t word;
+                struct{
+                    unsigned measure:1;
+                    unsigned inverse:1;
+                    unsigned reserve:6;
+                }bit;
+            }flags;
+            int s; //тек угол
+            int s_pls; // точка +
+            int s_mns; // точка -
+            int s_pls_prev; // пред точка +
+            int s_mns_prev; // пред точка -
+            x_uint32_t s_pls_delta; // модуль между соседними точками +
+            x_uint32_t s_mns_delta; // модуль между соседними точками -
+        }curr_angle; //< структура проверки на симметрию текущего угла
+        
         x_int32_t cnt_delta;
         x_uint32_t cnt_iter; //счетчик итераций между прерываниями
         x_uint32_t cnt_iter_sum; //счетчик итераций на выдачу с частотой Rate
@@ -120,7 +141,7 @@ typedef struct gld_globalDef{
     x_uint32_t nADCData[6];
     x_uint32_t nDACData[2];
     
-//    gld_thermo thermo;
+    //gld_thermo thermo;
     gld_cplc cplc;
     
     //sip

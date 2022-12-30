@@ -369,7 +369,7 @@
             <vShortWch>1</vShortWch>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>UART1REC __CONFIG_COMMANDS_DEFAULT UART0DBG HOST4</Define>
+              <Define>UART1REC __CONFIG_COMMANDS_DEFAULT UART0DBG HOST5</Define>
               <Undefine></Undefine>
               <IncludePath>..\App;..\xlib\include;..\GLDcore\include;..\LPChost\include;..\GLDbootloader\include</IncludePath>
             </VariousControls>

@@ -97,15 +97,17 @@ void gld_output(void)
             break;
 
             case 5: //rate mode
+                
                 //e. reset bits of current command code settings of periodicity and transfer rate
                 //r. сбросить в текущем коде команды биты установки периодичности и скорости передачи
                 CMD_Code &= 0xff1f;
+            
+                /*
                 //e. is it the Rate2 mode?
                 //r. это режим Rate2?
                 if (CMD_Code == SUBCMD_M_RATE2){
-										trm_ena = 1;  
-
-								}									
+                    trm_ena = 1;  
+                }	*/								
 									               	
             break;	
         }

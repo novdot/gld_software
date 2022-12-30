@@ -222,8 +222,10 @@ void command_cmd_DELTA_PS()
 	*/
     
     //e. disable interrupt from referense meander
-    g_gld.RgConB.word = RATE_VIBRO_1;
-    SwitchRefMeandInt(RATE_VIBRO_1);   
+    if(g_gld.RgConB.word != RATE_VIBRO_1){
+        g_gld.RgConB.word = RATE_VIBRO_1;
+        SwitchRefMeandInt(RATE_VIBRO_1);   
+    }
     
 	CMD_Mode = 1;
     
@@ -614,17 +616,22 @@ void command_subcmd_M_RATE1()
     command_utility_read_param();
     command_SwitchSpeed();
     
-    g_gld.RgConB.word =  RATE_REPER_OR_REFMEANDR;
-    SwitchRefMeandInt(RATE_REPER_OR_REFMEANDR);
+    if(g_gld.RgConB.word !=  RATE_REPER_OR_REFMEANDR){
+        g_gld.RgConB.word =  RATE_REPER_OR_REFMEANDR;
+        SwitchRefMeandInt(RATE_REPER_OR_REFMEANDR);
+    }
     
     // reset all bits of status word
     //g_gld.valid.word = 0;
     Valid_Data = 0;
     
-    //e. load needed length of working period 1
-    g_gld.internal_latch.work_period = 25000000;
     command_ans_M_RATE1();
-    SetIntLatch(g_gld.internal_latch.work_period);
+    
+    //e. load needed length of working period 1
+    if(g_gld.internal_latch.work_period!=25000000){
+        g_gld.internal_latch.work_period = 25000000;
+        SetIntLatch(g_gld.internal_latch.work_period);
+    }
 }
 /******************************************************************************/
 void command_subcmd_M_RATE2()
@@ -632,15 +639,22 @@ void command_subcmd_M_RATE2()
     command_utility_read_param();
     command_SwitchSpeed();
     
-    g_gld.RgConB.word = RATE_REPER_OR_REFMEANDR;
     //e. enable interrupt from ref. meander
-    SwitchRefMeandInt(RATE_REPER_OR_REFMEANDR);
-    
+    if(g_gld.RgConB.word !=  RATE_REPER_OR_REFMEANDR){
+        g_gld.RgConB.word =  RATE_REPER_OR_REFMEANDR;
+        SwitchRefMeandInt(RATE_REPER_OR_REFMEANDR);
+    }
     //e. frequency of output = fvibro 
 
-    g_gld.internal_latch.work_period = 0;
     command_ans_M_RATE2();
-    SetIntLatch(g_gld.internal_latch.work_period);
+    
+    if(g_gld.internal_latch.work_period!=0){
+        g_gld.internal_latch.work_period = 0;
+        SetIntLatch(g_gld.internal_latch.work_period);
+    }
+    //disable cyclic answer/ enable it when first packet collected
+    g_gld.cmd.trm_cycl = 0;
+    trm_ena = 0;
 }
 /******************************************************************************/
 void command_subcmd_M_RATE3()
@@ -648,9 +662,11 @@ void command_subcmd_M_RATE3()
     command_utility_read_param();
     command_SwitchSpeed();
     
-    g_gld.internal_latch.work_period = 2500;
     command_ans_M_RATE3();
-    SetIntLatch(g_gld.internal_latch.work_period);
+    if(g_gld.internal_latch.work_period!=2500){
+        g_gld.internal_latch.work_period = 2500;
+        SetIntLatch(g_gld.internal_latch.work_period);
+    }
 }
 /******************************************************************************/
 void command_subcmd_M_RATE7()
@@ -658,9 +674,11 @@ void command_subcmd_M_RATE7()
     command_utility_read_param();
     command_SwitchSpeed();
     
-    g_gld.internal_latch.work_period = 20000;
     command_ans_M_RATE7();
-    SetIntLatch(g_gld.internal_latch.work_period);
+    if(g_gld.internal_latch.work_period!=20000){
+        g_gld.internal_latch.work_period = 20000;
+        SetIntLatch(g_gld.internal_latch.work_period);
+    }
 }
 /******************************************************************************/
 void command_subcmd_M_RATE5K()

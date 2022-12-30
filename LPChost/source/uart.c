@@ -711,6 +711,9 @@ void UART_SwitchSpeed(unsigned Speed)
     int baudrate = 0;
 	int dlEest = 0;
 	float divAddVal, mulVal = 0;
+    
+//#include "core/global.h"
+    //int i=0;
     //char dbg[64];
     
     /*
@@ -753,7 +756,7 @@ void UART_SwitchSpeed(unsigned Speed)
             break;
 	}
     
-    //DBG2(dbg,64,"Switch to BR:%d %d",baudrate,( LPC_GPDMACH1->CConfig & (1<<17)) );
+    //DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"Switch to BR:%d",baudrate );
 
     pclk = getPclk();
     

@@ -355,6 +355,8 @@ void command_utility_read_param(void)
         //e. no, reset present flag
 		g_gld.cmd.trm_cycl = 0; 
 	}
+    g_gld.cmd.trm_cycl_sync = g_gld.cmd.trm_cycl;
+    
 	//e. clear the bit of transfer rate
 	SRgR &= 0xffcf;
 	g_gld.cmd.trm_rate = (rcv_buf[3] >> 1) & 0x0030;

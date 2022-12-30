@@ -157,14 +157,14 @@ void loop()
 	//	hardware_lightup_on();
     //delay();
     //WDTFeed();
-    /**/
+    /**
     nSwitch++;
     if(nSwitch>10000){
         nSwitch = 0;
         //UART_SendString("123",3);
         //DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"nADCData:%u \n\r",g_gld.nADCData[5]);
         //DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"WP_reg:%u \n\r",Output.Str.WP_reg);
-        DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"cnt:%u \n\r",g_gld.dbg_buffers.counters_latch);
+        //DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"cnt:%u \n\r",g_gld.dbg_buffers.counters_latch);
         //g_gld.dbg_buffers.counters_latch = 0;
     }
     /*if(LPC_GPIO0->FIOPIN&(1<<1)){

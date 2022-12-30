@@ -3,6 +3,7 @@
 #include "core/const.h"
 #include "core/math_dsp.h"
 #include "core/thermo.h"
+#include "core/command_handlers.h"      
 
 #include "hardware/qei.h"
 #include "hardware/uart.h"
@@ -52,7 +53,10 @@ void clc_Pulses()
     static int32_t dif_Curr_32_Ext = 0; //e. difference(number) for the external latch mode 
     static int32_t dif_Curr_32_previous = 0; //e. Previous (in comparison with Dif_Curr_32) number 
     static int32_t TermoCompens_Sum = 0;
+    float percent = 0.0;// соотношение разницы для переворота импульсов в команде mrate2
     
+    int i = 0;
+    char dbg[256];
     //read pulses
     g_gld.pulses.Curr_Cnt_Vib = qei_get_position();
     
@@ -129,13 +133,12 @@ void clc_Pulses()
 
   	case RATE_REPER_OR_REFMEANDR:
         //e. calculate Cnt_Mns or Cnt_Pls
-    
         g_gld.pulses.reper_meandr.cnt_iter++;
 		
-				if (qei_get_direction()==_x_plus)
-					  --sign_accum;
-				else
-					  ++sign_accum;
+        if (qei_get_direction()==_x_plus)
+              --sign_accum;
+        else
+              ++sign_accum;
 				
         Output.Str.WP_scope2 = sign_accum;
         
@@ -147,48 +150,117 @@ void clc_Pulses()
             g_gld.pulses.reper_meandr.cnt_prev = g_gld.pulses.reper_meandr.cnt_curr;
             Cnt_Overload(g_gld.pulses.reper_meandr.cnt_dif, INT32MAX_DIV2, INT32MIN_DIV2);
             
-            
             //e. "+" direction 
             if (qei_get_direction()==_x_plus) {
-                g_gld.pulses.reper_meandr.cnt_pls =L_abs(g_gld.pulses.reper_meandr.cnt_dif);
+                g_gld.pulses.reper_meandr.cnt_pls = L_abs(g_gld.pulses.reper_meandr.cnt_dif);
             } else {										
                 g_gld.pulses.reper_meandr.cnt_mns = L_abs(g_gld.pulses.reper_meandr.cnt_dif);
             }
-						sign_accum = 0;
+						
+            sign_accum = 0;
             //e. period of vibro elapsed
             if (data_Rdy & WHOLE_PERIOD) {
-							last_Cnt_Plus = g_gld.pulses.reper_meandr.cnt_pls;
-							dif_sum_32 += g_gld.pulses.reper_meandr.cnt_pls - g_gld.pulses.reper_meandr.cnt_mns;                
+                last_Cnt_Plus = g_gld.pulses.reper_meandr.cnt_pls;
+                dif_sum_32 += g_gld.pulses.reper_meandr.cnt_pls - g_gld.pulses.reper_meandr.cnt_mns;                
 
-							if (g_gld.internal_latch.work_period == 0){ //��� Rate2
-									Latch_Rdy = 1;										
-							}	                            
-						}
+                if (g_gld.internal_latch.work_period == 0){ 
+                    //Rate2
+                    Latch_Rdy = 1;										
+                }	                            
+            }
 					
-				data_Rdy &= ~RESET_PERIOD;//reset bits  
-        }
+			data_Rdy &= ~RESET_PERIOD;//reset bits  
+        }//HALF_PERIOD
 
+        /////////////////////////////////////////////////
         //e it's time for output 
 		if (Latch_Rdy) {
             LatchPhase = INT32_MAX;
-            
-							cntPls_sum_32 += last_Cnt_Plus - preLast_Cnt_Plus;             
-							g_gld.pulses.reper_meandr.cnt_delta = dif_sum_32 + (cntPls_sum_32>>1);     			
-						  ResetBitsOfWord(&cntPls_sum_32, 1); 
-							dif_sum_32 = 0;												
-							preLast_Cnt_Plus = last_Cnt_Plus;	
+
+            cntPls_sum_32 += last_Cnt_Plus - preLast_Cnt_Plus;             
+            g_gld.pulses.reper_meandr.cnt_delta = dif_sum_32 + (cntPls_sum_32>>1);     			
+            ResetBitsOfWord(&cntPls_sum_32, 1); 
+            dif_sum_32 = 0;												
+            preLast_Cnt_Plus = last_Cnt_Plus;	
 			
             Output.Str.Cnt_Dif = g_gld.pulses.reper_meandr.cnt_delta;
             g_gld.pulses.reper_meandr.cnt_delta = 0;            
 
-            /*Output.Str.Cnt_Mns = Cnt_Mns;//sumCnt_Mns;	   
-            //e. rewrite accumulated data to output
-            Output.Str.Cnt_Pls = Cnt_Pls;//sumCnt_Pls;	 */ 
-            Output.Str.Cnt_Mns = g_gld.pulses.reper_meandr.cnt_mns;            
-            Output.Str.Cnt_Pls = g_gld.pulses.reper_meandr.cnt_pls;
+            /**
+            Проверка на ассиметрию характеристики
+            // Вывод текущего угла
+            double s = -0.5 * m_counters[0].A;
+            for ( int i=0; i<CountOfPoints; i++ )
+            {
+                dataIn[i].y = s;
+                if ( i%2 == 0 )
+                    s += double(m_counters[i/2].A);
+                else
+                    s -= double(m_counters[i/2].B);
+            }
+            *
+            if(g_gld.pulses.reper_meandr.curr_angle.flags.bit.measure==0){
+                g_gld.pulses.reper_meandr.curr_angle.s += g_gld.pulses.reper_meandr.cnt_pls;
+                g_gld.pulses.reper_meandr.curr_angle.s_pls = g_gld.pulses.reper_meandr.curr_angle.s;
+                g_gld.pulses.reper_meandr.curr_angle.s -= g_gld.pulses.reper_meandr.cnt_mns;
+                g_gld.pulses.reper_meandr.curr_angle.s_mns = g_gld.pulses.reper_meandr.curr_angle.s;
+                //находим дельту
+                if(g_gld.pulses.reper_meandr.curr_angle.s_mns_prev!=0){
+                    if( g_gld.pulses.reper_meandr.curr_angle.s_mns_delta <
+                        abs(g_gld.pulses.reper_meandr.curr_angle.s_mns_prev - g_gld.pulses.reper_meandr.curr_angle.s_mns) )
+                    g_gld.pulses.reper_meandr.curr_angle.s_mns_delta =
+                        abs(g_gld.pulses.reper_meandr.curr_angle.s_mns_prev - g_gld.pulses.reper_meandr.curr_angle.s_mns);
+                }
+                if(g_gld.pulses.reper_meandr.curr_angle.s_pls_prev!=0){
+                    if( g_gld.pulses.reper_meandr.curr_angle.s_pls_delta <
+                        abs(g_gld.pulses.reper_meandr.curr_angle.s_pls_prev - g_gld.pulses.reper_meandr.curr_angle.s_pls) )
+                    g_gld.pulses.reper_meandr.curr_angle.s_pls_delta =
+                        abs(g_gld.pulses.reper_meandr.curr_angle.s_pls_prev - g_gld.pulses.reper_meandr.curr_angle.s_pls);
+                }
+                //обновляем прошлые значения
+                g_gld.pulses.reper_meandr.curr_angle.s_mns_prev = g_gld.pulses.reper_meandr.curr_angle.s_mns;
+                g_gld.pulses.reper_meandr.curr_angle.s_pls_prev = g_gld.pulses.reper_meandr.curr_angle.s_pls;
+                
+                //если дельты просчитаны определим разницу
+                if( (g_gld.pulses.reper_meandr.curr_angle.s_pls_delta!=0)
+                    && (g_gld.pulses.reper_meandr.curr_angle.s_mns_delta!=0)
+                ){
+                    percent = (float)g_gld.pulses.reper_meandr.curr_angle.s_pls_delta/
+                        (float)g_gld.pulses.reper_meandr.curr_angle.s_mns_delta ;
+                    
+                    if( (percent>2.0) ||(percent<0.5) ){
+                        g_gld.pulses.reper_meandr.curr_angle.flags.bit.inverse=1;
+                    }else {
+                        //g_gld.pulses.reper_meandr.curr_angle.flags.bit.inverse=0;
+                    }
+                    //g_gld.pulses.reper_meandr.curr_angle.flags.bit.measure = 1;
+                }
+            }
+            /**/
 
+            //if(g_gld.pulses.reper_meandr.curr_angle.flags.bit.inverse==0){
+                Output.Str.Cnt_Mns = g_gld.pulses.reper_meandr.cnt_mns;            
+                Output.Str.Cnt_Pls = g_gld.pulses.reper_meandr.cnt_pls;
+            /*}else{
+                Output.Str.Cnt_Mns = g_gld.pulses.reper_meandr.cnt_pls;            
+                Output.Str.Cnt_Pls = g_gld.pulses.reper_meandr.cnt_mns;
+            }*/
+            
             g_gld.pulses.reper_meandr.cnt_int_sum = g_gld.pulses.reper_meandr.cnt_int;
-            g_gld.pulses.reper_meandr.cnt_int = 0;          
+            g_gld.pulses.reper_meandr.cnt_int = 0;   
+            
+            /**/
+            DBG2(&g_gld.cmd.dbg.ring_out,dbg,256,"inverse:%d percent:%2.4f\n\r"
+                ,g_gld.pulses.reper_meandr.curr_angle.flags.bit.inverse
+                ,percent
+                );
+           /* */
+
+            //enable cyclic transmittion flag for Rate2    
+            if( g_gld.cmd.trm_cycl != g_gld.cmd.trm_cycl_sync ){
+                g_gld.cmd.trm_cycl = g_gld.cmd.trm_cycl_sync; 
+                //command_ans_M_RATE2();
+            }    
 		}		 
         break;
     }	 

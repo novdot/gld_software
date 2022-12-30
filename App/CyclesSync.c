@@ -145,6 +145,9 @@ void SetIntLatch(uint32_t cycle)
 ******************************************************************************/
 void SwitchRefMeandInt(uint32_t s)
 {
+    int i = 0;
+    char dbg[256];
+    //DBG1(&g_gld.cmd.dbg.ring_out,dbg,256,"SwitchRefMeandInt %d\n\r",s);
     LPC_QEI->CLR = 0x1fff; //e. reset all interrupts
     
     switch(s){
@@ -152,9 +155,24 @@ void SwitchRefMeandInt(uint32_t s)
         LPC_QEI->IEC = 0x1fff; //e.  disable direction changing interrupt
         break;
     case RATE_REPER_OR_REFMEANDR:
-			  g_gld.pulses.reper_meandr.cnt_prev = qei_get_position();
-				halfQEIPeriod = 0;
-				data_Rdy = 0;
+        g_gld.pulses.reper_meandr.cnt_curr = qei_get_position();;
+        g_gld.pulses.reper_meandr.cnt_prev = 0;//qei_get_position();
+        g_gld.pulses.reper_meandr.cnt_iter = 0; 
+        //g_gld.pulses.reper_meandr.cnt_pls = REPER_MEANDR_CNT_PLS_MIN_INIT; 
+        //g_gld.pulses.reper_meandr.cnt_mns = REPER_MEANDR_CNT_PLS_MIN_INIT; 
+        //Output.Str.Cnt_Pls = REPER_MEANDR_CNT_PLS_MIN_INIT;
+        //Output.Str.Cnt_Mns = REPER_MEANDR_CNT_PLS_MIN_INIT;
+    
+        //curr angle mease reset
+        g_gld.pulses.reper_meandr.curr_angle.s = 0;
+        g_gld.pulses.reper_meandr.curr_angle.s_mns_prev = 0;
+        g_gld.pulses.reper_meandr.curr_angle.s_pls_prev = 0;
+        g_gld.pulses.reper_meandr.curr_angle.s_mns_delta = 0;
+        g_gld.pulses.reper_meandr.curr_angle.s_pls_delta = 0;
+        g_gld.pulses.reper_meandr.curr_angle.flags.word = 0;
+        //
+        halfQEIPeriod = 0;
+        data_Rdy = 0;
         LPC_QEI->IES = 0x0008; //e.  enable direction changing interrupt
         break;
     }
