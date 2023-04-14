@@ -80,7 +80,7 @@ void Latch_Event()
 #include <math.h>
 #include <stdlib.h>
 
- uint32_t halfQEIPeriod = 0;
+ //uint32_t halfQEIPeriod = 0;
 
  __irq void QEI_IRQHandler (void) 
 {
@@ -99,7 +99,7 @@ void Latch_Event()
         
     data_Rdy |= HALF_PERIOD;
     //e. period elapsed, we can calculate Cnt_Dif
-    if( (++halfQEIPeriod)&1 ){
+    if( (++g_gld.pulses.reper_meandr.halfQEIPeriod)&1 ){
         data_Rdy |= WHOLE_PERIOD;	
     }
 	
@@ -158,20 +158,30 @@ void SwitchRefMeandInt(uint32_t s)
         g_gld.pulses.reper_meandr.cnt_curr = qei_get_position();;
         g_gld.pulses.reper_meandr.cnt_prev = 0;//qei_get_position();
         g_gld.pulses.reper_meandr.cnt_iter = 0; 
-        //g_gld.pulses.reper_meandr.cnt_pls = REPER_MEANDR_CNT_PLS_MIN_INIT; 
-        //g_gld.pulses.reper_meandr.cnt_mns = REPER_MEANDR_CNT_PLS_MIN_INIT; 
+        g_gld.pulses.reper_meandr.cnt_pls = REPER_MEANDR_CNT_PLS_MIN_INIT; 
+        g_gld.pulses.reper_meandr.cnt_mns = REPER_MEANDR_CNT_PLS_MIN_INIT; 
+    
+        g_gld.pulses.reper_meandr.curr_angle.cnt_pls_prev = REPER_MEANDR_CNT_PLS_MIN_INIT; 
+        g_gld.pulses.reper_meandr.curr_angle.cnt_mns_prev = REPER_MEANDR_CNT_PLS_MIN_INIT;
+    
+    
+        g_gld.pulses.reper_meandr.curr_angle.flags.word = 0;
+        g_gld.pulses.reper_meandr.curr_angle.flags.bit.measure = 1;
+    
         //Output.Str.Cnt_Pls = REPER_MEANDR_CNT_PLS_MIN_INIT;
         //Output.Str.Cnt_Mns = REPER_MEANDR_CNT_PLS_MIN_INIT;
     
         //curr angle mease reset
+    /*
         g_gld.pulses.reper_meandr.curr_angle.s = 0;
         g_gld.pulses.reper_meandr.curr_angle.s_mns_prev = 0;
         g_gld.pulses.reper_meandr.curr_angle.s_pls_prev = 0;
         g_gld.pulses.reper_meandr.curr_angle.s_mns_delta = 0;
         g_gld.pulses.reper_meandr.curr_angle.s_pls_delta = 0;
         g_gld.pulses.reper_meandr.curr_angle.flags.word = 0;
+    */
         //
-        halfQEIPeriod = 0;
+        g_gld.pulses.reper_meandr.halfQEIPeriod = 0;
         data_Rdy = 0;
         LPC_QEI->IES = 0x0008; //e.  enable direction changing interrupt
         break;

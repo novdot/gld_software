@@ -44,7 +44,7 @@ void clc_Pulses()
     static int32_t last_Cnt_Plus = 0;
     static int32_t dif_sum_32 = 0;
     static int32_t preLast_Cnt_Plus = 0;
-    static int32_t sign_accum = 0;
+    //static int32_t sign_accum = 0;
     static uint32_t	Old_Cnt_Vib = 0;
     static uint32_t Old_Cnt = 0;
     static int32_t RefMeand_Cnt_Dif;
@@ -54,6 +54,7 @@ void clc_Pulses()
     static int32_t dif_Curr_32_previous = 0; //e. Previous (in comparison with Dif_Curr_32) number 
     static int32_t TermoCompens_Sum = 0;
     float percent = 0.0;// соотношение разницы для переворота импульсов в команде mrate2
+    x_direction_t dir;
     
     int i = 0;
     char dbg[256];
@@ -135,12 +136,27 @@ void clc_Pulses()
         //e. calculate Cnt_Mns or Cnt_Pls
         g_gld.pulses.reper_meandr.cnt_iter++;
 		
-        if (qei_get_direction()==_x_plus)
-              --sign_accum;
-        else
-              ++sign_accum;
+        dir = qei_get_direction();
+        /*
+        //if first direction _x_minus - skip this iteration
+        if( (dir==_x_plus)
+            &&( (data_Rdy & WHOLE_PERIOD)==0 )
+            &&(g_gld.pulses.reper_meandr.cnt_mns==REPER_MEANDR_CNT_PLS_MIN_INIT) 
+            &&(g_gld.pulses.reper_meandr.cnt_pls==REPER_MEANDR_CNT_PLS_MIN_INIT) 
+        ){
+            g_gld.pulses.reper_meandr.halfQEIPeriod = 0;
+            Latch_Rdy = 0;	
+			data_Rdy &= ~RESET_PERIOD;//reset bits  	 
+            break;
+        }*/
+    
+        /*if (dir==_x_plus){
+            --sign_accum;
+        }else{
+            ++sign_accum;
+        }
 				
-        Output.Str.WP_scope2 = sign_accum;
+        Output.Str.WP_scope2 = sign_accum;*/
         
         /////////////////////////////////////////////////
         if (data_Rdy & HALF_PERIOD) { 
@@ -151,13 +167,13 @@ void clc_Pulses()
             Cnt_Overload(g_gld.pulses.reper_meandr.cnt_dif, INT32MAX_DIV2, INT32MIN_DIV2);
             
             //e. "+" direction 
-            if (qei_get_direction()==_x_plus) {
+            if (dir==_x_plus) {
                 g_gld.pulses.reper_meandr.cnt_pls = L_abs(g_gld.pulses.reper_meandr.cnt_dif);
             } else {										
                 g_gld.pulses.reper_meandr.cnt_mns = L_abs(g_gld.pulses.reper_meandr.cnt_dif);
             }
-						
-            sign_accum = 0;
+			
+            //sign_accum = 0;
             //e. period of vibro elapsed
             if (data_Rdy & WHOLE_PERIOD) {
                 last_Cnt_Plus = g_gld.pulses.reper_meandr.cnt_pls;
@@ -235,21 +251,45 @@ void clc_Pulses()
                     }
                     //g_gld.pulses.reper_meandr.curr_angle.flags.bit.measure = 1;
                 }
+            }*/
+            /*
+            Delta_pls_i = A_i - B_i-1
+            Delta_mns_i = A_i - B_i
+            Delta_pls_i/Delta_mns_i < 2.0
+            *
+            if(
+                (g_gld.pulses.reper_meandr.curr_angle.cnt_mns_prev!=REPER_MEANDR_CNT_PLS_MIN_INIT) 
+                &&(g_gld.pulses.reper_meandr.curr_angle.cnt_pls_prev!=REPER_MEANDR_CNT_PLS_MIN_INIT) ) {
+                percent = (float)fabs(g_gld.pulses.reper_meandr.cnt_pls - g_gld.pulses.reper_meandr.curr_angle.cnt_mns_prev) /
+                        (float)fabs(g_gld.pulses.reper_meandr.cnt_pls - g_gld.pulses.reper_meandr.cnt_mns) ;
+                g_gld.pulses.reper_meandr.curr_angle.flags.bit.measure = 0;
+                g_gld.pulses.reper_meandr.curr_angle.flags.bit.ready = 1;
+            }else{
+                percent = 0.0;
             }
-            /**/
-
-            //if(g_gld.pulses.reper_meandr.curr_angle.flags.bit.inverse==0){
+            //data for Rate2
+            if( (percent>=2.0)&&(g_gld.pulses.reper_meandr.curr_angle.flags.bit.ready==1) ){
+                Output.Str.Cnt_Mns = g_gld.pulses.reper_meandr.curr_angle.cnt_mns_prev;            
+                Output.Str.Cnt_Pls = g_gld.pulses.reper_meandr.cnt_pls;
+            }else
+            {
                 Output.Str.Cnt_Mns = g_gld.pulses.reper_meandr.cnt_mns;            
                 Output.Str.Cnt_Pls = g_gld.pulses.reper_meandr.cnt_pls;
-            /*}else{
-                Output.Str.Cnt_Mns = g_gld.pulses.reper_meandr.cnt_pls;            
-                Output.Str.Cnt_Pls = g_gld.pulses.reper_meandr.cnt_mns;
-            }*/
+            }
+            /***/
+            Output.Str.Cnt_Mns = g_gld.pulses.reper_meandr.cnt_mns;            
+            Output.Str.Cnt_Pls = g_gld.pulses.reper_meandr.cnt_pls;
+            /***/
+
+            //update previous value
+            g_gld.pulses.reper_meandr.curr_angle.cnt_mns_prev = g_gld.pulses.reper_meandr.cnt_mns;
+            g_gld.pulses.reper_meandr.curr_angle.cnt_pls_prev = g_gld.pulses.reper_meandr.cnt_pls;
             
+            //for dbg
             g_gld.pulses.reper_meandr.cnt_int_sum = g_gld.pulses.reper_meandr.cnt_int;
             g_gld.pulses.reper_meandr.cnt_int = 0;   
             
-            /**/
+            /**
             DBG2(&g_gld.cmd.dbg.ring_out,dbg,256,"inverse:%d percent:%2.4f\n\r"
                 ,g_gld.pulses.reper_meandr.curr_angle.flags.bit.inverse
                 ,percent
@@ -259,7 +299,6 @@ void clc_Pulses()
             //enable cyclic transmittion flag for Rate2    
             if( g_gld.cmd.trm_cycl != g_gld.cmd.trm_cycl_sync ){
                 g_gld.cmd.trm_cycl = g_gld.cmd.trm_cycl_sync; 
-                //command_ans_M_RATE2();
             }    
 		}		 
         break;

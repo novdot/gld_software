@@ -74,16 +74,18 @@ typedef struct gld_pulsesDef{
         x_int32_t cnt_dif;
         x_uint32_t cnt_pls;
         x_uint32_t cnt_mns;
+        x_uint32_t halfQEIPeriod; //< period elapsed, we can calculate Cnt_Dif
         
         struct{
             union{
                 x_int8_t word;
                 struct{
                     unsigned measure:1;
-                    unsigned inverse:1;
+                    unsigned ready:1;
                     unsigned reserve:6;
                 }bit;
             }flags;
+            /*
             int s; //тек угол
             int s_pls; // точка +
             int s_mns; // точка -
@@ -91,6 +93,10 @@ typedef struct gld_pulsesDef{
             int s_mns_prev; // пред точка -
             x_uint32_t s_pls_delta; // модуль между соседними точками +
             x_uint32_t s_mns_delta; // модуль между соседними точками -
+            */
+            x_uint32_t cnt_pls_prev;
+            x_uint32_t cnt_mns_prev;
+            
         }curr_angle; //< структура проверки на симметрию текущего угла
         
         x_int32_t cnt_delta;
