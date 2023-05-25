@@ -209,10 +209,10 @@ int SwitchMode()
     LPC_TIM3->IR = 0x0001;				//e. clear internal latch interrupt request
 #ifdef HOST4    // GPIO P0.1 as input
     LPC_GPIOINT->IO0IntEnR &= ~(1<<1);	//e. disable external latch
-	  LPC_GPIOINT->IO0IntClr |= (1<<1);	//e. clean external latch interrupt request
+	LPC_GPIOINT->IO0IntClr |= (1<<1);	//e. clean external latch interrupt request
 #else  				  // GPIO P0.7 as input
     LPC_GPIOINT->IO0IntEnR &= ~(1<<8);	//e. disable external latch
-	  LPC_GPIOINT->IO0IntClr |= (1<<8);	//e. clean external latch interrupt request	
+	LPC_GPIOINT->IO0IntClr |= (1<<8);	//e. clean external latch interrupt request	
 #endif
     //LPC_TIM0->TCR = 2;						//e. stop and reset the multidrop delay timer
     //LPC_TIM0->IR = 0x03F;				//e. clear internal latch interrupt request

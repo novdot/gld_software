@@ -23,6 +23,8 @@ typedef struct gld_thermoDef{
 */
 typedef struct gld_cplcDef{
     int WP_DelaySin_Array[21];
+    int16_t sin_func[PI_B3_MAX];
+    int16_t sin_index;	
 }gld_cplc;
 
 #define GLD_RINGBUFFER_SIZE (1024)

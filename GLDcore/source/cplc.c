@@ -22,7 +22,6 @@
 int MaxDelayPLC;
 int phase_Digital;
 int WP_reg32 = 0;
-int16_t g_sin_func[100];		
 /******************************************************************************/
 int PLC_MeanderDelay(int flag)
 {
@@ -55,7 +54,6 @@ int PLC_MeanderDelay(int flag)
 */
 int WP_PhaseDetectorRate(int a_nPhaseDetInput, int a_nIntegrateTime) 
 {
-
 	static int SampleAndHoldOut = 0;
 	static int WP_PhasDet_integr = 0;//, WP_PhasDetector = 0;
 	
@@ -84,7 +82,7 @@ void calc_sin_func()
     //e. synthesis of PLC scan signal
     for (i = 0; i<Device_blk.Str.PI_b3; i++) {
        // g_sin_func[i] = (x_int16_t)(5958*sin((float)i*2.0*PI/(float)Device_blk.Str.PI_b3));
-        g_sin_func[i] = (x_int16_t)(32000*sin((float)i*2.0*PI/(float)Device_blk.Str.PI_b3));
+        g_gld.cplc.sin_func[i] = (x_int16_t)(32000*sin((float)i*2.0*PI/(float)Device_blk.Str.PI_b3));
     }
 }
 
@@ -97,6 +95,7 @@ void cplc_init(void)
 	   WP_reg32 = Output.Str.WP_reg<<PLC_SHIFT;
 		   
     calc_sin_func();
+    g_gld.cplc.sin_index = 0;
     
     //e. calculation of filter coefficients for PLC		
 	init_BandPass( 1.0/(float)Device_blk.Str.PI_b3, 10.0/(float)(DEVICE_SAMPLE_RATE_HZ), PLC);	
@@ -141,9 +140,9 @@ void cplc_regulator(void)
     WP_Phase_Det = PLC_PhaseDetFilt(g_input.word.wp_sel);
 	
 	if (WP_Phase_Det > 0) {
-  		phase_Digital = 1;
+  		phase_Digital = -1;//1
 	} else {
-  		phase_Digital = -1;
+  		phase_Digital = 1;//-1
 	}
     
     //worms arrays
@@ -211,7 +210,7 @@ void cplc_regulator(void)
 /******************************************************************************/
 int cplc_calc_modulator(void)
 {
-	static int index = 0;
+	//static int index = 0;
 	int val = 0;  
     float perc = 0.0;
 	
@@ -223,15 +222,15 @@ int cplc_calc_modulator(void)
         Device_blk.Str.PI_a4 = PI_A4_MAX;
     }
     //e. current array index
-	index++;
-	if (index >= Device_blk.Str.PI_b3)
-        index = 0;
+    g_gld.cplc.sin_index++;
+	if (g_gld.cplc.sin_index >= Device_blk.Str.PI_b3)
+        g_gld.cplc.sin_index = 0;
 	
 	//e. calculate output value
     //val = mult(g_sin_func[index], Device_blk.Str.PI_a4)+ INT16_MAX;
     
     perc = (float)Device_blk.Str.PI_a4/(float)PI_A4_MAX;
-    perc *= (float)g_sin_func[index];
+    perc *= (float)g_gld.cplc.sin_func[g_gld.cplc.sin_index];
     val = (int)perc;
     
     //e. 
