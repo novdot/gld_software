@@ -27,7 +27,7 @@ uint32_t	latch_num;
 uint32_t	Delay_UART_Enbl = DELAY_UART_ENBL;
 //uint32_t	Delay_UART_Disbl = DELAY_UART_ENBL;
 
-#define EXT_LATCH_UART_DELAY (Device_blk.Str.My_Addres*1000 + 1)
+#define EXT_LATCH_UART_DELAY ((Device_blk.Str.My_Addres)*1000 + 1)
 
 /******************************************************************************
 ** Function name:		Latch_Event
@@ -128,6 +128,8 @@ __irq void MCPWM_IRQHandler (void)
 ******************************************************************************/
 void SetIntLatch(uint32_t cycle)
 {
+    g_gld.internal_latch.work_period = cycle;
+    
     LPC_TIM3->TCR = 0x2; //switch off and reset timer3
     if (cycle != 0) {
         LPC_TIM3->MR0 = (cycle<<2); //load new value
@@ -202,7 +204,7 @@ int SwitchMode()
 {
     x_uint8_t dbg[64];
     int i;
-    //DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"SwitchMode\n\r");
+    DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"SwitchMode\n\r");
     
     //disable latch sources
     SetIntLatch(0); 	   					//e. disable internal latch
@@ -214,19 +216,28 @@ int SwitchMode()
     LPC_GPIOINT->IO0IntEnR &= ~(1<<8);	//e. disable external latch
 	LPC_GPIOINT->IO0IntClr |= (1<<8);	//e. clean external latch interrupt request	
 #endif
-    //LPC_TIM0->TCR = 2;						//e. stop and reset the multidrop delay timer
-    //LPC_TIM0->IR = 0x03F;				//e. clear internal latch interrupt request
-    //wait while UART and DMA are active									 	
-	if ( LPC_GPDMACH1->CConfig & DMA_BUSY)				//e. if DMA channel is busy, wait
-	  return 0;	
-	LPC_GPDMACH1->CConfig &=  ~DMAChannelEn;			//e. disable DMA for UART transmition
+    LPC_TIM0->TCR = 2; //e. stop and reset the multidrop delay timer
+    LPC_TIM0->IR = 0x03F; //e. clear internal latch interrupt request
+    //wait while UART and DMA are active			
+    //e. if DMA channel is busy, wait    
+	if ( LPC_GPDMACH1->CConfig & DMA_BUSY) {
+        DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"SwitchMode bsy\n\r");
+        //return 0;	
+    }
+    
+    //e. disable DMA for UART transmition
+	LPC_GPDMACH1->CConfig &=  ~DMAChannelEn;			
 	LPC_GPDMACH2->CConfig &=  ~DMAChannelEn;
+    
     //uart_enable_transm
-	if (!(LPC_UART1->LSR & TRANS_SHIFT_BUF_EMPTY))      //e. transmit buffer is not empty
-        return 0;
-	///LPC_UART1->FCR |= 0x4;								//e. reset TX FIFO
-
-	//LPC_TIM0->IR = 0x3F;				 		//e. clear all interrupt flags 
+    //e. transmit buffer is not empty
+	if (!(LPC_UART1->LSR & TRANS_SHIFT_BUF_EMPTY)) {
+        DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"SwitchMode emp\n\r");
+        //return 0;
+    }        
+    
+	//LPC_UART1->FCR |= 0x4; //e. reset TX FIFO
+	//LPC_TIM0->IR = 0x3F; //e. clear all interrupt flags 
     //---------------------configure a new exchanging parameters------------
     if (Device_Mode > 3) //e. external latch mode enabled
     {
@@ -236,9 +247,11 @@ int SwitchMode()
         
         //DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"external latch mode enabled\n\r");
         LPC_SC->DMAREQSEL = 0x3; //0xC //e. external latch delay timer is source for DMA request
-        LPC_UART1->FCR &= ~0x08;  					//e. TX FIFO is not source for DMA request
+        LPC_UART1->FCR &= ~0x08; //e. TX FIFO is not source for DMA request
 
         //LPC_GPIOINT->IO0IntEnR |= 0x0000800;	//e. enable rising edge interrupt
+        
+        g_gld.ext_latch.flags.bit.en = 1;
     }
     else //e. internal latch mode enabled
     {
@@ -247,8 +260,10 @@ int SwitchMode()
         //LPC_TIM0->MR1 = Device_blk.Str.My_Addres*5000; //e. /10 = delay before enable signal (us)
         
         LPC_SC->DMAREQSEL = 0;//0x3; //e. FIFO generate DMA request
-        LPC_UART1->FCR |= 0x08;
+        LPC_UART1->FCR |= 0x08; //e. TX FIFO is source for DMA request
         //	LPC_SC->EXTINT = 0x8; //e. clean interrupt request
+        
+        g_gld.ext_latch.flags.bit.en = 0;
     }
     //UART_SwitchSpeed(SRgR & 0x0030);
     UART_SwitchSpeed(g_gld.cmd.trm_rate);
@@ -289,7 +304,6 @@ int SwitchMode()
         break;
     }
    //DBG2(&g_gld.cmd.dbg.ring_out,dbg,64,"SwitchMode:%d sp:%d\n\r",Device_Mode,g_gld.cmd.trm_rate);
-   
    
    return 1;
 }
@@ -399,13 +413,14 @@ __irq void TIMER0_IRQHandler()
         LPC_TIM0->IR = 1;
         LPC_GPDMACH1->CConfig |=  DMAChannelEn; //e. DMA for UART transmition
         LPC_GPDMACH2->CConfig |=  DMAChannelEn; 
-        if(toggle){
+        //UART0_SendByte(0x1);
+        /*if(toggle){
             hardware_lightup_on();
             toggle = 0;
         }else{
             hardware_lightup_off();
             toggle = 1;
-        }
+        }*/
         return;
     }
     
@@ -441,6 +456,8 @@ __irq void TIMER0_IRQHandler()
     //LPC_GPIOINT->IO0IntClr |= 0x0000800; //e. clean interrupt request
     latch_num = Sys_Clock;
     
+    //hardware_backlight_on();
+    //UART0_SendByte(0x1);
     //g_gld.dbg_buffers.counters_latch++;
 }
 /******************************************************************************
@@ -507,7 +524,7 @@ void ExtLatch_Init()
 }
 
  /******************************************************************************
-** Function name:		IntLatch_IRQHandler
+** Function name:		IntLatch_IRQHandler / TIMER3_IRQHandler
 **
 ** Descriptions:		Routine for Internal latch appearence processing
 **

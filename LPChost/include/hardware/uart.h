@@ -337,4 +337,8 @@ void uart_enable_transm(void);
 
 x_uint32_t uart_recieve_byte(x_uint8_t *key);
 void uart_send_byte(x_uint8_t c);
+
+int UART0_SendByte(int ucData);
+int UART1_SendByte(int ucData);
+int UART2_SendByte(int ucData);
 #endif

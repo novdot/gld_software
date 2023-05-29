@@ -163,8 +163,17 @@ typedef struct gld_globalDef{
     x_int32_t time_1_Sec;//e. pseudosecond timer
     x_uint32_t time_Seconds; //seconds from power on
     struct{
-        x_uint32_t work_period;
+        x_uint32_t work_period;//e. run period in cycles 
     }internal_latch;
+    struct{
+        union{
+            x_uint8_t word;
+            struct{
+                unsigned en:1; //< признак настройки на внешнюю защелку
+                unsigned reserve:7;
+            }bit;
+        }flags;            
+    }ext_latch;
     
     //cmd
     gld_cmd cmd;
@@ -268,5 +277,5 @@ extern x_uint32_t Out_main_cycle_latch; //e. counter of main cycles between exte
 extern x_uint32_t T_latch, Out_T_latch, temp_T_latch;
 
 //e. run period in cycles 
-extern x_uint32_t wrk_period;
+//extern x_uint32_t wrk_period;
 #endif

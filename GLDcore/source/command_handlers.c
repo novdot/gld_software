@@ -128,11 +128,15 @@ clear:
 /******************************************************************************/
 void command_handle(void)
 {
+    char dbg[64];	
+    int i = 0;
     x_uint32_t uCmdCode = 0;
     x_uint32_t uCmdCodeLong = 0;
 
     uCmdCode = (rcv_buf[2] & 0xFF) << 8;
     CMD_Code = uCmdCode | (rcv_buf[3] & 0xFF);
+    
+    DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,">>uCmdCode:%d\n\r",uCmdCode);
     
     //e. initialization of the flag of copying of receiving buffer
 	rx_buf_copy = 1;
@@ -178,6 +182,7 @@ void command_handle(void)
             line_sts = line_sts | CODE_ERR;
             return;
     }
+    DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,">>uCmdCodeLong:%d\n\r",uCmdCodeLong);
     
     switch(uCmdCodeLong){
         case CMD_MAINT       :  command_cmd_MAINT(); return;
@@ -232,6 +237,7 @@ void command_cmd_DELTA_PS()
     //wrk_period = 50000; 
     //SetIntLatch(wrk_period);
     g_gld.internal_latch.work_period = 50000;
+    //SetIntLatch(g_gld.internal_latch.work_period);
     SwitchMode();
     
 	return;
@@ -527,7 +533,14 @@ void command_subcmd_M_E5RA_W()
 /******************************************************************************/
 void command_cmd_MAINT()
 {
-	if (!g_gld.RgConB.word) {
+    //x_uint8_t dbg[64];
+    //int i;
+    //
+    //DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,"MAINT\n\r");
+    
+    //SwitchMode();
+    
+	if (g_gld.RgConB.word!=RATE_VIBRO_1) {
 		//e. disable interrupt from referense meander
 	    g_gld.RgConB.word = RATE_VIBRO_1;
 		SwitchRefMeandInt(RATE_VIBRO_1);   
@@ -541,7 +554,8 @@ void command_cmd_MAINT()
 	   Device_Mode = DM_INT_10KHZ_LATCH;
 	   trm_ena = 0;
 	} else {
-		command_SwitchSpeed();
+        //no read params!
+        command_SwitchSpeed();
 	}
 	return;
 }    
@@ -623,7 +637,7 @@ void command_subcmd_M_RATE1()
     
     // reset all bits of status word
     //g_gld.valid.word = 0;
-    Valid_Data = 0;
+    //Valid_Data = 0;
     
     command_ans_M_RATE1();
     
@@ -704,7 +718,7 @@ void command_ans_device_status(void)
 {
     //e. and set the answer transfer rate and its periodicity
 	command_utility_read_param();
-	num_of_par = 4;
+	num_of_par = 3;
     
     g_gld.serial.bit.Lo = (Device_blk.Str.Device_SerialNumber>>8)&0xFF;
     g_gld.serial.bit.Hi = (Device_blk.Str.Device_SerialNumber>>0)&0xFF;

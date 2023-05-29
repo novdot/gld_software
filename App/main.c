@@ -134,7 +134,9 @@ void init()
     g_gld.dbg_buffers.iteration = 100;
     __enable_irq();
     
-    //Device_blk.Str.My_Addres = 2;
+    //LPC_GPIOINT->IO0IntEnR |= (1<<8);
+    //LPC_GPIOINT->IO0IntClr |= (1<<8); //e. clean external latch interrupt request
+	//NVIC_EnableIRQ(EINT3_IRQn);	
 }
 /******************************************************************************/
 void loop_echo()
@@ -146,6 +148,12 @@ void loop()
     static int nSwitch = 0;
     x_uint8_t dbg[64];
     int i;
+    
+    /*if(LPC_GPIO0->FIOPIN>>8)0x1){
+        hardware_backlight_on();
+    }else{
+        hardware_backlight_off();
+    }*/
     
     uart_recieve_unblocked(0,&g_gld.cmd.dbg.ring_in);
     UART_DBG_SEND(&g_gld.cmd.dbg.ring_out);

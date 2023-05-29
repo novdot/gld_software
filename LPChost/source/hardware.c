@@ -58,7 +58,7 @@ void hardware_backlight_on()
 #ifdef HOST4
     LPC_GPIO2->FIOCLR  = (1<<12);
 #else
-		LPC_GPIO2->FIOSET  = (1<<3);
+	LPC_GPIO2->FIOSET  = (1<<3);
 #endif
 }
 /******************************************************************************/
@@ -67,7 +67,7 @@ void hardware_backlight_off()
 #ifdef HOST4
     LPC_GPIO2->FIOSET  = (1<<12);
 #else
-	  LPC_GPIO2->FIOCLR  = (1<<3);
+	 LPC_GPIO2->FIOCLR  = (1<<3);
 #endif
 }
 /******************************************************************************/

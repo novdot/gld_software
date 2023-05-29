@@ -51,7 +51,7 @@ x_bool_t command_check_lcc(x_uint8_t* a_pBuffer,x_uint32_t a_uCount)
     } else {
         for (iCRC_calc = 0; iCRC_calc < (a_uCount); iCRC_calc++)
             sprintf(dbg_word,"%s%x",dbg_word,a_pBuffer[iCRC_calc]);
-        DBG2(&g_gld.cmd.dbg.ring_out,dbg,64,"command_check_lcc FAILED! word:%s, cnt:%u\n\r",dbg_word,(unsigned int)a_uCount);
+        DBG2(&g_gld.cmd.dbg.ring_out,dbg,64,"lcc err:%s, cnt:%u\n\r",dbg_word,(unsigned int)a_uCount);
         return _x_false;
     }
 }
@@ -71,7 +71,7 @@ void command_recieve_gld()
         sprintf(dbg_word,"");
         for (iCRC_calc = 0; iCRC_calc < (rcv_num_byt); iCRC_calc++)
             sprintf(dbg_word,"%s%x",dbg_word,rcv_buf[iCRC_calc]);
-        DBG2(&g_gld.cmd.dbg.ring_out,dbg,64,"end part of packet is absent %s, cnt:%u\n\r",dbg_word,(unsigned int)rcv_num_byt);
+        DBG2(&g_gld.cmd.dbg.ring_out,dbg,64,"len err:%s, cnt:%u\n\r",dbg_word,(unsigned int)rcv_num_byt);
         
         do rcv_buf[--rcv_num_byt] = 0;
         while(rcv_num_byt);
@@ -236,15 +236,15 @@ void command_transm(void)
 {
     x_uint32_t param, param_byte, CRC; 
     x_int16_t *trans_param;	
-    char dbg[64];	
     char dbg_word[64];
+    char dbg[64];	
     int i = 0;
     
     //e. is transfer needed?  
     if (trm_ena == 0)										
         return;
-    if (uart_is_ready_transm() == _x_false)										
-        return;
+    //if (uart_is_ready_transm() == _x_false)										
+    //    return;
     
     trm_ena = 0; //e. reset the flag of transmission allowing 
 
@@ -278,9 +278,17 @@ void command_transm(void)
 
     trm_num_byt += 2;
     
-    //sprintf(dbg_word,"%xh %xh",trm_buf[2],trm_buf[3]);
-    //DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"Tr cmd:%s\n\r",dbg_word);
-    uart_transm( trm_num_byt, Device_Mode, trm_buf);
+    uart_transm( trm_num_byt, g_gld.ext_latch.flags.bit.en , trm_buf);
+    
+    /*sprintf(dbg_word,"%xh %xh | %xh %xh | %xh %xh"
+    ,LPC_GPDMACH1->CControl
+    ,LPC_GPDMACH2->CControl
+    ,LPC_GPDMACH1->CConfig
+    ,LPC_GPDMACH2->CConfig
+    ,LPC_SC->DMAREQSEL
+    ,LPC_UART1->FCR
+    );*/
+    //DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"<<:%d\n\r",trm_num_byt);
 }
 /******************************************************************************/
 void command_decode(void)
@@ -371,8 +379,6 @@ void command_utility_read_param(void)
 /******************************************************************************/
 void command_SwitchSpeed(void)
 {
-    int i = 0;
-    
     //check if trm_rate changed
     if(g_gld.cmd.trm_rate == g_gld.cmd.trm_rate_prev) {
         return;

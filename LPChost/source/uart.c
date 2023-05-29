@@ -93,9 +93,6 @@ void UART0_Init(x_uint32_t baudrate);
 void UART1_Init(x_uint32_t baudrate);
 void UART2_Init(x_uint32_t baudrate);
 
-int UART0_SendByte(int ucData);
-int UART1_SendByte(int ucData);
-int UART2_SendByte(int ucData);
 
 void UART0_SendString(char* ucData,int size);
 void UART1_SendString(char* ucData,int size);
@@ -665,13 +662,39 @@ void uart_enable_transm(void)
     LPC_GPDMACH2->CConfig |= DMAChannelEn&(1<<18);
 }
 /******************************************************************************/
-void uart_transm(x_uint32_t trm_num_byt, int Device_Mode, x_uint8_t*a_pBufferTransm)
+void uart_transm(x_uint32_t trm_num_byt, int ext_latch, x_uint8_t*a_pBufferTransm)
 {
     LPC_GPDMACH1->CSrcAddr = (uint32_t)a_pBufferTransm;
+    
+    /** Config
+    0 E Channel enable. 
+    5:1 SrcPeripheral Source peripheral. 
+    10:6 DestPeripheral Destination peripheral. 
+    13:11 TransferType 
+    14 IE Interrupt error mask.
+    15 ITC Terminal count interrupt mask.
+    16 L Lock. 
+    17 A Active:
+    18 H Halt
+    
+    Control
+    11:0 TransferSize
+    14:12 SBSize
+    17:15 DBSize
+    20:18 SWidth
+    23:21 DWidth
+    25:24 - 0
+    26 SI
+    27 DI
+    28 Prot1
+    29 Prot2
+    30 Prot3
+    31 I
+    */
 
     LPC_GPDMACH1->CControl &= ~0xFFF; //e. reset of numer bytes for transmitting
     LPC_GPDMACH2->CControl &= ~0xFFF; //e. reset of numer bytes for transmitting
-
+    
     LPC_GPDMACH1->CLLI = 0; //e. linked list is empty
 
     if (trm_num_byt > 16) //e. a packet is too long for FIFO 
@@ -683,22 +706,29 @@ void uart_transm(x_uint32_t trm_num_byt, int Device_Mode, x_uint8_t*a_pBufferTra
 
     LPC_GPDMACH2->CControl |= 1; //e. set 1 transfert for enable signal   
 
-    if (Device_Mode < 4) //e. work with internal latch
+    //if (Device_Mode < 4) //e. work with internal latch
+    if(ext_latch==0)
     {						 	
         //LPC_TIM0->TCR = 1; //e. start timer		
 
         //LPC_GPIO2->FIOSET |= 8; //turn on RS-422 driver 
 
-        LPC_GPDMACH1->CConfig |=  DMAChannelEn;				    //e. DMA for UART transmition
-        LPC_GPDMACH2->CConfig |=  DMAChannelEn;                   //e. DMA for enable signal 
-    }   
-    if (Device_Mode == 4) //e. work with ext latch
+        LPC_GPDMACH1->CConfig |=  DMAChannelEn;//e. DMA for UART transmition
+        LPC_GPDMACH2->CConfig |=  DMAChannelEn;//e. DMA for enable signal 
+    }//else
+    {
+        //LPC_TIM0->TCR = 1; //e. start timer		//latch_start_meas        
+        //LPC_GPIOINT->IO0IntEnR |= (1<<1);
+        //LPC_GPIOINT->IO0IntClr |= (1<<1); //e. clean external latch interrupt request
+        //LPC_GPDMACH1->CConfig |=  DMAChannelEn; //e. DMA for UART transmition
+    }
+    /*if (Device_Mode == 4) //e. work with ext latch
     {					
         //LPC_TIM0->TCR = 1; //e. start timer		//latch_start_meas        
         //LPC_GPIOINT->IO0IntEnR |= (1<<1);
         //LPC_GPIOINT->IO0IntClr |= (1<<1); //e. clean external latch interrupt request
         //LPC_GPDMACH1->CConfig |=  DMAChannelEn;				    //e. DMA for UART transmition
-    }
+    }*/
 	  	                          	   
     return;	
 }	  

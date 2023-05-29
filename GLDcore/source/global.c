@@ -102,5 +102,5 @@ x_uint32_t main_cycle_latch = 0;
 x_uint32_t Out_main_cycle_latch; //e. counter of main cycles between external latch pulse appearence
 x_uint32_t T_latch, Out_T_latch, temp_T_latch;
 
-x_uint32_t wrk_period;
+//x_uint32_t wrk_period;
 

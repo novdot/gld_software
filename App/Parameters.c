@@ -52,6 +52,7 @@ void params_load(unsigned source)
             params_load_default();	
             break;
     }
+    //Device_blk.Str.My_Addres = 1; 
 }
 /******************************************************************************/
 void params_load_default(void)      
