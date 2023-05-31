@@ -410,9 +410,68 @@ void command_subcmd_M_STIMUL()
 	return;
 }
 /******************************************************************************/
+/*********************************************************************//**
+* @brief 		Initial for Watchdog function
+* 					Clock source = RTC ,
+* @param[in]	ClkSrc  Select clock source, should be:
+* 				- WDT_CLKSRC_IRC: Clock source from Internal RC oscillator
+* 				- WDT_CLKSRC_PCLK: Selects the APB peripheral clock (PCLK)
+* 				- WDT_CLKSRC_RTC: Selects the RTC oscillator
+* @param[in]	WDTMode WDT mode, should be:
+* 				- WDT_MODE_INT_ONLY: Use WDT to generate interrupt only
+* 				- WDT_MODE_RESET: Use WDT to generate interrupt and reset MCU
+* @return 		None
+ **********************************************************************
+void WDT_Init (WDT_CLK_OPT ClkSrc, WDT_MODE_OPT WDTMode)
+{
+	CHECK_PARAM(PARAM_WDT_CLK_OPT(ClkSrc));
+	CHECK_PARAM(PARAM_WDT_MODE_OPT(WDTMode));
+	CLKPWR_SetPCLKDiv (CLKPWR_PCLKSEL_WDT, CLKPWR_PCLKSEL_CCLK_DIV_4);
+
+	//Set clock source
+	LPC_WDT->WDCLKSEL &= ~WDT_WDCLKSEL_MASK;
+	LPC_WDT->WDCLKSEL |= ClkSrc;
+	//Set WDT mode
+	if (WDTMode == WDT_MODE_RESET){
+		LPC_WDT->WDMOD |= WDT_WDMOD(WDTMode);
+	}
+}
+/*********************************************************************//**
+* @brief 		Start WDT activity with given timeout value
+* @param[in]	TimeOut WDT reset after timeout if it is not feed
+* @return 		None
+ **********************************************************************
+void WDT_Start(uint32_t TimeOut)
+{
+	uint32_t ClkSrc;
+
+	ClkSrc = LPC_WDT->WDCLKSEL;
+	ClkSrc &=WDT_WDCLKSEL_MASK;
+	WDT_SetTimeOut(ClkSrc,TimeOut);
+	//enable watchdog
+	LPC_WDT->WDMOD |= WDT_WDMOD_WDEN;
+	WDT_Feed();
+    WDTFeed();
+}
+/**/
 void command_subcmd_M_RESET()
 {
-	while(1);
+    int i = 0;
+    char dbg[64];
+    // Initialize WDT, IRC OSC, interrupt mode, timeout = 5000000us = 5s
+    //0 WDEN
+    //1 WDRESET
+    LPC_WDT->MOD = (1<<0) + (1<<1);
+    LPC_WDT->WDCLKSEL = 0;
+	LPC_WDT->TC = 0x003FFFFF;
+    
+	// Start watchdog with timeout given
+	
+    DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,">>RESET\n\r");
+    
+    WDTFeed();
+    //infinite loop to wait chip reset from WDT
+	//while(1);
 }  
 /******************************************************************************/
 void command_subcmd_M_CTL_R()
