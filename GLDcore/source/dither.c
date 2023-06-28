@@ -120,8 +120,8 @@ void clc_OutFreq_regulator(void)
         //e. the regulator loop is closed
         if (loop_is_closed(VB_TAU_ON)) {
             //возьмем желательное значение частоты
-            temp = Device_blk.Str.VB_Fdf_Hi << 16;
-            temp |= Device_blk.Str.VB_Fdf_Lo;
+            temp = (Device_blk.Str.VB_Fdf_Hi&0xFFFF) << 16;
+            temp |= (Device_blk.Str.VB_Fdf_Lo&0xFFFF);
             //memorize pure temo before 
             //temp_pure = temp;
             // (out_freq_sum - temp) with saturation, then >> 3

@@ -52,6 +52,10 @@ void params_load(unsigned source)
             params_load_default();	
             break;
     }
+    
+    /*for (i = 0; i <VARIABLE_COUNT ; i++) {
+        Device_blk.Array[i] &= 0xFFFF;
+    }*/
     //Device_blk.Str.My_Addres = 1; 
 }
 /******************************************************************************/

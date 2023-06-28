@@ -27,7 +27,8 @@ uint32_t	latch_num;
 uint32_t	Delay_UART_Enbl = DELAY_UART_ENBL;
 //uint32_t	Delay_UART_Disbl = DELAY_UART_ENBL;
 
-#define EXT_LATCH_UART_DELAY ((Device_blk.Str.My_Addres)*1000 + 1)
+// +2000 work for 0,1,2,3,5,6
+#define EXT_LATCH_UART_DELAY ((Device_blk.Str.My_Addres)*1000 + 2000)
 
 /******************************************************************************
 ** Function name:		Latch_Event
@@ -128,7 +129,10 @@ __irq void MCPWM_IRQHandler (void)
 ******************************************************************************/
 void SetIntLatch(uint32_t cycle)
 {
-    g_gld.internal_latch.work_period = cycle;
+    int i = 0;
+    char dbg[64];
+    
+    DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"SetIntLatch %d\n\r",cycle);
     
     LPC_TIM3->TCR = 0x2; //switch off and reset timer3
     if (cycle != 0) {
@@ -148,8 +152,10 @@ void SetIntLatch(uint32_t cycle)
 void SwitchRefMeandInt(uint32_t s)
 {
     int i = 0;
-    char dbg[256];
-    //DBG1(&g_gld.cmd.dbg.ring_out,dbg,256,"SwitchRefMeandInt %d\n\r",s);
+    char dbg[64];
+    
+    DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"SwitchRefMeandInt %d\n\r",s);
+    
     LPC_QEI->CLR = 0x1fff; //e. reset all interrupts
     
     switch(s){
@@ -451,8 +457,13 @@ __irq void TIMER0_IRQHandler()
 	LPC_GPIOINT->IO0IntClr =  (1<<8);	//e. clean external latch interrupt request	
 #endif	
     LatchPhase = (int)LPC_PWM1->TC; //e. read moment of latch
-	LPC_TIM0->IR = 0x3F;				 //e. clear all interrupt flags 
+    
+    //Если не перезаписывать , то отваливается обмен на высокой частоте
+    LPC_TIM0->MR0 = EXT_LATCH_UART_DELAY;
+    
+	LPC_TIM0->IR = 0x3F; //e. clear all interrupt flags 
     LPC_TIM0->TCR = 1; //e. start and reset the multidrop delay timer
+    
     //LPC_GPIOINT->IO0IntClr |= 0x0000800; //e. clean interrupt request
     latch_num = Sys_Clock;
     

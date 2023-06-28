@@ -84,57 +84,75 @@ void clc_Pulses()
 			TermoCompens_Sum += thermo_CalcCompens(); 
 	break;
 
-	case	TERMO_OFF:
+	case TERMO_OFF:
 	default:
 		//e. thermocompensation is disable, therefore its part is equal to zero 
-			TermoCompens_Sum = 0;
+		TermoCompens_Sum = 0;
 	break;
 	}
     //e. selecting display mode
     switch (g_gld.RgConB.word) {
-   		case RATE_VIBRO_1:
-			if (Latch_Rdy) {	
-            dif_Curr_32_Ext = interpolation(Dif_Curr_32, LatchPhase ); 
-					  LatchPhase = INT32_MAX;	 //in Latch_Event it's indicator of latch appearing               
-				//e. add to the accumulated sum the interpolated sample of an external latch 	
-				//e. substract the accumulated termocompensational part from the accumulated number				
-            PSdif_sum_Vib_32 += dif_Curr_32_Ext - TermoCompens_Sum; // PSdif_sum_Vib_32 += dif_Curr_32_Ext; 
-						PSdif_sum_Vib_64 += dif_Curr_32_Ext - TermoCompens_Sum; //e. receive last data
-				//e. nulling the accumulated termocompenstion for beginning of the new cycle of accumulation
-						TermoCompens_Sum = 0; 
-				
-				//e. preparing number for output
-				 	  Output.Str.BINS_dif = PSdif_sum_Vib_32;	  
+    case RATE_VIBRO_1:
+        
+        // Доработка для команды M_Delay
+        if(g_gld.pulses.vibro1.idelay_max!=0){
+            //save to buf Dif_Curr_32
+            g_gld.pulses.vibro1.delay_buff[g_gld.pulses.vibro1.idelay_curr] = Dif_Curr_32;
+            g_gld.pulses.vibro1.idelay_curr++;
+            if(g_gld.pulses.vibro1.idelay_curr>=g_gld.pulses.vibro1.idelay_max){
+                g_gld.pulses.vibro1.idelay_curr = 0;
+            }
+            Dif_Curr_32 = g_gld.pulses.vibro1.delay_buff[g_gld.pulses.vibro1.idelay_curr];
+        }
+    
+        if (Latch_Rdy) {
+            dif_Curr_32_Ext = interpolation(Dif_Curr_32, LatchPhase );
+            //in Latch_Event it's indicator of latch appearing 
+            LatchPhase = INT32_MAX;	               
+            //e. add to the accumulated sum the interpolated sample of an external latch 	
+            //e. substract the accumulated termocompensational part from the accumulated number
+            // PSdif_sum_Vib_32 += dif_Curr_32_Ext;             
+            PSdif_sum_Vib_32 += dif_Curr_32_Ext - TermoCompens_Sum;
+            //e. receive last data
+            PSdif_sum_Vib_64 += dif_Curr_32_Ext - TermoCompens_Sum; 
+            //e. nulling the accumulated termocompenstion for beginning of the 
+            //new cycle of accumulation
+            TermoCompens_Sum = 0; 
+            
+            //e. preparing number for output
+            Output.Str.BINS_dif = PSdif_sum_Vib_32;	  
             Output.Str.PS_dif = Output.Str.BINS_dif >> 16;	
-						Output.Str.SF_dif = PSdif_sum_Vib_64; 
-                										 				
+            Output.Str.SF_dif = PSdif_sum_Vib_64; 
+                                                                    
             if ((Device_Mode == DM_EXT_LATCH_DELTA_BINS_PULSE) || \
                ((Device_Mode == DM_EXT_LATCH_DELTA_SF_PULSE) && Ext_Latch_ResetEnable)){	 
-                  //e. to initialize a new external latch cycle 
-                  PSdif_sum_Vib_32 = 0;      
-                  PSdif_sum_Vib_64 = 0;					
-                }else{
-                  ResetBitsOfWord(&PSdif_sum_Vib_32, 16);	 
-                }
-							
-					   dif_Curr_32_Ext = Dif_Curr_32 - temp22;//dif_Curr_32_Ext;
-				//e. preserve rest of counters difference for next measure cycle: PSdif_sum_Vib_32 += Dif_Curr_32 - dif_Curr_32_Ext;
-						 PSdif_sum_Vib_32 +=  dif_Curr_32_Ext;                
-						 PSdif_sum_Vib_64 +=  dif_Curr_32_Ext;									 
-			}else {	
-        //e. the latch at this moment is abscent
-				//e. continue accumulating the sum from internal samples
-						PSdif_sum_Vib_32 += Dif_Curr_32; // PSdif_sum_Vib_32 += Dif_Curr_32 ;			
-						PSdif_sum_Vib_64 += Dif_Curr_32; //e. sum for scale factor measurement mode
-			} 
+                //e. to initialize a new external latch cycle 
+                PSdif_sum_Vib_32 = 0;      
+                PSdif_sum_Vib_64 = 0;					
+            }else{
+                ResetBitsOfWord(&PSdif_sum_Vib_32, 16);	 
+            }
+                        
+            //dif_Curr_32_Ext;
+            dif_Curr_32_Ext = Dif_Curr_32 - temp22;
+            //e. preserve rest of counters difference for next measure cycle: 
+            //PSdif_sum_Vib_32 += Dif_Curr_32 - dif_Curr_32_Ext;
+            PSdif_sum_Vib_32 +=  dif_Curr_32_Ext;                
+            PSdif_sum_Vib_64 +=  dif_Curr_32_Ext;									 
+        } else {	
+            //e. the latch at this moment is abscent
+            //e. continue accumulating the sum from internal samples
+            PSdif_sum_Vib_32 += Dif_Curr_32; // PSdif_sum_Vib_32 += Dif_Curr_32 ;			
+            PSdif_sum_Vib_64 += Dif_Curr_32; //e. sum for scale factor measurement mode
+        }
 
-            //e. save previous number
-			dif_Curr_32_previous = Dif_Curr_32; 
-    break;
+        //e. save previous number
+        dif_Curr_32_previous = Dif_Curr_32; 
+        break;
 
   	case RATE_REPER_OR_REFMEANDR:
         //e. calculate Cnt_Mns or Cnt_Pls
-        g_gld.pulses.reper_meandr.cnt_iter++;
+        g_gld.pulses.reper_meandr.cnt_iter ++;
 		
         dir = qei_get_direction();
         /*
@@ -295,12 +313,11 @@ void clc_Pulses()
                 ,percent
                 );
            /* */
-
             //enable cyclic transmittion flag for Rate2    
             if( g_gld.cmd.trm_cycl != g_gld.cmd.trm_cycl_sync ){
                 g_gld.cmd.trm_cycl = g_gld.cmd.trm_cycl_sync; 
-            }    
-		}		 
+            }
+		}//latch_rdy		 
         break;
     }	 
 } // clc_Pulses

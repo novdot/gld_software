@@ -146,6 +146,8 @@ void command_handle(void)
         case CMD_DELTA_BINS  : command_cmd_DELTA_BINS();	return;
         case CMD_DELTA_SF	 : command_cmd_DELTA_SF(); return;
         case CMD_DEV_MODE    : command_cmd_DEV_MODE(); return;
+        case CMD_M_DELAY     : command_cmd_M_DELAY(); return;
+        
         case CMD_BIT_MODE    : command_cmd_BIT_MODE();	return;
         case CMD_RATE        : command_cmd_RATE();	return;
         case CMD_DELTA       : command_cmd_DELTA();	return;
@@ -224,7 +226,7 @@ void command_cmd_DELTA_PS()
         Device_Mode = DM_EXT_LATCH_DELTA_PS_LINE;
 	else
         Device_Mode = DM_EXT_LATCH_DELTA_PS_PULSE;
-	*/
+	/**/
     
     //e. disable interrupt from referense meander
     if(g_gld.RgConB.word != RATE_VIBRO_1){
@@ -245,6 +247,8 @@ void command_cmd_DELTA_PS()
 /******************************************************************************/
 void command_cmd_DELTA_PS_EXEC()
 {
+    char dbg[64];	
+    int i = 0;
     static void * paramTable[11] = {
         &(Output.Str.F_ras) 
         , &(Output.Str.AD_value)
@@ -281,6 +285,7 @@ void command_cmd_DELTA_PS_EXEC()
  
     index++;
 	if (index > 21) {
+        DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,">>_DELTA_PS_EXEC\n\r");
 		index = 0;
 	}
     
@@ -330,6 +335,16 @@ void command_cmd_DEV_MODE()
 	command_ans_DEV_MODE();
 	return;
 } 
+/******************************************************************************/
+void command_cmd_M_DELAY()
+{
+    int i = 0;
+    char dbg[64];
+    DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,">>Delay\n\r");
+    g_gld.pulses.vibro1.idelay_max = rcv_buf[3] & 0x00ff;
+    command_ans_common();
+	return;
+}
 /******************************************************************************/
 void command_cmd_BIT_MODE()
 {
@@ -410,49 +425,6 @@ void command_subcmd_M_STIMUL()
 	return;
 }
 /******************************************************************************/
-/*********************************************************************//**
-* @brief 		Initial for Watchdog function
-* 					Clock source = RTC ,
-* @param[in]	ClkSrc  Select clock source, should be:
-* 				- WDT_CLKSRC_IRC: Clock source from Internal RC oscillator
-* 				- WDT_CLKSRC_PCLK: Selects the APB peripheral clock (PCLK)
-* 				- WDT_CLKSRC_RTC: Selects the RTC oscillator
-* @param[in]	WDTMode WDT mode, should be:
-* 				- WDT_MODE_INT_ONLY: Use WDT to generate interrupt only
-* 				- WDT_MODE_RESET: Use WDT to generate interrupt and reset MCU
-* @return 		None
- **********************************************************************
-void WDT_Init (WDT_CLK_OPT ClkSrc, WDT_MODE_OPT WDTMode)
-{
-	CHECK_PARAM(PARAM_WDT_CLK_OPT(ClkSrc));
-	CHECK_PARAM(PARAM_WDT_MODE_OPT(WDTMode));
-	CLKPWR_SetPCLKDiv (CLKPWR_PCLKSEL_WDT, CLKPWR_PCLKSEL_CCLK_DIV_4);
-
-	//Set clock source
-	LPC_WDT->WDCLKSEL &= ~WDT_WDCLKSEL_MASK;
-	LPC_WDT->WDCLKSEL |= ClkSrc;
-	//Set WDT mode
-	if (WDTMode == WDT_MODE_RESET){
-		LPC_WDT->WDMOD |= WDT_WDMOD(WDTMode);
-	}
-}
-/*********************************************************************//**
-* @brief 		Start WDT activity with given timeout value
-* @param[in]	TimeOut WDT reset after timeout if it is not feed
-* @return 		None
- **********************************************************************
-void WDT_Start(uint32_t TimeOut)
-{
-	uint32_t ClkSrc;
-
-	ClkSrc = LPC_WDT->WDCLKSEL;
-	ClkSrc &=WDT_WDCLKSEL_MASK;
-	WDT_SetTimeOut(ClkSrc,TimeOut);
-	//enable watchdog
-	LPC_WDT->WDMOD |= WDT_WDMOD_WDEN;
-	WDT_Feed();
-    WDTFeed();
-}
 /**/
 void command_subcmd_M_RESET()
 {
@@ -477,7 +449,7 @@ void command_subcmd_M_RESET()
 void command_subcmd_M_CTL_R()
 {
 	//e. clear in it bit of errors and byte number
-	CMD_Code &= 0xff10;           
+	CMD_Code &= 0xff00;           
 	command_ans_M_CTL_R();
 	return;
 }  
@@ -768,7 +740,11 @@ void command_ans_common(void)
 {
 	//prepare of the standart answer
 	num_of_par = 1;             //e. total amount parameters in answer - 1 
+	CMD_Code &= 0xff00; //e. clear in command bit of errors and byte number 
 	COMMAND_UTILITY_ANSWER_FIELD(0,(void*)&CMD_Code,2);
+    /**/
+	//COMMAND_UTILITY_ANSWER_FIELD(1,(void*)&line_err,1);
+    /**/
 	trm_ena = 1;              	//e. allow operation of the transmitter of the device
 }
 
@@ -875,6 +851,7 @@ void command_ans_M_CTL_R()
 {
 	num_of_par = 2; //e. 2 parameters transfer
 	
+	CMD_Code &= 0xff10; //e. clear in command bit of errors and byte number 
 	COMMAND_UTILITY_ANSWER_FIELD(0,(void*)&CMD_Code,2);
 	if ((rcv_buf[3] & (1 << 4)) == 0) {
 		COMMAND_UTILITY_ANSWER_FIELD(1,(void*)&g_gld.RgConA.word,2);
@@ -890,7 +867,7 @@ void command_ans_M_CTL_M()
 	x_uint16_t * ptr;
 	x_uint32_t bit_numb;
 	
-	num_of_par = 2;        
+	num_of_par = 2;       
 	COMMAND_UTILITY_ANSWER_FIELD(0,(void*)&CMD_Code,2);
 	COMMAND_UTILITY_ANSWER_FIELD(1,(void*)ptr,2);   
 	

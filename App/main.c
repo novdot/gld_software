@@ -130,6 +130,11 @@ void init()
     cplc_init();
     dither_init();
     g_gld.RgConB.word = RATE_VIBRO_1;
+    g_gld.pulses.vibro1.idelay_curr = 0;
+    g_gld.pulses.vibro1.idelay_max = 0;
+	for (i=0; i < RATE_VIBRO_1_DELAY_BUF_MAX; i++) {
+		g_gld.pulses.vibro1.delay_buff[i] = 0;	
+	}	
     
     g_gld.dbg_buffers.iteration = 100;
     __enable_irq();
@@ -146,8 +151,9 @@ void loop_echo()
 void loop()
 {
     static int nSwitch = 0;
-    x_uint8_t dbg[64];
+    x_uint8_t dbg[128];
     int i;
+    static int temp = 0;
     
     /*if(LPC_GPIO0->FIOPIN>>8)0x1){
         hardware_backlight_on();
@@ -170,7 +176,14 @@ void loop()
     if(nSwitch>10000){
         nSwitch = 0;
         //UART_SendString("123",3);
-        //DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"nADCData:%u \n\r",g_gld.nADCData[5]);
+        temp = Device_blk.Str.VB_Fdf_Hi << 16;
+        temp |= Device_blk.Str.VB_Fdf_Lo;
+        
+        DBG3(&g_gld.cmd.dbg.ring_out,dbg,64,"hi:%u lo:%u f:%d \n\r"
+            ,Device_blk.Str.VB_Fdf_Hi
+            ,Device_blk.Str.VB_Fdf_Lo
+            ,(temp)
+        );
         //DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"WP_reg:%u \n\r",Output.Str.WP_reg);
         //DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"cnt:%u \n\r",g_gld.dbg_buffers.counters_latch);
         //g_gld.dbg_buffers.counters_latch = 0;

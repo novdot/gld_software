@@ -8,6 +8,7 @@
 #define  CMD_DELTA_BINS  	0xb000  //e. the code of the B_DeltaBINS command
 #define  CMD_DELTA_SF	  	0xb200  //e. the code of the B_DeltaSF command 
 #define  CMD_DEV_MODE    	0xA500  //e. the code of the Device_Mode command
+#define  CMD_M_DELAY    	0xA600  //e. 
 #define  CMD_BIT_MODE    	0xA700  //e. the code of the B.I.T. command 
 #define  CMD_RATE        	0x0000  //e. the code of the Rate command  
 #define  CMD_DELTA       	0x0f00  //e. the code of the Delta command
@@ -59,6 +60,7 @@ void command_cmd_DELTA_PS_EXEC();
 void command_cmd_DELTA_BINS();
 void command_cmd_DELTA_SF();
 void command_cmd_DEV_MODE();
+void command_cmd_M_DELAY();
 void command_cmd_BIT_MODE();
 void command_cmd_RATE();
 void command_cmd_DELTA();

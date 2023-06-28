@@ -59,7 +59,9 @@ typedef struct gld_cmdDef{
     x_uint16_t recieve_cmd_size;
 }gld_cmd;
 
+
 #define REPER_MEANDR_CNT_PLS_MIN_INIT (0xFFFFFFFF)
+#define RATE_VIBRO_1_DELAY_BUF_MAX (255)
 typedef struct gld_pulsesDef{
     x_uint32_t Cnt_curr; //< value from qei. Only for RATE_REPER_OR_REFMEANDR
     x_uint32_t Curr_Cnt_Vib; //< value_Vib = diff between curent value and old
@@ -69,7 +71,10 @@ typedef struct gld_pulsesDef{
         x_uint32_t cnt_prev;
         x_uint32_t cnt_dif;
         x_uint32_t cnt_reduced;
-    }vibro1;
+        x_int32_t delay_buff[RATE_VIBRO_1_DELAY_BUF_MAX];
+        x_int32_t idelay_curr;
+        x_int32_t idelay_max;
+    }vibro1; //RATE_VIBRO_1
     struct{
         x_uint32_t cnt_curr;
         x_uint32_t cnt_prev;
@@ -98,7 +103,6 @@ typedef struct gld_pulsesDef{
             */
             x_uint32_t cnt_pls_prev;
             x_uint32_t cnt_mns_prev;
-            
         }curr_angle; //< структура проверки на симметрию текущего угла
         
         x_int32_t cnt_delta;
@@ -115,7 +119,7 @@ typedef struct gld_pulsesDef{
             }bit;
             x_uint8_t word;
         }flags;
-    }reper_meandr;
+    }reper_meandr; //RATE_REPER_OR_REFMEANDR
 }gld_pulses;
 
 /**
