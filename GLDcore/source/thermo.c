@@ -17,7 +17,8 @@
 
 #define	TEMPERFILT_LEN	4 
 #define	TEMPERFILT_SHIFT 2
-#define SCALE(t, n)  mac_r(Device_blk.Str.Tmp_bias[n] << 16 , (t - 0x8000), Device_blk.Str.Tmp_scal[n])
+#define TERMO_SCALE(t, n)  \
+    mac_r(Device_blk.Str.Tmp_bias[n] << 16 , (t - 0x8000), Device_blk.Str.Tmp_scal[n])
 
 int buffer_dT[TEMPERFILT_LEN];
 long int smooth_dT;
@@ -32,7 +33,9 @@ void thermo_Max_Saturation(unsigned *lvl, unsigned limit)
 	if (*lvl>limit) *lvl = limit;	
 }
 
-/******************************************************************************/
+/*****************************************************************************
+расчет компенсирующего значения для подсчета импульсов 
+*/
 long thermo_CalcCompens(void)
 {
 	float x = static_.delta + TermoCompDelta_dNdT;
@@ -44,38 +47,50 @@ void thermo_DeltaRecalc(int temperature, THERMOCOMP_DATA* data)
 {
 	int i = 0;
 
-		if(temperature > data->temperature_array[TERMO_FUNC_SIZE - 1]) {
-			 temperature = data->temperature_array[TERMO_FUNC_SIZE - 1];
-		}
+    if(temperature > data->temperature_array[TERMO_FUNC_SIZE - 1]) {
+        temperature = data->temperature_array[TERMO_FUNC_SIZE - 1];
+    }
 
-	  while( temperature > data->temperature_array[i] ) i++;
-	
-    data->delta = data->dN_array[i] - data->dNdT_array[i] * (float)( data->temperature_array[i] - temperature );   
+    while( temperature > data->temperature_array[i] ) i++;
+
+    data->delta = 
+        data->dN_array[i] 
+        - data->dNdT_array[i] * (float)( data->temperature_array[i] - temperature );   
 } 
 
 
 /******************************************************************************/
+/**
+    Инициализация-Расчет параметров 
+*/
 void dNdT_calc(int i, THERMOCOMP_DATA* data){
 		
-	int dT = data->temperature_array[i] - data->temperature_array[i-1];
-				if (dT == 0) {
-            data->dNdT_array[i] = 0.0;
-        } else {
-            data->dNdT_array[i] = (data->dN_array[i] - data->dN_array[i-1]) / (float)dT;
-        }
+	int dT = 0;
+    
+    if(i<=0) goto fail;
+    if(i>=TERMO_FUNC_SIZE) goto fail;
+    
+    dT = data->temperature_array[i] - data->temperature_array[i-1];
+    if (dT == 0) {
+        data->dNdT_array[i] = 0.0;
+    } else {
+        data->dNdT_array[i] = (data->dN_array[i] - data->dN_array[i-1]) / (float)dT;
+    }
+fail:;
+    return;
 }
 
 /******************************************************************************/
 void thermo_init()
 {
     int i = 0;
-	
-	  dynamic_.temperature_array = Device_blk.Str.TemperCoolIntDyn;
-	  dynamic_.dN_array = (float*)Device_blk.Str.ThermoCoolDelta;
-	
-		static_.temperature_array = Device_blk.Str.TemperIntDyn;
-	  static_.dN_array = (float*)Device_blk.Str.ThermoHeatDelta;
-/*	    
+
+    dynamic_.temperature_array = Device_blk.Str.TemperCoolIntDyn;
+    dynamic_.dN_array = (float*)Device_blk.Str.ThermoCoolDelta;
+
+    static_.temperature_array = Device_blk.Str.TemperIntDyn;
+    static_.dN_array = (float*)Device_blk.Str.ThermoHeatDelta;
+    /*	    
     for (i = 0; i < TERMO_FUNC_SIZE; i++)  {
         static_.dN_array[i] = .0e-2;//-7.0e-4 + 1.0e-4*i;
         dynamic_.dN_array[i] = 1.0e-4;//7.0e-6 - 1.0e-6*i;
@@ -83,20 +98,18 @@ void thermo_init()
 			  dynamic_.temperature_array[i] = -6000+1000*i;  
     }
 	*/
-		//расчет коэффициентов наклона для интерполяции  
-	  for (i = 1; i < TERMO_FUNC_SIZE; i++)  {		
-			   dNdT_calc(i, &dynamic_);
-				 dNdT_calc(i, &static_);			
+    //расчет коэффициентов наклона для интерполяции  
+    for (i = 1; i < TERMO_FUNC_SIZE; i++)  {		
+        dNdT_calc(i, &dynamic_);
+        dNdT_calc(i, &static_);			
     }
     
     //Filter
-    buffer_dT[0] = 0;	
-    
     //e. smooth average initialization 
-   for (i = 0; i < TEMPERFILT_LEN; ++i)
-				buffer_dT[i] = 0;   
-		
-		smooth_dT = 0;
+    for (i = 0; i < TEMPERFILT_LEN; ++i)
+        buffer_dT[i] = 0;   
+
+    smooth_dT = 0;
 }
 
 /******************************************************************************/
@@ -128,8 +141,8 @@ void thermo_clc_ThermoSensors(void)
 
 	//e. conversion of temperature values on ADC output 
 	//to range -32768 .. +32767 ( additional code; format 1.15 )
-	Output.Str.Tmp_Out[TSENS_NUMB] = SCALE(g_input.word.temp1, TSENS_NUMB);
-  Output.Str.Tmp_Out[TS_DELTA_NUMB] = SCALE(g_input.word.delta_t, TS_DELTA_NUMB);
+	Output.Str.Tmp_Out[TSENS_NUMB] = TERMO_SCALE(g_input.word.temp1, TSENS_NUMB);
+    Output.Str.Tmp_Out[TS_DELTA_NUMB] = TERMO_SCALE(g_input.word.delta_t, TS_DELTA_NUMB);
  
 	//e. 1 second elapsed
 	if (g_gld.time_1_Sec == DEVICE_SAMPLE_RATE_uks) {
@@ -147,29 +160,30 @@ void thermo_clc_ThermoSensors(void)
 		Temp_Aver_delta = TS_sum_delta / (DEVICE_SAMPLE_RATE_HZ * TEMP_AVER_PERIOD); 
 		//e. reset the sum for calculation of an mean
  		TS_sum = 0; 
-    TS_sum_delta = 0;       
+        TS_sum_delta = 0;       
 
-   if (bSingleInit){
-      thermo_DeltaRecalc(Temp_Aver, &dynamic_);
-      bSingleInit = _x_false;
-   }
-        
-   if((Device_blk.Str.TermoMode)&&(!bSingleInit)){
-        switch (Device_blk.Str.TermoMode & 0xF0) {
-        case 0x00:
-              TermoCompDelta_dNdT = dynamic_.delta * 
-                        (float)(thermo_MovAver_filter((Temp_Aver-Temp_Aver_prev)<<4));
-        break;
+        if (bSingleInit){
+            thermo_DeltaRecalc(Temp_Aver, &dynamic_);
+            bSingleInit = _x_false;
+        }
             
-        case 0x10:
-              TermoCompDelta_dNdT = dynamic_.delta * 
-                        (float)(thermo_MovAver_filter(Temp_Aver_delta<<4));
-        break;
-            }
-    }        
+        if((Device_blk.Str.TermoMode)&&(!bSingleInit)){
+            switch (Device_blk.Str.TermoMode & 0xF0) {
+            case 0x00:
+                  TermoCompDelta_dNdT = dynamic_.delta * 
+                            (float)(thermo_MovAver_filter((Temp_Aver-Temp_Aver_prev)<<4));
+            break;
+                
+            case 0x10:
+                  TermoCompDelta_dNdT = dynamic_.delta * 
+                            (float)(thermo_MovAver_filter(Temp_Aver_delta<<4));
+            break;
+                }
+        }        
 	}else{
-		TS_sum += Output.Str.Tmp_Out[TSENS_NUMB];
-    TS_sum_delta += Output.Str.Tmp_Out[TS_DELTA_NUMB];		
+        //accumul
+        TS_sum += Output.Str.Tmp_Out[TSENS_NUMB];
+        TS_sum_delta += Output.Str.Tmp_Out[TS_DELTA_NUMB];		
 	}
 
 	//e. calculation the mean temperature for 1 Sec for T4 and T5 sensors 

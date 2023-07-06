@@ -81,7 +81,7 @@ void clc_Pulses()
 	case TERMO_ON_STATIC_ONLY:
 	case TERMO_ON_STATIC_ONLY_NUMB_OFF:
 		//e. accumulation of the value of thermocompensation from request to request 
-			TermoCompens_Sum += thermo_CalcCompens(); 
+		TermoCompens_Sum += thermo_CalcCompens(); 
 	break;
 
 	case TERMO_OFF:

@@ -562,13 +562,31 @@ void uart_send_blocked(int a_ch, x_ring_buffer_t*a_pbuf)
     }
 }
 /******************************************************************************/
+#include <core/global.h>
 void uart_recieve(x_uint8_t*a_pBuffer,x_uint32_t*a_uCount)                  
 { 
+    static uint8_t max_packet = 0;
     //e. reciever contain some information
 #if defined UART1REC
-    while ((LPC_UART1->LSR & RecievBufEmpty) != 0) { 
+    //The U1IER is used to enable the four UART1 interrupt sources
+    LPC_UART1->IER = 0; 
+    
+    //The U1MSR is a read-only register that provides status information 
+    //on the modem input signals. 
+    LPC_UART1->MSR;
+    
+    //The U1LCR determines the format of the data character that is to 
+    //be transmitted or received.
+    //DLAB set 0
+    LPC_UART1->LCR &= 0x7F;
+    
+    //The U1LSR is a read-only register that provides status information 
+    //on the UART1 TX and RX blocks.
+    if( (LPC_UART1->LSR&0x1)==1 ){
+        if( (*a_uCount)>=(RCV_BUF_SIZE-1) ) return;
         a_pBuffer[(*a_uCount)] = LPC_UART1->RBR;
         (*a_uCount) += 1;
+        if( (*a_uCount)>=RCV_BUF_SIZE ) *a_uCount=(RCV_BUF_SIZE-1);
     }
 #elif defined UART0REC
     while ((LPC_UART0->LSR & RecievBufEmpty) != 0){ 

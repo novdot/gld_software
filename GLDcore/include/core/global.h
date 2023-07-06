@@ -29,6 +29,7 @@ typedef struct gld_cplcDef{
 
 #define GLD_RINGBUFFER_SIZE (1024)
 #define GLD_BUF_SIZE (512)
+#define RCV_BUF_SIZE (256)
 typedef struct gld_cmdDef{
     x_uint8_t trm_cycl; //is cyclic bit from cmd
     x_uint8_t trm_cycl_sync; //бит для синхронизации выдаваемого первого пакета данных

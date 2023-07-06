@@ -29,8 +29,8 @@ void gld_global_init(void)
 x_uint32_t rcv_num_byt;
 x_uint32_t rcv_Rdy;
 
-x_uint8_t rcv_buf[256];//64
-x_uint8_t rcv_copy[256];
+x_uint8_t rcv_buf[RCV_BUF_SIZE];//64
+x_uint8_t rcv_copy[RCV_BUF_SIZE];
 
 x_int32_t rx_buf_copy;
 x_int32_t rcv_byt_copy;

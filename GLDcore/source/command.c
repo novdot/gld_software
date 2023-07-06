@@ -39,7 +39,7 @@ x_bool_t command_check_lcc(x_uint8_t* a_pBuffer,x_uint32_t a_uCount)
     char dbg_word[64];
     int i = 0;
     
-    sprintf(dbg_word,"");
+    //sprintf(dbg_word,"");
 
 	for (iCRC_calc = 1; iCRC_calc < (a_uCount-2); iCRC_calc++)
 		CRC_calc += a_pBuffer[iCRC_calc];  
@@ -49,9 +49,10 @@ x_bool_t command_check_lcc(x_uint8_t* a_pBuffer,x_uint32_t a_uCount)
 	if( (CRC_real - CRC_calc) == 0) {
         return _x_true;
     } else {
-        for (iCRC_calc = 0; iCRC_calc < (a_uCount); iCRC_calc++)
+        /*for (iCRC_calc = 0; iCRC_calc < (a_uCount); iCRC_calc++)
             sprintf(dbg_word,"%s%x",dbg_word,a_pBuffer[iCRC_calc]);
         DBG2(&g_gld.cmd.dbg.ring_out,dbg,64,"lcc err:%s, cnt:%u\n\r",dbg_word,(unsigned int)a_uCount);
+        */
         return _x_false;
     }
 }
@@ -68,11 +69,11 @@ void command_recieve_gld()
     
     //e. end part of packet is absent
 	if (( ToWaitEnd > 25000)) {
-        sprintf(dbg_word,"");
+        /*sprintf(dbg_word,"");
         for (iCRC_calc = 0; iCRC_calc < (rcv_num_byt); iCRC_calc++)
             sprintf(dbg_word,"%s%x",dbg_word,rcv_buf[iCRC_calc]);
         DBG2(&g_gld.cmd.dbg.ring_out,dbg,64,"len err:%s, cnt:%u\n\r",dbg_word,(unsigned int)rcv_num_byt);
-        
+        */
         do rcv_buf[--rcv_num_byt] = 0;
         while(rcv_num_byt);
         
@@ -160,6 +161,7 @@ void command_recieve_gld()
 /******************************************************************************/
 void command_recieve_bootloader()
 {
+    /*
     static int ToWaitEnd, ErrReg ;
     char dbg[64];
     
@@ -208,12 +210,12 @@ void command_recieve_bootloader()
         //DBG0(dbg,64,"get packet bootloader");
 		rcv_Rdy = 1;	  	
 	}
-	ToWaitEnd = 0;
+	ToWaitEnd = 0;*/
 }
 /******************************************************************************/
 void command_recieve(command_recieve_flag flag)
 { 
-    x_uint32_t num;
+    //x_uint32_t num;
 	uart_recieve(rcv_buf,&rcv_num_byt);
     
     switch(flag){

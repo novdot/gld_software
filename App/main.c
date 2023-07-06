@@ -142,6 +142,7 @@ void init()
     //LPC_GPIOINT->IO0IntEnR |= (1<<8);
     //LPC_GPIOINT->IO0IntClr |= (1<<8); //e. clean external latch interrupt request
 	//NVIC_EnableIRQ(EINT3_IRQn);	
+    
 }
 /******************************************************************************/
 void loop_echo()
