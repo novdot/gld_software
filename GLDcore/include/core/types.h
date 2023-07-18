@@ -69,7 +69,7 @@ typedef enum _WATCH_MODE
     @brief the BLOCK of VARIABLES, LOADED from FLASH-memory
     Address (parameter number in the block = 0..255 )
 */
-#define VARIABLE_COUNT (171)
+#define VARIABLE_COUNT (201)
 //#define VARIABLE_SIZE (VARIABLE_COUNT*sizeof(int))
 typedef union {
     x_int32_t Array[VARIABLE_COUNT];
@@ -133,8 +133,8 @@ typedef union {
         x_int32_t PI_b6; //  42
 
         //e. parameters of normalization of the temperature sensors 
-        x_int32_t Tmp_bias[6]; //e. 43 - an array of shifts of the 0..5 temperature sensors 
-        x_int32_t Tmp_scal[6]; //e. 49 - an array of the scale coefficients of temperature sensors
+        x_int32_t Tmp_bias[6]; //e. (43-48) - an array of shifts of the 0..5 temperature sensors 
+        x_int32_t Tmp_scal[6]; //e. (49-54) - an array of the scale coefficients of temperature sensors
         x_int32_t WP_reset;    //e. 55 - initial position of the CPLC regulator (after reset)
 
         //e. gain factor of photodetector channels 
@@ -149,23 +149,28 @@ typedef union {
         x_int32_t WP_start;       //e. 61 - start position for CPLC regulation
         x_int32_t TermoMode;	//e  62 - device operation mode (with thermocompenstion, without it, debug )
         //e. addition for the piecewise-linear termocorrection 
-        x_int32_t TemperInt[TERMO_FUNC_SIZE];	//e. 63 
-        x_int32_t TermoFunc[TERMO_FUNC_SIZE];	//e. 77
-        x_int32_t WP_reset2;          //e. 91 - voltages of CPLC regulator reset at cooling 	//e. parameters setting termocompensation parameters in dynamics (at heating and cooling)
-        x_int32_t Reserved1;        //e. 92 - not used
-        x_int32_t Reserved2;        //e. 93 - not used
-        x_int32_t K_vb_tu; 			//e. 94 - slope of dependence of the VB_N division factor from temperature (as though Hz/degree, but in relative units ) 
-        x_int32_t TemperNormal; 		//e. 95 -temperature for which the VB_N division factor of the dither drive is set 
-        x_int32_t K_WP_rst_heating; 	//r. 96 - 
-        x_int32_t K_WP_rst_cooling; 	//e. 97 - slope of dependence of a reset voltage at cooling from temperature (as though Volt/degree, but in relative units of DAC and temperature sensors)
-        x_int32_t WP_transition_step; //e. 98 - step of change of a heater voltage at resetting 
-        x_int32_t Reserved3;          //e. 99 -not used
-        x_int32_t HF_scl_2;           //e. 100 -
-        x_int32_t TemperIntDyn[TERMO_FUNC_SIZE]; //e. 101-114 - точки температуры
-        x_int32_t ThermoHeatDelta[TERMO_FUNC_SIZE]; //e. 115-128 - смещение
-        x_int32_t DeltaTempRecalc;    //e. 129 temperature delta for dynamic thermocompensation recalculation(in relative units)
-        x_int32_t TemperCoolIntDyn[TERMO_FUNC_SIZE]; // e. 130-143 - точки температуры скорости
-        x_int32_t ThermoCoolDelta[TERMO_FUNC_SIZE];  //e. 144-157 - скорость смещение
+        x_int32_t TemperInt[TERMO_FUNC_SIZE];	//e. 63 - 76 
+        x_int32_t TermoFunc[TERMO_FUNC_SIZE];	//e. 77 - 104
+        x_int32_t TermoFunc_[TERMO_FUNC_SIZE];	//e. 77 - 104
+        x_int32_t WP_reset2;          //e. 105/91 - voltages of CPLC regulator reset at cooling 	//e. parameters setting termocompensation parameters in dynamics (at heating and cooling)
+        x_int32_t Reserved1;        //e. 106/92 - not used
+        x_int32_t Reserved1_;        //e. 107/92 - not used
+        x_int32_t Reserved2;        //e. 108 - not used
+        x_int32_t Reserved2_;        //e. 109 - not used
+        x_int32_t K_vb_tu; 			//e. 110 - slope of dependence of the VB_N division factor from temperature (as though Hz/degree, but in relative units ) 
+        x_int32_t TemperNormal; 		//e. 111 -temperature for which the VB_N division factor of the dither drive is set 
+        x_int32_t K_WP_rst_heating; 	//r. 112 - 
+        x_int32_t K_WP_rst_cooling; 	//e. 113 - slope of dependence of a reset voltage at cooling from temperature (as though Volt/degree, but in relative units of DAC and temperature sensors)
+        x_int32_t WP_transition_step; //e. 114 - step of change of a heater voltage at resetting 
+        x_int32_t Reserved3;          //e. 115 -not used
+        x_int32_t HF_scl_2;           //e. 116 -
+        x_int32_t TemperIntDyn[TERMO_FUNC_SIZE]; //e. 117-130 - точки температуры
+        x_int32_t ThermoHeatDelta[TERMO_FUNC_SIZE]; //e. 131-... - смещение
+        x_int32_t ThermoHeatDelta_[TERMO_FUNC_SIZE]; //e. ...-158 - смещение
+        x_int32_t DeltaTempRecalc;    //e. 159 temperature delta for dynamic thermocompensation recalculation(in relative units)
+        x_int32_t TemperCoolIntDyn[TERMO_FUNC_SIZE]; // e. 160-173 - точки температуры скорости
+        x_int32_t ThermoCoolDelta[TERMO_FUNC_SIZE];  //e. 174-... - скорость смещение
+        x_int32_t ThermoCoolDelta_[TERMO_FUNC_SIZE];  //e. ...-200 - скорость смещение
     } Str;
 } TDEVICE_BLK;
 

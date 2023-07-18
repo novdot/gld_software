@@ -9,7 +9,13 @@
 
  typedef struct {
 	x_int32_t* temperature_array;
-	float* dN_array;
+	//float* dN_array_hi;
+	//float* dN_array_lo;
+     union{
+         float fdata;
+         x_uint32_t udata;
+     }dN_array[TERMO_FUNC_SIZE];
+	//float dN_array[TERMO_FUNC_SIZE];
 	float dNdT_array[TERMO_FUNC_SIZE];
 	float delta;
 } THERMOCOMP_DATA;

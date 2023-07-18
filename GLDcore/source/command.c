@@ -271,8 +271,14 @@ void command_transm(void)
                 trm_buf[trm_num_byt] = (*trans_param) & 0x00ff;
                 trans_param ++; //e. go to next memory cell         
             }
+            /*DBG3(&g_gld.cmd.dbg.ring_out,dbg,64
+                ,"param_byte:%d buf:%u n:%d\n\r"
+                    ,param_byte
+                    ,trm_buf[trm_num_byt]
+                    ,trm_num_byt
+                ); */
             CRC += trm_buf[trm_num_byt]; //e. current CRC calculation              
-            trm_num_byt++; //e. number of bytes which have transmitted into packet    
+            trm_num_byt++; //e. number of bytes which have transmitted into packet  
         } 
     }
     trm_buf[trm_num_byt] = CRC >> 8; //e. writing of final CRC into the packet 

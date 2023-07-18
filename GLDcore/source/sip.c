@@ -58,6 +58,8 @@ void clc_Pulses()
     
     int i = 0;
     char dbg[256];
+    static int nSwitch = 0;
+    
     //read pulses
     g_gld.pulses.Curr_Cnt_Vib = qei_get_position();
     
@@ -90,6 +92,8 @@ void clc_Pulses()
 		TermoCompens_Sum = 0;
 	break;
 	}
+    nSwitch++;
+    
     //e. selecting display mode
     switch (g_gld.RgConB.word) {
     case RATE_VIBRO_1:
@@ -108,7 +112,17 @@ void clc_Pulses()
         if (Latch_Rdy) {
             dif_Curr_32_Ext = interpolation(Dif_Curr_32, LatchPhase );
             //in Latch_Event it's indicator of latch appearing 
-            LatchPhase = INT32_MAX;	               
+            LatchPhase = INT32_MAX;	  
+
+            if(nSwitch>10000){
+                nSwitch = 0;
+                DBG2(&g_gld.cmd.dbg.ring_out,dbg,64
+                        ,"dif=%u TermoComp=%u\n\r"
+                        ,dif_Curr_32_Ext
+                        ,TermoCompens_Sum
+                    );
+            }
+            
             //e. add to the accumulated sum the interpolated sample of an external latch 	
             //e. substract the accumulated termocompensational part from the accumulated number
             // PSdif_sum_Vib_32 += dif_Curr_32_Ext;             

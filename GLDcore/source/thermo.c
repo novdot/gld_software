@@ -17,8 +17,6 @@
 
 #define	TEMPERFILT_LEN	4 
 #define	TEMPERFILT_SHIFT 2
-#define TERMO_SCALE(t, n)  \
-    mac_r(Device_blk.Str.Tmp_bias[n] << 16 , (t - 0x8000), Device_blk.Str.Tmp_scal[n])
 
 int buffer_dT[TEMPERFILT_LEN];
 long int smooth_dT;
@@ -54,7 +52,7 @@ void thermo_DeltaRecalc(int temperature, THERMOCOMP_DATA* data)
     while( temperature > data->temperature_array[i] ) i++;
 
     data->delta = 
-        data->dN_array[i] 
+        data->dN_array[i].fdata 
         - data->dNdT_array[i] * (float)( data->temperature_array[i] - temperature );   
 } 
 
@@ -74,40 +72,72 @@ void dNdT_calc(int i, THERMOCOMP_DATA* data){
     if (dT == 0) {
         data->dNdT_array[i] = 0.0;
     } else {
-        data->dNdT_array[i] = (data->dN_array[i] - data->dN_array[i-1]) / (float)dT;
+        data->dNdT_array[i] = (data->dN_array[i].fdata - data->dN_array[i-1].fdata) / (float)dT;
     }
 fail:;
     return;
 }
 
 /******************************************************************************/
+#include "hardware/uart.h"
 void thermo_init()
 {
     int i = 0;
+    int ifun = 0;
+    x_uint8_t dbg[64];
 
     dynamic_.temperature_array = Device_blk.Str.TemperCoolIntDyn;
-    dynamic_.dN_array = (float*)Device_blk.Str.ThermoCoolDelta;
-
-    static_.temperature_array = Device_blk.Str.TemperIntDyn;
-    static_.dN_array = (float*)Device_blk.Str.ThermoHeatDelta;
-    /*	    
-    for (i = 0; i < TERMO_FUNC_SIZE; i++)  {
-        static_.dN_array[i] = .0e-2;//-7.0e-4 + 1.0e-4*i;
-        dynamic_.dN_array[i] = 1.0e-4;//7.0e-6 - 1.0e-6*i;
-		    static_.temperature_array[i] = -6000+1000*i; 
-			  dynamic_.temperature_array[i] = -6000+1000*i;  
+    //dynamic_.dN_array_hi = (float*)Device_blk.Str.ThermoCoolDelta;
+    //dynamic_.dN_array_lo = (float*)Device_blk.Str.ThermoHeatDelta_;
+    for(ifun=0;ifun<TERMO_FUNC_SIZE;ifun++){
+        if(ifun<(TERMO_FUNC_SIZE/2)){
+            dynamic_.dN_array[ifun].udata = 
+                (((Device_blk.Str.ThermoCoolDelta[(ifun+0)*2]<<16)&0xffff0000) 
+                + ((Device_blk.Str.ThermoCoolDelta[(ifun+1)*2])&0x0000ffff));
+        }else{
+            dynamic_.dN_array[ifun].udata = 
+                (((Device_blk.Str.ThermoCoolDelta_[(ifun+0-(TERMO_FUNC_SIZE/2))*2]<<16)&0xffff0000) 
+                + ((Device_blk.Str.ThermoCoolDelta_[(ifun+1-(TERMO_FUNC_SIZE/2))*2])&0xffff));
+        }
     }
-	*/
+    
+    static_.temperature_array = Device_blk.Str.TemperIntDyn;
+    //static_.dN_array_hi = (float*)Device_blk.Str.ThermoHeatDelta;
+    //static_.dN_array_lo = (float*)Device_blk.Str.ThermoHeatDelta_;
+    for(ifun=0;ifun<TERMO_FUNC_SIZE;ifun++){
+        if(ifun<(TERMO_FUNC_SIZE/2)){
+            static_.dN_array[ifun].udata = 
+                (((Device_blk.Str.ThermoHeatDelta[(ifun+0)*2]<<16)&0xffff0000) 
+                + ((Device_blk.Str.ThermoHeatDelta[(ifun+1)*2])&0x0000ffff));
+        }else{
+            static_.dN_array[ifun].udata = 
+                (((Device_blk.Str.ThermoHeatDelta_[(ifun+0-(TERMO_FUNC_SIZE/2))*2]<<16)&0xffff0000) 
+                + ((Device_blk.Str.ThermoHeatDelta_[(ifun+1-(TERMO_FUNC_SIZE/2))*2])&0xffff));
+        }
+        
+        DBG4(&g_gld.cmd.dbg.ring_out,dbg,64,"%d static_:%f = %u %u\n\r"
+            ,ifun
+            ,static_.dN_array[ifun].fdata
+        ,Device_blk.Str.ThermoHeatDelta[ifun]
+        ,Device_blk.Str.ThermoHeatDelta_[ifun]
+        );
+    }
+    /**
+    for (i = 0; i < TERMO_FUNC_SIZE; i++)  {
+        static_.dN_array[i] = -7.0e-4 + (1.0e-4)*i;//-7.0e-4 + 1.0e-4*i;
+        dynamic_.dN_array[i] = 7.0e-6 - (1.0e-6)*i;//7.0e-6 - 1.0e-6*i;
+    }
+	/**/
     //расчет коэффициентов наклона для интерполяции  
-    for (i = 1; i < TERMO_FUNC_SIZE; i++)  {		
-        dNdT_calc(i, &dynamic_);
-        dNdT_calc(i, &static_);			
+    for (ifun = 1; ifun < TERMO_FUNC_SIZE; ifun++)  {		
+        dNdT_calc(ifun, &dynamic_);
+        dNdT_calc(ifun, &static_);			
     }
     
     //Filter
     //e. smooth average initialization 
-    for (i = 0; i < TEMPERFILT_LEN; ++i)
-        buffer_dT[i] = 0;   
+    for (ifun = 0; ifun < TEMPERFILT_LEN; ++ifun)
+        buffer_dT[ifun] = 0;   
 
     smooth_dT = 0;
 }
@@ -128,6 +158,10 @@ int thermo_MovAver_filter(int Input)
     return ((int)(smooth_dT>>TEMPERFILT_SHIFT));	
 } 
 /******************************************************************************/
+
+#define TERMO_SCALE(t, n)  \
+    mac_r(Device_blk.Str.Tmp_bias[n] << 16 , (t - 0x8000), Device_blk.Str.Tmp_scal[n])
+
 void thermo_clc_ThermoSensors(void)	
 {
 	static int TS_sum = 0; //аккумулятор T_main
@@ -137,7 +171,7 @@ void thermo_clc_ThermoSensors(void)
 	static int Temp_Aver_prev = -7000;
 	static int Temp_Aver_delta = 0;
 	static int Temp_Aver = 0;
-  static x_bool_t bSingleInit = _x_true;
+    static x_bool_t bSingleInit = _x_true;
 
 	//e. conversion of temperature values on ADC output 
 	//to range -32768 .. +32767 ( additional code; format 1.15 )

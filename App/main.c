@@ -68,7 +68,8 @@ void init1()
 void init()
 {
     int i=0;
-    char dbg[64];
+    x_uint8_t dbg[64];
+    
     //program variables
     x_ring_init(&g_gld.cmd.dbg.ring_in,g_gld.cmd.dbg.buf_in,GLD_RINGBUFFER_SIZE);
     x_ring_init(&g_gld.cmd.dbg.ring_out,g_gld.cmd.dbg.buf_out,GLD_RINGBUFFER_SIZE);
@@ -143,6 +144,9 @@ void init()
     //LPC_GPIOINT->IO0IntClr |= (1<<8); //e. clean external latch interrupt request
 	//NVIC_EnableIRQ(EINT3_IRQn);	
     
+    ////////
+    //Device_blk.Str.TermoMode = 1;
+    
 }
 /******************************************************************************/
 void loop_echo()
@@ -152,7 +156,7 @@ void loop_echo()
 void loop()
 {
     static int nSwitch = 0;
-    x_uint8_t dbg[128];
+    x_uint8_t dbg[64];
     int i;
     static int temp = 0;
     
@@ -177,13 +181,11 @@ void loop()
     if(nSwitch>10000){
         nSwitch = 0;
         //UART_SendString("123",3);
-        temp = Device_blk.Str.VB_Fdf_Hi << 16;
-        temp |= Device_blk.Str.VB_Fdf_Lo;
         
-        DBG3(&g_gld.cmd.dbg.ring_out,dbg,64,"hi:%u lo:%u f:%d \n\r"
-            ,Device_blk.Str.VB_Fdf_Hi
-            ,Device_blk.Str.VB_Fdf_Lo
-            ,(temp)
+        DBG3(&g_gld.cmd.dbg.ring_out,dbg,64,"hi:%u lo:%u _:%u\n\r"
+            ,Device_blk.Str.VBN_Tzd
+            ,Device_blk.Str.VBN_Ran
+            ,Device_blk.Str.VBN_k
         );
         //DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"WP_reg:%u \n\r",Output.Str.WP_reg);
         //DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,"cnt:%u \n\r",g_gld.dbg_buffers.counters_latch);
@@ -228,7 +230,7 @@ void loop()
     dbg_recieve();
     
     // data_Rdy &= ~RESET_PERIOD;
-    LPC_PWM1->IR = 0x0001; //e. clear interrupt flag 	
+    LPC_PWM1->IR = 0x0001; //e. clear interrupt flag 
 }
 
 /******************************************************************************/

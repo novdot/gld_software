@@ -70,6 +70,9 @@ void dither_noise_regulator(void)
 	static x_uint32_t Flag = 0;
 	static int PeriodCount = 0, Tnoise = 0;
 	static short int rando;
+    static x_int32_t VBN_Tzd = 0;
+    static x_int32_t VBN_Ran = 0;
+    ;
     
 	if ( PeriodCount >= Tnoise ){
 		PeriodCount = 0;
@@ -78,7 +81,7 @@ void dither_noise_regulator(void)
 		//rando = (x_uint16_t)((rand()+32768)>>1);
         
         // Tnoise = VBN_Tzd + VBN_Ran * rando; with saturation
-		Tnoise = add( Device_blk.Str.VBN_Tzd, mult_r(Device_blk.Str.VBN_Ran, rando)); 
+		Tnoise = add( VBN_Tzd, mult_r(VBN_Ran, rando)); 
 		Output.Str.WP_scope1 = rando;
         
 		//e. calculation +dF/-dF 
@@ -93,7 +96,10 @@ void dither_noise_regulator(void)
         //e. checking upper and lower levels of control range
 		Saturation(Device_blk.Str.VB_tau, Device_blk.Str.VB_Tmax, Device_blk.Str.VB_Tmin);
         
-		Flag = !Flag;                
+		Flag = !Flag;  
+            
+        VBN_Tzd = Device_blk.Str.VBN_Tzd;
+        VBN_Ran = Device_blk.Str.VBN_Ran;
 	} else {
 		PeriodCount++;
 	}
