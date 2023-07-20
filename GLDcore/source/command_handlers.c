@@ -136,7 +136,7 @@ void command_handle(void)
     uCmdCode = (rcv_buf[2] & 0xFF) << 8;
     CMD_Code = uCmdCode | (rcv_buf[3] & 0xFF);
     
-    DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,">>uCmdCode:%d\n\r",uCmdCode);
+    //DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,">>uCmdCode:%d\n\r",uCmdCode);
     
     //e. initialization of the flag of copying of receiving buffer
 	rx_buf_copy = 1;
@@ -184,7 +184,7 @@ void command_handle(void)
             line_sts = line_sts | CODE_ERR;
             return;
     }
-    DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,">>uCmdCodeLong:%d\n\r",uCmdCodeLong);
+    //DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,">>uCmdCodeLong:%d\n\r",uCmdCodeLong);
     
     switch(uCmdCodeLong){
         case CMD_MAINT       :  command_cmd_MAINT(); return;
@@ -247,8 +247,8 @@ void command_cmd_DELTA_PS()
 /******************************************************************************/
 void command_cmd_DELTA_PS_EXEC()
 {
-    char dbg[64];	
-    int i = 0;
+    //char dbg[64];	
+    //int i = 0;
     static void * paramTable[11] = {
         &(Output.Str.F_ras) 
         , &(Output.Str.AD_value)
@@ -283,11 +283,11 @@ void command_cmd_DELTA_PS_EXEC()
     //g_gld.valid.word = 0;
     Valid_Data = 0;
  
-    index++;
+    /*index++;
 	if (index > 21) {
         DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,">>_DELTA_PS_EXEC\n\r");
 		index = 0;
-	}
+	}*/
     
     command_ans_DELTA_PS_EXEC(&paramTmpWord);
     

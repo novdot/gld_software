@@ -114,14 +114,14 @@ void clc_Pulses()
             //in Latch_Event it's indicator of latch appearing 
             LatchPhase = INT32_MAX;	  
 
-            if(nSwitch>10000){
+            /*if(nSwitch>10000){
                 nSwitch = 0;
                 DBG2(&g_gld.cmd.dbg.ring_out,dbg,64
                         ,"dif=%u TermoComp=%u\n\r"
                         ,dif_Curr_32_Ext
                         ,TermoCompens_Sum
                     );
-            }
+            }*/
             
             //e. add to the accumulated sum the interpolated sample of an external latch 	
             //e. substract the accumulated termocompensational part from the accumulated number

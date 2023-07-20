@@ -145,7 +145,8 @@ void init()
 	//NVIC_EnableIRQ(EINT3_IRQn);	
     
     ////////
-    //Device_blk.Str.TermoMode = 1;
+    //Device_blk.Str.TermoMode = 0;
+    //Device_blk.Str.DeltaTempRecalc = 0;
     
 }
 /******************************************************************************/

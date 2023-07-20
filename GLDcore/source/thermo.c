@@ -35,12 +35,17 @@ void thermo_Max_Saturation(unsigned *lvl, unsigned limit)
 расчет компенсирующего значения для подсчета импульсов 
 */
 long thermo_CalcCompens(void)
-{
+{   
 	float x = static_.delta + TermoCompDelta_dNdT;
     return LONG_2_FRACT_14_18(x);
 }
 
-/******************************************************************************/
+/*****************************************************************************
+[in] temperature - new mean temperature for 1 Sec from T4
+[in] data - static holder
+[out] data->temperature_array - update by temperature
+
+*/
 void thermo_DeltaRecalc(int temperature, THERMOCOMP_DATA* data) 
 {
 	int i = 0;
@@ -82,8 +87,8 @@ fail:;
 #include "hardware/uart.h"
 void thermo_init()
 {
-    int i = 0;
     int ifun = 0;
+    int i = 0;
     x_uint8_t dbg[64];
 
     dynamic_.temperature_array = Device_blk.Str.TemperCoolIntDyn;
@@ -115,17 +120,17 @@ void thermo_init()
                 + ((Device_blk.Str.ThermoHeatDelta_[(ifun+1-(TERMO_FUNC_SIZE/2))*2])&0xffff));
         }
         
-        DBG4(&g_gld.cmd.dbg.ring_out,dbg,64,"%d static_:%f = %u %u\n\r"
+        /*DBG4(&g_gld.cmd.dbg.ring_out,dbg,64,"%d static_:%f = %u %u\n\r"
             ,ifun
             ,static_.dN_array[ifun].fdata
         ,Device_blk.Str.ThermoHeatDelta[ifun]
         ,Device_blk.Str.ThermoHeatDelta_[ifun]
-        );
+        );*/
     }
     /**
     for (i = 0; i < TERMO_FUNC_SIZE; i++)  {
-        static_.dN_array[i] = -7.0e-4 + (1.0e-4)*i;//-7.0e-4 + 1.0e-4*i;
-        dynamic_.dN_array[i] = 7.0e-6 - (1.0e-6)*i;//7.0e-6 - 1.0e-6*i;
+        static_.dN_array[i].fdata = -7.0e-4 + (1.0e-4)*i;//-7.0e-4 + 1.0e-4*i;
+        dynamic_.dN_array[i].fdata = 7.0e-6 - (1.0e-6)*i;//7.0e-6 - 1.0e-6*i;
     }
 	/**/
     //расчет коэффициентов наклона для интерполяции  
@@ -172,6 +177,8 @@ void thermo_clc_ThermoSensors(void)
 	static int Temp_Aver_delta = 0;
 	static int Temp_Aver = 0;
     static x_bool_t bSingleInit = _x_true;
+    int i = 0;
+    x_uint8_t dbg[64];
 
 	//e. conversion of temperature values on ADC output 
 	//to range -32768 .. +32767 ( additional code; format 1.15 )
@@ -184,6 +191,8 @@ void thermo_clc_ThermoSensors(void)
 	}
 
 	//e. TEMP_AVER_PERIOD second elapsed 
+	//e. calculation the mean temperature for 1 Sec for T4 and T5 sensors 
+	//r. расчет средней за 1 секунду температуры датчиков T4, T5
 	if (seconds_aver > TEMP_AVER_PERIOD) {
 		 seconds_aver = 1;
 
@@ -213,27 +222,29 @@ void thermo_clc_ThermoSensors(void)
                             (float)(thermo_MovAver_filter(Temp_Aver_delta<<4));
             break;
                 }
-        }        
+        }       
+        /*DBG3(&g_gld.cmd.dbg.ring_out,dbg,64,"TermoCompDelta:%f delta:%f Temp_Aver:%d\n\r"
+            ,TermoCompDelta_dNdT
+            ,dynamic_.delta
+            ,Temp_Aver
+        );   */     
 	}else{
         //accumul
         TS_sum += Output.Str.Tmp_Out[TSENS_NUMB];
         TS_sum_delta += Output.Str.Tmp_Out[TS_DELTA_NUMB];		
 	}
 
-	//e. calculation the mean temperature for 1 Sec for T4 and T5 sensors 
-	//r. расчет средней за 1 секунду температуры датчиков T4, T5
 	if (( abs(Temp_Aver - Temp_AverPrevDynCalc) > Device_blk.Str.DeltaTempRecalc)&&(!bSingleInit)){
 		Temp_AverPrevDynCalc = Temp_Aver;
-		
 		thermo_DeltaRecalc(Temp_Aver, &static_);
 	}
 
 	// cyclic built-in test
 	if ((Output.Str.Tmp_Out[TSENS_NUMB] < TS_MIN) 
 	 || (Output.Str.Tmp_Out[TSENS_NUMB] > TS_MAX)) {
-				Valid_Data |= THERMO_RANGE_ERROR;
+		Valid_Data |= THERMO_RANGE_ERROR;
 	}else{
-				Valid_Data &= ~THERMO_RANGE_ERROR;
+		Valid_Data &= ~THERMO_RANGE_ERROR;
 	}
 
 	if ( Output.Str.Tmp_Out[TS_DELTA_NUMB] > TS_DIFF_MAX ) {
