@@ -21,7 +21,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 //#if defined(HOST5)
-#define FIRMWARE_VER	 0x08 //e. firmware version number 
+#define FIRMWARE_VER	 0x09 //e. firmware version number 
 
 //e. constants for the piecewise-linear thermocompensation 
 #define TERMO_FUNC_SIZE    14 //e. amount of the points of the table function of thermocompensation 

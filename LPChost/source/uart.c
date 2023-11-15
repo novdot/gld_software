@@ -569,16 +569,16 @@ void uart_recieve(x_uint8_t*a_pBuffer,x_uint32_t*a_uCount)
     //e. reciever contain some information
 #if defined UART1REC
     //The U1IER is used to enable the four UART1 interrupt sources
-    LPC_UART1->IER = 0; 
+    //LPC_UART1->IER = 0; 
     
     //The U1MSR is a read-only register that provides status information 
     //on the modem input signals. 
-    LPC_UART1->MSR;
+    //LPC_UART1->MSR;
     
     //The U1LCR determines the format of the data character that is to 
     //be transmitted or received.
     //DLAB set 0
-    LPC_UART1->LCR &= 0x7F;
+    //LPC_UART1->LCR &= 0x7F;
     
     //The U1LSR is a read-only register that provides status information 
     //on the UART1 TX and RX blocks.

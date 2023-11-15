@@ -247,8 +247,8 @@ void command_cmd_DELTA_PS()
 /******************************************************************************/
 void command_cmd_DELTA_PS_EXEC()
 {
-    //char dbg[64];	
-    //int i = 0;
+    char dbg[64];	
+    int i = 0;
     static void * paramTable[11] = {
         &(Output.Str.F_ras) 
         , &(Output.Str.AD_value)
@@ -283,11 +283,13 @@ void command_cmd_DELTA_PS_EXEC()
     //g_gld.valid.word = 0;
     Valid_Data = 0;
  
-    /*index++;
+    /**/
+    index++;
 	if (index > 21) {
-        DBG0(&g_gld.cmd.dbg.ring_out,dbg,64,">>_DELTA_PS_EXEC\n\r");
+        DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,">>_DELTA_PS_EXEC:%u\n\r",paramTmpWord);
 		index = 0;
-	}*/
+	}
+    /**/
     
     command_ans_DELTA_PS_EXEC(&paramTmpWord);
     

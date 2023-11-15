@@ -189,6 +189,8 @@ void thermo_clc_ThermoSensors(void)
 	if (g_gld.time_1_Sec == DEVICE_SAMPLE_RATE_uks) {
 		  seconds_aver++;
 	}
+    
+    //Device_blk.Str.TermoMode = 0;
 
 	//e. TEMP_AVER_PERIOD second elapsed 
 	//e. calculation the mean temperature for 1 Sec for T4 and T5 sensors 
