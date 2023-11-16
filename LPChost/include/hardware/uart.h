@@ -214,10 +214,7 @@ void UART_Init(x_uint32_t baudrate);
 
 #if defined(UART0DBG)
 #define UART_DBG_SEND(buf) ; if(x_ring_get_count(buf)>0) uart_send_unblocked(0,buf);
-#else 
-#define UART_DBG_SEND(buf) ;
-#endif
-/**/
+
 //buff to ring
 #define DBG_SEND(ring,buf,size) \
     for(i=0;i<size;i++){x_ring_put(buf[i],ring);}\
@@ -257,6 +254,26 @@ void UART_Init(x_uint32_t baudrate);
     DBG_PREPARE(buf,size)\
     sprintf(buf,text,par1,par2,par3,par4,par5,par6);\
     DBG_SEND(ring,buf,strlen(buf));
+#else /////////////////////////////////////////////////////////////////////////
+#define UART_DBG_SEND(buf) ;
+//buff to ring
+#define DBG_SEND(ring,buf,size) ;
+
+#define DBG0(ring,buf,size,text) ;
+    
+#define DBG1(ring,buf,size,text,par1) ;
+    
+#define DBG2(ring,buf,size,text,par1,par2) ;
+    
+#define DBG3(ring,buf,size,text,par1,par2,par3) ;
+    
+#define DBG4(ring,buf,size,text,par1,par2,par3,par4) ;
+    
+#define DBG5(ring,buf,size,text,par1,par2,par3,par4,par5) ;
+    
+#define DBG6(ring,buf,size,text,par1,par2,par3,par4,par5,par6) ;
+#endif
+/**/
     
     
 /**/

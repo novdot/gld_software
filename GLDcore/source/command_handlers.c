@@ -954,18 +954,18 @@ void command_ans_M_PARAM_W()
 /******************************************************************************/
 void command_ans_M_PARAM_R()
 {   
-    x_uint8_t dbg[128];
+    //x_uint8_t dbg[128];
     int i;
     
 	num_of_par = 1;	
 	COMMAND_UTILITY_ANSWER_FIELD(0,(void*)(&Device_blk.Str.My_Addres + rcv_buf[3]),2);
 	trm_ena = 1; 
     
-    DBG2(&g_gld.cmd.dbg.ring_out,dbg,64
+    /*DBG2(&g_gld.cmd.dbg.ring_out,dbg,64
         ,"addr_param:%u rcv_buf:%u\n\r"
             ,(*addr_param[0])
             ,rcv_buf[3]
-        );
+        );*/
 }
 /******************************************************************************/
 void command_ans_M_E5RA_W()

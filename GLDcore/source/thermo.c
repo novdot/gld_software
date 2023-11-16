@@ -178,7 +178,7 @@ void thermo_clc_ThermoSensors(void)
 	static int Temp_Aver = 0;
     static x_bool_t bSingleInit = _x_true;
     int i = 0;
-    x_uint8_t dbg[64];
+    //x_uint8_t dbg[64];
 
 	//e. conversion of temperature values on ADC output 
 	//to range -32768 .. +32767 ( additional code; format 1.15 )
