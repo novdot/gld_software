@@ -264,7 +264,7 @@ void command_cmd_DELTA_PS_EXEC()
     };
 	static uint32_t val, paramTmpWord = 0;
 	static uint32_t * ptr;
-	static uint32_t index = 0;
+	static uint8_t index = 0;
 		   
     // high byte
 	if ((index & 1) == 0){
@@ -286,7 +286,7 @@ void command_cmd_DELTA_PS_EXEC()
     /**/
     index++;
 	if (index > 21) {
-        DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,">>_DELTA_PS_EXEC:%u\n\r",paramTmpWord);
+        //DBG1(&g_gld.cmd.dbg.ring_out,dbg,64,">>_DELTA_PS_EXEC:%u\n\r",paramTmpWord);
 		index = 0;
 	}
     /**/

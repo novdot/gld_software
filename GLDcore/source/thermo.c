@@ -34,10 +34,21 @@ void thermo_Max_Saturation(unsigned *lvl, unsigned limit)
 /*****************************************************************************
 расчет компенсирующего значения для подсчета импульсов 
 */
+#include <cmath>
 long thermo_CalcCompens(void)
 {   
 	float x = static_.delta + TermoCompDelta_dNdT;
-    return LONG_2_FRACT_14_18(x);
+    //return LONG_2_FRACT_14_18(x);
+    //return LONG_2_FRACT_14_18(-0.000100); // коэфф., при котором за 1 сек накапливается 1 импульс
+    
+    static float _fdelta = 0.0;
+    float _retval = 0.0;
+
+    //x = (-0.000000100);
+    
+    //#include <cmath>
+    _fdelta = modff( (float)(((long int)1 << SHIFT_TO_FRACT))*x + _fdelta, &_retval);
+    return (long)_retval;
 }
 
 /*****************************************************************************
@@ -57,7 +68,7 @@ void thermo_DeltaRecalc(int temperature, THERMOCOMP_DATA* data)
     while( temperature > data->temperature_array[i] ) i++;
 
     data->delta = 
-        data->dN_array[i].fdata 
+        data->dN_array[i].fdata  
         - data->dNdT_array[i] * (float)( data->temperature_array[i] - temperature );   
 } 
 
@@ -97,12 +108,12 @@ void thermo_init()
     for(ifun=0;ifun<TERMO_FUNC_SIZE;ifun++){
         if(ifun<(TERMO_FUNC_SIZE/2)){
             dynamic_.dN_array[ifun].udata = 
-                (((Device_blk.Str.ThermoCoolDelta[(ifun+0)*2]<<16)&0xffff0000) 
-                + ((Device_blk.Str.ThermoCoolDelta[(ifun+1)*2])&0x0000ffff));
+                (((Device_blk.Str.ThermoCoolDelta[(ifun)*2+0]<<16)&0xffff0000) 
+                + ((Device_blk.Str.ThermoCoolDelta[(ifun)*2+1])&0x0000ffff));
         }else{
             dynamic_.dN_array[ifun].udata = 
-                (((Device_blk.Str.ThermoCoolDelta_[(ifun+0-(TERMO_FUNC_SIZE/2))*2]<<16)&0xffff0000) 
-                + ((Device_blk.Str.ThermoCoolDelta_[(ifun+1-(TERMO_FUNC_SIZE/2))*2])&0xffff));
+                (((Device_blk.Str.ThermoCoolDelta_[(ifun-(TERMO_FUNC_SIZE/2))*2+0]<<16)&0xffff0000) 
+                + ((Device_blk.Str.ThermoCoolDelta_[(ifun-(TERMO_FUNC_SIZE/2))*2+1])&0xffff));
         }
     }
     
@@ -112,12 +123,12 @@ void thermo_init()
     for(ifun=0;ifun<TERMO_FUNC_SIZE;ifun++){
         if(ifun<(TERMO_FUNC_SIZE/2)){
             static_.dN_array[ifun].udata = 
-                (((Device_blk.Str.ThermoHeatDelta[(ifun+0)*2]<<16)&0xffff0000) 
-                + ((Device_blk.Str.ThermoHeatDelta[(ifun+1)*2])&0x0000ffff));
+                (((Device_blk.Str.ThermoHeatDelta[(ifun)*2+0]<<16)&0xffff0000) 
+                + ((Device_blk.Str.ThermoHeatDelta[(ifun)*2+1])&0x0000ffff));
         }else{
             static_.dN_array[ifun].udata = 
-                (((Device_blk.Str.ThermoHeatDelta_[(ifun+0-(TERMO_FUNC_SIZE/2))*2]<<16)&0xffff0000) 
-                + ((Device_blk.Str.ThermoHeatDelta_[(ifun+1-(TERMO_FUNC_SIZE/2))*2])&0xffff));
+                (((Device_blk.Str.ThermoHeatDelta_[(ifun-(TERMO_FUNC_SIZE/2))*2+0]<<16)&0xffff0000) 
+                + ((Device_blk.Str.ThermoHeatDelta_[(ifun-(TERMO_FUNC_SIZE/2))*2+1])&0xffff));
         }
         
         /*DBG4(&g_gld.cmd.dbg.ring_out,dbg,64,"%d static_:%f = %u %u\n\r"
@@ -129,8 +140,8 @@ void thermo_init()
     }
     /**
     for (i = 0; i < TERMO_FUNC_SIZE; i++)  {
-        static_.dN_array[i].fdata = -7.0e-4 + (1.0e-4)*i;//-7.0e-4 + 1.0e-4*i;
-        dynamic_.dN_array[i].fdata = 7.0e-6 - (1.0e-6)*i;//7.0e-6 - 1.0e-6*i;
+        static_.dN_array[i].fdata = -5e-6;//-7.0e-4 + (1.0e-4)*i;//-7.0e-4 + 1.0e-4*i;
+        dynamic_.dN_array[i].fdata = -5e-6;//7.0e-6 - (1.0e-6)*i;//7.0e-6 - 1.0e-6*i;
     }
 	/**/
     //расчет коэффициентов наклона для интерполяции  

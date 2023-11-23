@@ -52,7 +52,7 @@ void clc_Pulses()
     static __int64 PSdif_sum_Vib_64 = 0;
     static int32_t dif_Curr_32_Ext = 0; //e. difference(number) for the external latch mode 
     static int32_t dif_Curr_32_previous = 0; //e. Previous (in comparison with Dif_Curr_32) number 
-    static int32_t TermoCompens_Sum = 0;
+    static __int64 TermoCompens_Sum = 0;
     float percent = 0.0;// соотношение разницы для переворота импульсов в команде mrate2
     x_direction_t dir;
     
@@ -107,7 +107,7 @@ void clc_Pulses()
                 g_gld.pulses.vibro1.idelay_curr = 0;
             }
             Dif_Curr_32 = g_gld.pulses.vibro1.delay_buff[g_gld.pulses.vibro1.idelay_curr];
-        }
+        }//M_Delay
     
         if (Latch_Rdy) {
             dif_Curr_32_Ext = interpolation(Dif_Curr_32, LatchPhase );
@@ -125,7 +125,9 @@ void clc_Pulses()
             
             //e. add to the accumulated sum the interpolated sample of an external latch 	
             //e. substract the accumulated termocompensational part from the accumulated number
-            // PSdif_sum_Vib_32 += dif_Curr_32_Ext;             
+            // PSdif_sum_Vib_32 += dif_Curr_32_Ext;   
+//for TEST dif_Curr_32_Ext - TermoCompens_Sum;
+//dif_Curr_32_Ext = 0;               
             PSdif_sum_Vib_32 += dif_Curr_32_Ext - TermoCompens_Sum;
             //e. receive last data
             PSdif_sum_Vib_64 += dif_Curr_32_Ext - TermoCompens_Sum; 
@@ -149,16 +151,20 @@ void clc_Pulses()
                         
             //dif_Curr_32_Ext;
             dif_Curr_32_Ext = Dif_Curr_32 - temp22;
+//for TEST
+//dif_Curr_32_Ext = 0;
             //e. preserve rest of counters difference for next measure cycle: 
-            //PSdif_sum_Vib_32 += Dif_Curr_32 - dif_Curr_32_Ext;
+            ////PSdif_sum_Vib_32 += Dif_Curr_32 - dif_Curr_32_Ext;
             PSdif_sum_Vib_32 +=  dif_Curr_32_Ext;                
             PSdif_sum_Vib_64 +=  dif_Curr_32_Ext;									 
-        } else {	
+        } else { //Latch_Rdy	
             //e. the latch at this moment is abscent
             //e. continue accumulating the sum from internal samples
+//for TEST
+//Dif_Curr_32 = 0;
             PSdif_sum_Vib_32 += Dif_Curr_32; // PSdif_sum_Vib_32 += Dif_Curr_32 ;			
             PSdif_sum_Vib_64 += Dif_Curr_32; //e. sum for scale factor measurement mode
-        }
+        }//!Latch_Rdy
 
         //e. save previous number
         dif_Curr_32_previous = Dif_Curr_32; 
